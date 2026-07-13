@@ -1,6 +1,6 @@
-# MAAF BYOB → GitHub Actions Setup
+# Managed Apps BYOB → GitHub Actions Setup
 
-A step-by-step walkthrough for setting up a new MAAF Bring-Your-Own-Build (BYOB)
+A step-by-step walkthrough for setting up a new managed apps Bring-Your-Own-Build (BYOB)
 deployment pipeline using GitHub Actions. It covers both Dataverse-enabled and
 non-Dataverse (DV-free) environments.
 
@@ -27,7 +27,7 @@ This is an interactive walkthrough — **not** a doc to dump on the user all at 
 
 ## Outcome
 
-When all steps complete, every push to the configured branch deploys the MAAF code app to the target Power Platform environment via a Service Principal — no developer machine in the loop.
+When all steps complete, every push to the configured branch deploys the managed apps code app to the target Power Platform environment via a Service Principal — no developer machine in the loop.
 
 ---
 
@@ -47,7 +47,7 @@ Ask: *"Can you create app registrations in your tenant at portal.azure.com? Quic
 
 ### Prereq 2 — Power Platform admin access to the target environment
 
-Ask: *"Do you have admin access to the target Power Platform environment? Quick way to check: open the right PPAC for your ring (admin.powerplatform.com for prod, admin.preprod.powerplatform.com for preprod, admin.test.powerplatform.com for test) → Environments → find the env. Can you see a Settings tab when you click into it?"*
+Ask: *"Do you have admin access to the target Power Platform environment? Quick way to check: open the right PPAC for your ring (admin.powerplatform.com for prod, admin.test.powerplatform.com for test) → Environments → find the env. Can you see a Settings tab when you click into it?"*
 
 **If No:**
 - The user needs **System Administrator** on the env (for DV) or **Environment Admin** (for non-DV), OR tenant-wide Power Platform Admin.
@@ -55,9 +55,9 @@ Ask: *"Do you have admin access to the target Power Platform environment? Quick 
 - Alternative: existing env admin opens the env in PPAC and adds the user as System Administrator (DV) or runs the BAP API to grant Environment Admin (non-DV — see Step 2b in this guide for the API call shape).
 - Then re-ask.
 
-### Prereq 3 — GitHub repository for the MAAF app
+### Prereq 3 — GitHub repository for the managed apps app
 
-Ask: *"Do you have a GitHub repo ready for the MAAF app, with permission to add repo Settings → Secrets and variables → Actions secrets?"*
+Ask: *"Do you have a GitHub repo ready for the managed apps app, with permission to add repo Settings → Secrets and variables → Actions secrets?"*
 
 **If No:**
 - Create one at github.com/new — visibility doesn't matter for this; private is fine.
@@ -71,7 +71,7 @@ Ask: *"Has your tenant admin enabled `AllowExternalArtifactDeployment` on the ta
 
 **If No / Not sure:**
 - This is a server-side setting; the user typically can't check it directly without running PowerShell.
-- Guide: ask the env admin (or run as yourself if you have Power Platform Admin) using the wiki at https://microsoft.ghe.com/bic/Managed-Ops-Internal/blob/main/docs/devops/MAAF/allowExternalArtifactDeployment-powershell.md
+- Guide: ask the env admin (or run it yourself if you have Power Platform Admin) to enable `AllowExternalArtifactDeployment` on the target environment via PowerShell.
 - Symptom if not enabled: `ms app deploy` errors with `External artifact deployment is not enabled for this environment.`
 - It's OK to proceed without confirming this right now — we'll catch it at Step 7's deploy if it's still off. But warn the user.
 
@@ -104,7 +104,7 @@ Ask: *"Is your target environment Dataverse-enabled, or non-DV / DV-free? If you
 
 Once all prereqs are confirmed, ask these two before starting Step 1:
 
-1. *"Which ring is your target environment — Prod, Preprod, or Test?"* (This sets the `cloud` value in the workflow and the BAP base URL if non-DV.)
+1. *"Which ring is your target environment — Prod or Test?"* (This sets the `cloud` value in the workflow and the BAP base URL if non-DV.)
 2. *"Is the env Dataverse-enabled or non-DV?"* (If they answered "not sure" earlier, give the check from Step 2: PPAC env Details → look for Dataverse database URL.)
 
 Capture both answers and use them throughout the rest of the walkthrough — e.g. set the `cloud:` workflow input automatically, route to Step 2a vs Step 2b without re-asking later.
@@ -117,7 +117,7 @@ Walk the user through:
 
 1. Open https://portal.azure.com → **Microsoft Entra ID** → **App registrations** → **+ New registration**
 2. Fields:
-   - **Name:** something descriptive, e.g. `github-powerplatform-actions-ci-MAAF`
+   - **Name:** something descriptive, e.g. `github-actions-ci-managed-apps`
    - **Supported account types:** *Accounts in this organizational directory only* (single tenant)
    - **Redirect URI:** leave blank
 3. **Register**
@@ -161,7 +161,6 @@ For Dataverse-enabled environments. Walk the user through:
 
 1. Open the Power Platform Admin Center for the target ring:
    - Prod: https://admin.powerplatform.com
-   - Preprod: https://admin.preprod.powerplatform.com
    - Test: https://admin.test.powerplatform.com
 2. **Environments** → click on the target environment.
 3. **Settings** (top bar) → expand **Users + permissions** → **Application users**.
@@ -179,7 +178,7 @@ For Dataverse-enabled environments. Walk the user through:
 
 **Verification:** ask the user to confirm the new Application User appears in the list with both roles. Common mistakes to flag:
 - Choosing the wrong environment (if the same SPN deploys to multiple envs — repeat this step for each)
-- Adding only System Customizer (insufficient — needs System Administrator too for MAAF endpoints)
+- Adding only System Customizer (insufficient — needs System Administrator too for managed apps endpoints)
 - Adding a user account by accident (the search must resolve to the **app reg**, not a person)
 
 Skip to **Step 3**.
@@ -291,7 +290,7 @@ $env:MS_CLI_SP_CLIENT_SECRET = [System.Net.NetworkCredential]::new('', $secret).
 $env:MS_CLI_USE_SP_AUTH  = 'true'
 $env:MS_CLI_SP_CLIENT_ID = '<Application (client) ID from Step 1>'
 $env:MS_CLI_SP_TENANT_ID = '<Tenant ID from Step 1>'
-$env:MS_CLI_CLOUD_INSTANCE = 'preprod'   # or 'test', 'prod', etc.
+$env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
 
 ms auth status
 ```
@@ -305,15 +304,15 @@ If you get a 401 or "not signed in": double-check the three SPN env vars (`MS_CL
 
 ---
 
-## Step 4 — Create the MAAF app (one-time, locally)
+## Step 4 — Create the managed apps app (one-time, locally)
 
 Run **locally as the user** (not as the SPN), because `ms app create` writes scaffolded files to disk and works best interactively.
 
 1. Fresh directory:
 
    ```powershell
-   mkdir my-maaf-app
-   cd my-maaf-app
+   mkdir my-managed-app
+   cd my-managed-app
    ```
 
 2. Switch back to interactive auth:
@@ -327,17 +326,16 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    ms auth login   # browser opens; sign in as the user with admin on the target env
    ```
 
-3. Set the target environment id explicitly (useful when CLI routing isn't allowlisted for your tenant):
+3. Set the target cloud instance:
 
    ```powershell
-   $env:MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID = '<target environment GUID>'
-   $env:MS_CLI_CLOUD_INSTANCE = 'preprod'   # or 'test', 'prod', etc.
+   $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
    ```
 
 4. Create the app with `--repo none` (BYOB / escape-hatch mode — required for both DV and non-DV):
 
    ```powershell
-   ms app create --display-name "My MAAF App" --repo "none"
+   ms app create --display-name "My Managed App" --repo "none"
    ```
 
    (Operates on the current directory. Add `--force` only if re-scaffolding a
@@ -359,7 +357,7 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    ```powershell
    git init
    git add .
-   git commit -m "scaffold MAAF code app"
+   git commit -m "scaffold managed apps code app"
    git branch -M main
    git remote add origin <your github repo URL>
    git push -u origin main
@@ -417,7 +415,7 @@ jobs:
     - name: Install ms CLI
       uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 
-    - name: Pack MAAF App
+    - name: Pack Managed App
       uses: microsoft/Managed-Apps/github-actions/ms-app-pack@v1
       with:
         working-directory: '<app-path>'
@@ -425,11 +423,11 @@ jobs:
         client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
         tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 
-    - name: Deploy MAAF App
+    - name: Deploy Managed App
       uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
       with:
         working-directory: '<app-path>'
-        cloud: 'preprod'   # set to the ring of your target env: prod, preprod, test
+        cloud: 'test'   # set to the ring of your target env: prod, test
         app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
         client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
         tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
@@ -437,7 +435,7 @@ jobs:
 
 **Why this shape:**
 
-- **`paths:` filter** — the workflow only runs when files inside `<app-path>/**` change. In a monorepo with multiple MAAF apps, edits to other apps don't trigger this one's deploy.
+- **`paths:` filter** — the workflow only runs when files inside `<app-path>/**` change. In a monorepo with multiple managed apps, edits to other apps don't trigger this one's deploy.
 - **`working-directory:` on every step** — `npm install` resolves the right `package.json`; `ms-app-pack` / `ms-app-deploy` find `ms.config.json` in the correct subdirectory. Mismatched paths are the most common workflow setup error.
 - **Self-trigger on workflow file changes** — adds the workflow YAML itself to `paths:`. Without this, editing the workflow doesn't trigger a run, which is a confusing dev loop.
 - **One workflow file per app** — name the file `deploy-<app-name>.yml`. Mixing multiple apps into one workflow file works but obscures the per-app cloud / SPN config.
@@ -470,10 +468,10 @@ Commit and push the workflow file.
 |---|---|---|
 | `Service principal environment variables ... must be set` | All three SPN inputs not supplied to a step | Pass `app-id` / `client-secret` / `tenant-id` to **both** `ms-app-pack` and `ms-app-deploy` |
 | `npm error code E401 Incorrect or missing password` | Azure DevOps PAT scope or org mismatch | Action uses public npm by default; if overriding `registry-url` to ADO, PAT must match the feed's org and have **Packaging (Read)** scope |
-| **DV env:** `Forbidden — 'Repositories.MicrosoftApps.Deploy.Write'` | SPN added as App User but missing MAAF permission | Re-check Step 2a — both System Administrator AND System Customizer assigned. If still failing, escalate to the MAAF team for role-to-permission clarification |
+| **DV env:** `Forbidden — 'Repositories.MicrosoftApps.Deploy.Write'` | SPN added as App User but missing managed apps permission | Re-check Step 2a — both System Administrator AND System Customizer assigned. If still failing, contact support for role-to-permission clarification |
 | **Non-DV env:** `InvalidDevEnvironmentOperation` or `LinkedEnvironmentForbiddenOperation` from the controller | SPN doesn't have `EnvironmentAdmin` on the env, OR you targeted a DV env and used the non-DV path | Verify with Step 2b's "list role assignments" GET. If the SPN isn't there, retry Step 2b's POST. If the env is DV, switch to Step 2a |
 | **Non-DV env:** 400 "Principal not found" on the `modifyRoleAssignments` POST | Used App Registration's ObjectId instead of Service Principal's ObjectId | Re-read Step 2b.1 — get the SP ObjectId from **Enterprise applications**, not **App registrations** |
-| `External artifact deployment is not enabled for this environment` | Tenant admin hasn't enabled `AllowExternalArtifactDeployment` | Run the PowerShell from https://microsoft.ghe.com/bic/Managed-Ops-Internal/blob/main/docs/devops/MAAF/allowExternalArtifactDeployment-powershell.md |
+| `External artifact deployment is not enabled for this environment` | Tenant admin hasn't enabled `AllowExternalArtifactDeployment` | Ask your tenant admin to enable `AllowExternalArtifactDeployment` on the environment via PowerShell |
 | `ms.config.json not found in working-directory` | Action's `working-directory` input doesn't point at the app | Set `working-directory` to the path containing `ms.config.json` |
 | Workflow runs green but the app doesn't update in the player | Browser cached an older bundle | Hard-refresh; verify the workflow's `commit-sha` output matches the latest commit |
 

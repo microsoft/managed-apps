@@ -3,8 +3,9 @@
 
 // src/shared/env.ts
 //
-// Side-effect-free module that exports the env var names produced by
-// install-ms-cli and consumed by ms-app-pack / ms-app-deploy.
+// Side-effect-free module that exports the internal env var names produced by
+// install-ms-cli and consumed by ms-app-pack / ms-app-deploy to coordinate
+// across steps in a job. These are private to these actions.
 //
 // IMPORTANT — DO NOT ADD RUNTIME CODE HERE.
 // The whole point of this module is that importing it from any action
@@ -15,7 +16,7 @@
 // is loaded.
 
 /** Set to 'true' after install-ms-cli successfully installs the CLI. */
-export const MsInstalledEnvVarName = 'POWERPLATFORMTOOLS_MSINSTALLED';
+export const MsInstalledEnvVarName = 'MS_MANAGED_APPS_INSTALLED';
 
 /** Absolute path to the installed `ms` binary on the runner. */
-export const MsPathEnvVarName = 'POWERPLATFORMTOOLS_MSPATH';
+export const MsPathEnvVarName = 'MS_MANAGED_APPS_PATH';

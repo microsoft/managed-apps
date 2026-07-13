@@ -3,7 +3,7 @@
 #
 # ms-app-deploy/action.yml
 #
-# Deploys a MAAF code app via `ms app deploy`. Three deploy modes are
+# Deploys a Microsoft managed apps code app via `ms app deploy`. Three deploy modes are
 # supported, selected based on inputs and the app's repoType from
 # ms.config.json:
 #
@@ -29,14 +29,13 @@
 #     earlier (with a prior `npm ci`), OR the CLI will pack internally.
 #   - Tenant admin has enabled `AllowExternalArtifactDeployment` on the
 #     target environment. Without it, deploy returns a policy error from
-#     the RP. Wiki:
-#     microsoft.ghe.com/bic/Managed-Ops-Internal/blob/main/docs/devops/MAAF/allowExternalArtifactDeployment-powershell.md
+#     the service. Ask your tenant administrator to enable it.
 #
 # ---------------------------------------------------------------------------
 # Service Principal auth:
 #   The auth inputs (`app-id`, `client-secret`, `tenant-id`) are wired to the
-#   CLI's SPN env vars (MS_CLI_SP_* + MS_CLI_USE_SP_AUTH). The Power Apps RP
-#   accepts Service Principal identities for MAAF operations. Provide all three
+#   CLI's SPN env vars (MS_CLI_SP_* + MS_CLI_USE_SP_AUTH). The service
+#   accepts Service Principal identities for managed apps operations. Provide all three
 #   inputs together to deploy as the SPN with no developer in the loop.
 # ---------------------------------------------------------------------------
 #
@@ -75,7 +74,7 @@
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 #
 name: 'ms-app-deploy'
-description: 'Power Platform MS App Deploy — deploys a MAAF code app for the given commit'
+description: 'Deploy a Microsoft managed apps code app for the given commit'
 
 inputs:
   # ── App context ───────────────────────────────────────────────────────────
@@ -98,8 +97,8 @@ inputs:
 
   cloud:
     description: >
-      Cloud instance to target. One of: prod, test, preprod, preview,
-      gccmoderate, dev. The MAAF end-to-end flow is currently supported only
+      Cloud instance to target. One of: prod, test, preview,
+      gccmoderate, dev. The managed apps end-to-end flow is currently supported only
       in 'test'. Maps to MS_CLI_CLOUD_INSTANCE.
     required: false
     default: 'test'

@@ -53,7 +53,7 @@ See each action's `action.yml` for the full input/output reference.
 
 Step-by-step guides any operator — or coding-agent CLI (GitHub Copilot CLI, Claude Code, etc.) — can follow. See [`AGENTS.md`](AGENTS.md) for the index.
 
-- [Architecture & Flow](agent-skills/architecture.md) — the end-to-end MAAF lifecycle (setup, local dev, CI loops), the `ms-app-deploy` sequence with RP rejection points, and the release/versioning flow, with diagrams.
+- [Architecture & Flow](agent-skills/architecture.md) — the end-to-end managed apps lifecycle (setup, local dev, CI loops), the `ms-app-deploy` sequence with service rejection points, and the release/versioning flow, with diagrams.
 - [BYOB setup walkthrough](agent-skills/byob-setup.md) — step-by-step guide to standing up a BYOB deploy pipeline (service principal, per-environment permission grant, app creation, workflow wiring).
 - [Release guide](agent-skills/release-guide.md) — how to cut a release PR (version bump + changelog + dist rebuild).
 

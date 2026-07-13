@@ -2,7 +2,7 @@
 
 This directory holds the **`install-ms-cli`**, **`ms-app-pack`**, and
 **`ms-app-deploy`** GitHub Actions for building and deploying Microsoft Managed
-Apps (MAAF) from CI.
+Apps from CI.
 
 If you're an agent (GitHub Copilot CLI, Claude Code, or any other) helping with
 this component, the reusable skills below are plain Markdown runbooks — read the

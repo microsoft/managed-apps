@@ -1,6 +1,6 @@
 # Managed Apps GitHub Actions — Architecture & Flow
 
-How the actions under `github-actions/` fit into the end-to-end MAAF lifecycle:
+How the actions under `github-actions/` fit into the end-to-end managed apps lifecycle:
 one-time app setup, the local dev loop, the CI/CD deploy loop, and how this repo
 releases the actions themselves. Diagrams are Mermaid (render on GitHub).
 
@@ -55,7 +55,7 @@ flowchart TD
 
 ## 2. Inside `ms-app-deploy`
 
-What the deploy action does on each run, and where the Resource Provider (RP)
+What the deploy action does on each run, and where the service
 can reject it.
 
 ```mermaid
@@ -63,10 +63,10 @@ sequenceDiagram
     participant WF as Workflow
     participant ACT as ms-app-deploy
     participant CLI as ms CLI
-    participant RP as Power Apps RP
+    participant RP as Managed Apps service
 
     WF->>ACT: with working-directory, app-id, client-secret, tenant-id
-    ACT->>ACT: require POWERPLATFORMTOOLS_MSINSTALLED == true
+    ACT->>ACT: require MS_MANAGED_APPS_INSTALLED == true
     ACT->>ACT: read ms.config.json -> repoType
     ACT->>ACT: set MS_CLI_* SPN env (only if all 3 provided)
     ACT->>CLI: ms app deploy [--artifact | --commit | pack+upload]
@@ -122,24 +122,21 @@ flowchart LR
 - **`repoType: none` needs no git remote.** `ms app create --repo none` scaffolds
   from a template and writes `ms.config.json`; deploy builds locally and uploads
   the artifact. No `git init`/remote required.
-- **Cloud target** is set via `MS_CLI_CLOUD_INSTANCE` (tested `preprod`). The
+- **Cloud target** is set via `MS_CLI_CLOUD_INSTANCE` (e.g. `test`). The
   `ms-app-deploy` action exposes this as the `cloud` input.
 - **Auth:** interactive sign-in (`ms auth login`) works for local dev. For CI,
   supply all three Service Principal inputs (`app-id`, `client-secret`,
-  `tenant-id`) — the actions set `MS_CLI_USE_SP_AUTH` + `MS_CLI_SP_*`, and the RP
-  accepts the SPN for MAAF operations, so the deploy runs with no developer in
+  `tenant-id`) — the actions set `MS_CLI_USE_SP_AUTH` + `MS_CLI_SP_*`, and the service
+  accepts the SPN for managed apps operations, so the deploy runs with no developer in
   the loop.
 - **Sharing:** for `repoType: none` apps (no platform-managed repo),
   `ms app share <id> --access edit` grants contributor access at the **app scope**
   rather than the repository scope.
-- **Debug env override:** `MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID` was used in testing to
-  target a specific environment id.
 
-### Example (validated, non-Dataverse preprod)
+### Example (validated, non-Dataverse test environment)
 
 ```pwsh
-$Env:MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID = '<environment-guid>'
-$Env:MS_CLI_CLOUD_INSTANCE = 'preprod'
+$Env:MS_CLI_CLOUD_INSTANCE = 'test'
 ms app create --display-name "Non DV test" --repo "none"
 npm install
 ms app deploy            # succeeds once AllowExternalArtifactDeployment is on

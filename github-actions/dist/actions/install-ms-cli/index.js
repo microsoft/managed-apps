@@ -19811,8 +19811,8 @@ var path = __toESM(require("node:path"));
 var fs = __toESM(require("node:fs/promises"));
 
 // out/shared/env.js
-var MsInstalledEnvVarName = "POWERPLATFORMTOOLS_MSINSTALLED";
-var MsPathEnvVarName = "POWERPLATFORMTOOLS_MSPATH";
+var MsInstalledEnvVarName = "MS_MANAGED_APPS_INSTALLED";
+var MsPathEnvVarName = "MS_MANAGED_APPS_PATH";
 
 // out/actions/install-ms-cli/index.js
 var MS_CLI_BINARY = "ms";

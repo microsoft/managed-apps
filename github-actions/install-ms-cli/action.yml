@@ -3,7 +3,7 @@
 #
 # install-ms-cli/action.yml
 #
-# Installs the MAAF `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner.
+# Installs the managed apps `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner.
 #
 # Defaults to the public npm registry — @microsoft/managed-apps-cli is published there
 # (since 2026-05-14). No inputs are required for standard usage:
@@ -16,11 +16,11 @@
 #   - uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 #     with:
 #       version: '0.3.1-dev.20260511.4'
-#       registry-url: 'https://pkgs.dev.azure.com/msazure/OneAgile/_packaging/PowerPlatform-Managed-Host-consumption/npm/registry/'
+#       registry-url: 'https://pkgs.dev.azure.com/<org>/<project>/_packaging/<feed>/npm/registry/'
 #       registry-auth-token: ${{ secrets.AZURE_DEVOPS_PAT }}
 #
 name: 'install-ms-cli'
-description: 'Power Platform Install MS CLI — installs @microsoft/managed-apps-cli (binary: ms)'
+description: 'Install the Microsoft managed apps CLI (@microsoft/managed-apps-cli, binary: ms)'
 
 inputs:
   version:

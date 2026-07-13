@@ -19809,7 +19809,7 @@ var path = __toESM(require("node:path"));
 var fs = __toESM(require("node:fs/promises"));
 
 // out/shared/env.js
-var MsInstalledEnvVarName = "POWERPLATFORMTOOLS_MSINSTALLED";
+var MsInstalledEnvVarName = "MS_MANAGED_APPS_INSTALLED";
 
 // out/actions/ms-app-pack/index.js
 var MS_CONFIG_FILE = "ms.config.json";
@@ -19860,7 +19860,7 @@ async function validateAppDirectory(dir) {
   const configPath = path.join(dir, MS_CONFIG_FILE);
   await fs.access(configPath).catch(() => {
     throw new Error(`${MS_CONFIG_FILE} not found in working-directory: ${dir}
-Ensure working-directory points to a MAAF app created via \`ms app create\`.`);
+Ensure working-directory points to a managed apps app created via \`ms app create\`.`);
   });
   core.info(`App directory validated: ${dir}`);
 }

@@ -3,14 +3,14 @@
 #
 # ms-app-pack/action.yml
 #
-# Packs a MAAF code app into a deployable artifact by invoking `ms app pack`.
+# Packs a Microsoft managed apps code app into a deployable artifact by invoking `ms app pack`.
 # Pack runs the `buildCommand` from ms.config.json (default `npm run build`)
 # and copies the build output to the canonical packed layout at
 #   <workingDirectory>/.ms/packed/apps/<appId>/client/
 #
 # After pack, `ms-app-deploy` picks up the artifact automatically.
 #
-# This action is a transitional step. The MAAF CLI is adding a `--artifact`
+# This action is a transitional step. The managed apps CLI is adding a `--artifact`
 # flag to `ms app deploy` that will fold pack into deploy for repoType:'none'
 # apps. Once that ships, you can drop the `- uses: ms-app-pack` step from
 # your workflow.
@@ -43,7 +43,7 @@
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 #
 name: 'ms-app-pack'
-description: 'Power Platform MS App Pack — builds and packs a MAAF code app into a deployable artifact'
+description: 'Build and pack a Microsoft managed apps code app into a deployable artifact'
 
 inputs:
   working-directory:
@@ -54,7 +54,7 @@ inputs:
     default: ''
 
   # ── Service Principal authentication ──
-  # Required even for pack (which doesn't make any RP calls itself), because
+  # Required even for pack (which doesn't make any service calls itself), because
   # the CLI auto-activates SP auth in CI mode (CI=true is set by GitHub
   # Actions) and validates that MS_CLI_SP_* env vars are present at startup.
 

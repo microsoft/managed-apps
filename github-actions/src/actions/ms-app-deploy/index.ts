@@ -3,7 +3,7 @@
 
 // src/actions/ms-app-deploy/index.ts
 //
-// Deploys a MAAF code app via `ms app deploy`. Three modes:
+// Deploys a Microsoft managed apps code app via `ms app deploy`. Three modes:
 //
 //   1. repoType:'none' + artifact-path supplied → --artifact <zip>
 //      Uploads a pre-built zip and deploys it.
@@ -218,7 +218,7 @@ async function validateAppDirectory(dir: string): Promise<void> {
     await fs.access(configPath).catch(() => {
         throw new Error(
             `${MS_CONFIG_FILE} not found in working-directory: ${dir}\n` +
-            'Ensure working-directory points to a MAAF app created via `ms app create`.'
+            'Ensure working-directory points to a managed apps app created via `ms app create`.'
         );
     });
     core.info(`App directory validated: ${dir}`);

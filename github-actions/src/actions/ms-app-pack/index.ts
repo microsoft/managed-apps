@@ -3,11 +3,11 @@
 
 // src/actions/ms-app-pack/index.ts
 //
-// Packs a MAAF code app via `ms app pack`. Pack runs the `buildCommand` from
+// Packs a Microsoft managed apps code app via `ms app pack`. Pack runs the `buildCommand` from
 // ms.config.json (default: `npm run build`) and copies the result into the
 // canonical packed layout `<projectRoot>/.ms/packed/apps/<appId>/client/`.
 //
-// SPN env vars are forwarded even though pack does not make any RP calls
+// SPN env vars are forwarded even though pack does not make any service calls
 // itself — the CLI auto-activates SP auth in CI (CI=true is set by GitHub
 // Actions) and validates that MS_CLI_SP_* env vars are present at startup.
 //
@@ -94,7 +94,7 @@ async function validateAppDirectory(dir: string): Promise<void> {
     await fs.access(configPath).catch(() => {
         throw new Error(
             `${MS_CONFIG_FILE} not found in working-directory: ${dir}\n` +
-            'Ensure working-directory points to a MAAF app created via `ms app create`.'
+            'Ensure working-directory points to a managed apps app created via `ms app create`.'
         );
     });
     core.info(`App directory validated: ${dir}`);
