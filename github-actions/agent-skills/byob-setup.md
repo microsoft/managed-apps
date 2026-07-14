@@ -229,6 +229,52 @@ Common failures:
 
 ---
 
+## Step 2c — Enable external artifact deployment on the environment
+
+**Needs:** **Environment Admin** on the target environment (you have it from Step 2), **PowerShell 7**, and a delegated user token captured from a live **Power Platform Admin Center (PPAC)** browser session. Do this **now**, before the first deploy, so you don't discover it via a failed CI run. It doesn't block Steps 3–6, but it **must** be on before Step 7.
+
+BYOB / escape-hatch apps (`repoType: none`, created in Step 4) upload an **external artifact** — a bundle built outside a platform-managed repo. Environments reject those by default. Until the environment setting `MicrosoftApps_AllowExternalArtifactDeployment` is `true`, **every** `ms app deploy` (local or CI) fails with:
+
+```
+External artifact deployment is not enabled for this environment.
+To enable it, contact your administrator to turn on the
+AllowExternalArtifactDeployment environment setting.
+```
+
+This is **not** exposed by `pac`, `ms`, or the BAP environment object. It's flipped via a `PATCH` to the Power Platform **Environment Management API**. There's no fully-automated path: Azure CLI can't mint the required scope (`AADSTS65002`), so you capture a delegated token from PPAC.
+
+1. **Get the environment id** from PPAC (or Step 2).
+2. **Pick the ring-aware API endpoint** (if unsure, find it in F12 → Network on any PPAC page that calls `api.*.powerplatform.com` — see step 3):
+
+   | Ring | API endpoint |
+   |---|---|
+   | Production | `https://api.powerplatform.com/` |
+   | Test | `https://api.test.powerplatform.com/` |
+   | Preprod | `https://api.preprod.powerplatform.com/` |
+   | Preview / Dogfood | `https://api.preview.powerplatform.com/` |
+
+3. **Capture the token** (a delegated user token for the `api.*.powerplatform.com` audience): open **admin.powerplatform.com** → **F12 → Network**, clear logs, then trigger any call to `api.*.powerplatform.com` — for a **DV env** open the environment's **Settings → Features**; for a **non-DV env** (no Settings page) just open the environment or let the **Environments** list load. Filter by `api.*.powerplatform.com`, open any request (e.g. `/settings?api-version=` or `/environments`), and copy the `authorization` header value (the part **after** `Bearer `). Tokens last ~90 min; treat them as secrets — never commit them.
+4. **Set it** with the helper at [`assets/set-allowexternalartifactdeployment.ps1`](assets/set-allowexternalartifactdeployment.ps1) (PowerShell 7):
+
+   ```powershell
+   . ./assets/set-allowexternalartifactdeployment.ps1
+
+   $token = Read-Host -AsSecureString "Paste the PPAC bearer token (Value only, no 'Bearer ' prefix)"
+   Set-MicrosoftAppsAllowExternalArtifactDeployment `
+     -Token $token `
+     -Env '<environment id>' `
+     -ApiEndpoint 'https://api.test.powerplatform.com/' `   # match your ring
+     -AllowExternalArtifactDeployment $true
+   ```
+
+   Pass `$false` to disable or `$null` to clear it (three-state setting).
+
+**Verification:** read it back with the companion `Get-MicrosoftAppsAllowExternalArtifactDeployment` (same file) — it should return `True`. A successful Step 7 deploy (no *"external artifact deployment is not enabled"* error) is the end-to-end confirmation.
+
+> Common token errors: `Forbidden` / `InsufficientDelegatedPermissions` → token came from Azure CLI, capture from PPAC instead; `AuthorizationHeaderInvalid` / `SignatureKeyNotFound` → token expired, re-capture; `404 Not Found` on the `$select` → the setting isn't deployed to that ring/environment yet.
+
+---
+
 ## Step 3 — Smoke-test the SPN locally
 
 **Needs:** `@microsoft/managed-apps-cli` installed locally, version **>= 0.7.0** (`ms --version`). If it's missing or older, install/update with `npm install -g @microsoft/managed-apps-cli@latest` (Node 22+ required — `node --version`), then continue.
@@ -236,7 +282,7 @@ Common failures:
 Same regardless of DV vs non-DV. Have the user run in PowerShell:
 
 ```powershell
-$secret = Read-Host -AsSecureString "Paste client secret"
+$secret = Read-Host -AsSecureString "Paste client secret VALUE"   # the Value, NOT the Secret ID
 $env:MS_CLI_SP_CLIENT_SECRET = [System.Net.NetworkCredential]::new('', $secret).Password
 
 $env:MS_CLI_USE_SP_AUTH  = 'true'
@@ -244,15 +290,18 @@ $env:MS_CLI_SP_CLIENT_ID = '<Application (client) ID from Step 1>'
 $env:MS_CLI_SP_TENANT_ID = '<Tenant ID from Step 1>'
 $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
 
-ms auth status
+# `ms auth status` is interactive-only and does NOT work under SP auth.
+# Verify SP auth by running a real read command instead:
+ms app list --environment-id <target environment id> --non-interactive
 ```
 
-**Expected:**
-```
-Signed in as Service Principal: <client-id>
-```
+**Expected:** the command returns the list of apps (or `No apps found.` on an empty env) — either way, the SPN authenticated successfully.
 
-If you get a 401 or "not signed in": double-check the three SPN env vars (`MS_CLI_SP_CLIENT_ID`, `MS_CLI_SP_CLIENT_SECRET`, `MS_CLI_SP_TENANT_ID`), `MS_CLI_USE_SP_AUTH=true`, and that the secret value is correct and unexpired.
+If it fails:
+- `AADSTS7000215: Invalid client secret provided` → you pasted the secret **ID**, not the secret **Value**. Copy the **Value** column in Certificates & secrets (only shown at creation — make a new secret if you lost it) and re-set `MS_CLI_SP_CLIENT_SECRET`.
+- 401 / other auth error → double-check the three SPN env vars (`MS_CLI_SP_CLIENT_ID`, `MS_CLI_SP_CLIENT_SECRET`, `MS_CLI_SP_TENANT_ID`), `MS_CLI_USE_SP_AUTH=true`, and that the secret is current and unexpired.
+
+To get the Application (client) ID without copying from the portal, resolve it from the SP Object ID: `az ad sp show --id <sp-object-id> --query appId -o tsv`.
 
 ---
 
@@ -278,11 +327,18 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    ms auth login   # browser opens; sign in as the user with admin on the target env
    ```
 
-3. Set the target cloud instance:
+3. Set the target cloud instance **and the target environment** — both are required before `ms app create` so the app lands in the right environment:
 
    ```powershell
-   $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
+   $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc. — must match the environment's ring
+   # Pins which environment the app is created in (written to ms.config.json).
+   # Use the environmentId **GUID** (from PPAC → Environment → Details, or the deploy
+   # error text). Do NOT use the 'Default-<guid>' environment *name* form — it returns
+   # `EnvironmentNotFound` from the appframework API.
+   $env:MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID = '<your-environmentId-guid>'
    ```
+
+   If you skip `MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID`, the CLI may target the wrong (default) environment, and the later deploy fails against an environment where you never enabled `AllowExternalArtifactDeployment` (Step 2c) or granted the SPN.
 
 4. Create the app with `--repo none` (BYOB / escape-hatch mode — required for both DV and non-DV):
 
@@ -290,8 +346,16 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    ms app create --display-name "My Managed App" --repo "none"
    ```
 
-   (Operates on the current directory. Add `--force` only if re-scaffolding a
-   non-empty directory.)
+   > **The directory MUST be empty.** `ms app create` refuses a populated directory,
+   > and there is **no `--force` flag** to override this (only `--force-reauth`, which
+   > is unrelated). Just as important: `ms app init` can only register a **`native`**
+   > (platform-managed GRS) or **`github`** app — it can **never** produce `repoType: none`.
+   > So the *only* way to get a BYOB/external-build app is `ms app create --repo none` in an
+   > empty dir. **Do not** hand-edit `repoType` from `native` to `none` in an existing
+   > `ms.config.json` — the server-side app record stays native and the deploy fails with
+   > `GitOperationsNotSupportedForNonExternalBuildRepo`. To convert an existing populated
+   > project, scaffold a fresh app with `create --repo none` in an empty dir, then move your
+   > source in alongside the CLI-generated `ms.config.json`.
 
 5. Verify:
    - `ms.config.json` exists with `appId`, `environmentId`, and `repoType: "none"`
@@ -304,16 +368,52 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    npm run build
    ```
 
-7. Commit and push to GitHub:
+7. Commit and push to GitHub.
+
+   **If the repo is new/empty**, initialize it here and push:
 
    ```powershell
    git init
    git add .
-   git commit -m "scaffold managed apps code app"
+   git commit -m "scaffold managed app"
    git branch -M main
    git remote add origin <your github repo URL>
    git push -u origin main
    ```
+
+   **If the app lives inside an existing repo** (already cloned, has its own history/branch), do **not** run `git init` in the app folder — that creates a nested repo with unrelated history and the push will be rejected (`non-fast-forward` / `refusing to merge unrelated histories`). Instead, scaffold the app *inside* your existing clone and commit it as a subdirectory:
+
+   ```powershell
+   cd <path to the existing clone>
+   git checkout <branch>; git pull origin <branch>
+   git add <app-dir>
+   git commit -m "Add managed app scaffold"
+   git push origin <branch>
+   ```
+
+---
+
+## Step 4b — Grant the Service Principal edit access to the app (required for BYOB deploy)
+
+**Needs:** you're signed in as the app **creator/owner** (interactive user auth, not the SPN), and `ms.config.json` is present in the app directory.
+
+For BYOB apps (`repoType: none`), `EnvironmentAdmin` lets the SPN reach the environment but **not deploy this specific app** — deploy permission is granted at the *app scope*. Skip this and the CI deploy fails with:
+
+> `You don't have permission to deploy this app. Ask an admin to grant you Contributor on the repo.`
+
+As the app creator, grant the SPN **edit** access. Run it from the app directory so `--app` defaults from `ms.config.json`:
+
+```powershell
+# be yourself (the creator), not the SPN
+Remove-Item Env:MS_CLI_USE_SP_AUTH,Env:MS_CLI_SP_CLIENT_ID,Env:MS_CLI_SP_CLIENT_SECRET,Env:MS_CLI_SP_TENANT_ID -ErrorAction SilentlyContinue
+$env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod'
+
+ms app share <SPN Application (client) ID> --access edit
+```
+
+If the client ID doesn't resolve, use the SPN's **Object ID** from Enterprise applications. For `repoType: none` apps the CLI grants contributor access at the app scope and prints: `App ... has no platform-managed repository, so granting contributor access at the app scope instead of repository scope.`
+
+**Verification:** trigger the deploy (Step 7) — it should now pack, upload, and return a Play URL instead of the permission error.
 
 ---
 
@@ -407,7 +507,7 @@ Commit and push the workflow file.
 
 ## Step 7 — Trigger and verify
 
-**Needs:** `AllowExternalArtifactDeployment` enabled on the target environment. It's a server-side setting a tenant admin enables via PowerShell; you usually can't check it beforehand. If deploy fails with `External artifact deployment is not enabled for this environment.`, that's the cause — have the tenant admin enable it and re-run.
+**Needs:** `AllowExternalArtifactDeployment` enabled on the target environment — done back in **Step 2c**. If you skipped it, deploy fails here with `External artifact deployment is not enabled for this environment.`; have an admin enable it and re-run.
 
 1. **Actions** tab → trigger the workflow (automatic on next push, or **Run workflow** for `workflow_dispatch`).
 2. Each step should succeed:
@@ -427,7 +527,11 @@ Commit and push the workflow file.
 | **DV env:** `Forbidden — 'Repositories.MicrosoftApps.Deploy.Write'` | SPN added as App User but missing managed apps permission | Re-check Step 2a — both System Administrator AND System Customizer assigned. If still failing, contact support for role-to-permission clarification |
 | **Non-DV env:** `InvalidDevEnvironmentOperation` or `LinkedEnvironmentForbiddenOperation` from the controller | SPN doesn't have `EnvironmentAdmin` on the env, OR you targeted a DV env and used the non-DV path | Verify with Step 2b's "list role assignments" GET. If the SPN isn't there, retry Step 2b's POST. If the env is DV, switch to Step 2a |
 | **Non-DV env:** 400 "Principal not found" on the `modifyRoleAssignments` POST | Used App Registration's ObjectId instead of Service Principal's ObjectId | Re-read Step 2b.1 — get the SP ObjectId from **Enterprise applications**, not **App registrations** |
-| `External artifact deployment is not enabled for this environment` | Tenant admin hasn't enabled `AllowExternalArtifactDeployment` | Ask your tenant admin to enable `AllowExternalArtifactDeployment` on the environment via PowerShell |
+| `GitOperationsNotSupportedForNonExternalBuildRepo — only supported for repositories with RepoType=ExternallyProvidedBuild` (HTTP 400 on `uploadBuild`) | The app was registered server-side as `native`/`github` (created via `ms app init`), but `ms.config.json` says `repoType: none`. Hand-editing `repoType` does **not** change the server record | Recreate the app with `ms app create --repo none` in an empty dir (registers it as external-build server-side), then point your project at the new `appId`. See **Step 4** |
+| `EnvironmentNotFound ... 'Default-<guid>' could not be found` on `ms app create`/`init` | `MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID` was set to the `Default-<guid>` environment *name* instead of the environmentId GUID | Set `MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID` to the environmentId **GUID** — see **Step 4.3** |
+| `External artifact deployment is not enabled for this environment` | Environment setting `MicrosoftApps_AllowExternalArtifactDeployment` isn't `true` | Enable it via the Environment Management API — see **Step 2c** (`assets/set-allowexternalartifactdeployment.ps1`); do it before the first deploy |
+| `You don't have permission to deploy this app. Ask an admin to grant you Contributor on the repo.` | BYOB app: SPN has `EnvironmentAdmin` but lacks edit/Contributor at the **app scope** | The app creator runs `ms app share <spn> --access edit` — see **Step 4b** |
+| `AADSTS7000215: Invalid client secret provided` (Step 3 smoke test or deploy) | Used the client secret **ID** instead of its **Value** | Copy the **Value** column in **Certificates & secrets** (shown only at creation — create a new secret if lost); re-set `MS_CLI_SP_CLIENT_SECRET` locally and the `PP_SP_CLIENT_SECRET` repo secret |
 | `ms.config.json not found in working-directory` | Action's `working-directory` input doesn't point at the app | Set `working-directory` to the path containing `ms.config.json` |
 | Workflow runs green but the app doesn't update in the player | Browser cached an older bundle | Hard-refresh; verify the workflow's `commit-sha` output matches the latest commit |
 
@@ -443,10 +547,10 @@ The SPN is a per-tenant resource; **the permission grant is per-environment**. I
 
 ## Notable detail — `ms app share` for principal access
 
-After deploy, the user may want to grant edit access to a colleague or another principal:
+Beyond the SPN grant in **Step 4b**, the same command shares an app with a colleague or another principal:
 
 ```powershell
-ms app share <principal-objectId> --access edit
+ms app share <principal-objectId-or-upn> --access edit
 ```
 
 For BYOB apps (`repoType: 'none'`), this grants contributor access **at the app scope** (since there's no platform-managed repository). The CLI surfaces this automatically: `App ... has no platform-managed repository, so granting contributor access at the app scope instead of repository scope.`
