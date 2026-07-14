@@ -19939,7 +19939,7 @@ async function validateAppDirectory(dir) {
   const configPath = path.join(dir, MS_CONFIG_FILE);
   await fs.access(configPath).catch(() => {
     throw new Error(`${MS_CONFIG_FILE} not found in working-directory: ${dir}
-Ensure working-directory points to a managed apps app created via \`ms app create\`.`);
+Ensure working-directory points to a managed app created via \`ms app create\`.`);
   });
   core.info(`App directory validated: ${dir}`);
 }

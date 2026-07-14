@@ -55,9 +55,9 @@ Ask: *"Do you have admin access to the target Power Platform environment? Quick 
 - Alternative: existing env admin opens the env in PPAC and adds the user as System Administrator (DV) or runs the BAP API to grant Environment Admin (non-DV — see Step 2b in this guide for the API call shape).
 - Then re-ask.
 
-### Prereq 3 — GitHub repository for the managed apps app
+### Prereq 3 — GitHub repository for the managed app
 
-Ask: *"Do you have a GitHub repo ready for the managed apps app, with permission to add repo Settings → Secrets and variables → Actions secrets?"*
+Ask: *"Do you have a GitHub repo ready for the managed app, with permission to add repo Settings → Secrets and variables → Actions secrets?"*
 
 **If No:**
 - Create one at github.com/new — visibility doesn't matter for this; private is fine.
@@ -304,7 +304,7 @@ If you get a 401 or "not signed in": double-check the three SPN env vars (`MS_CL
 
 ---
 
-## Step 4 — Create the managed apps app (one-time, locally)
+## Step 4 — Create the managed app (one-time, locally)
 
 Run **locally as the user** (not as the SPN), because `ms app create` writes scaffolded files to disk and works best interactively.
 
