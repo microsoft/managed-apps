@@ -17,10 +17,9 @@
 ### "same" SPN. Using the wrong one produces a 400 "Principal not found".
 
 # --- BAP base URL per ring (uncomment exactly one) ---------------
-# Prod:    @baseUrl = https://api.bap.microsoft.com
-# Preprod: @baseUrl = https://tip1.api.bap.microsoft.com
-# Test:    @baseUrl = https://tip2.api.bap.microsoft.com
-@baseUrl       = https://tip1.api.bap.microsoft.com
+# Prod: @baseUrl = https://api.bap.microsoft.com
+# Test: @baseUrl = https://tip2.api.bap.microsoft.com
+@baseUrl       = https://tip2.api.bap.microsoft.com
 
 @apiVersion    = 2021-04-01
 @tenantId      = <YOUR TENANT GUID>

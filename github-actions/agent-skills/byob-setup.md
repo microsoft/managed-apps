@@ -1,389 +1,206 @@
 # Managed Apps BYOB → GitHub Actions Setup
 
-A step-by-step walkthrough for setting up a new managed apps Bring-Your-Own-Build (BYOB)
-deployment pipeline using GitHub Actions. It covers both Dataverse-enabled and
-non-Dataverse (DV-free) environments.
+Set up a Bring-Your-Own-Build (BYOB) deploy pipeline so every push to your repo
+builds and deploys a managed app to a Power Platform environment — no developer
+machine in the loop.
 
-This is a plain runbook. Follow it yourself, or hand it to any coding-agent CLI
-(GitHub Copilot CLI, Claude Code, etc.) to drive interactively — the guidance
-below is written for whoever (person or agent) is driving it.
+**This skill is agent-driven.** Hand it to a coding-agent CLI (GitHub Copilot
+CLI, Claude Code, etc.) and it does the work: it creates the service principal,
+grants it access to your environment, scaffolds the app, sets your repo secrets,
+writes the workflow, and verifies the first deploy. You just answer a few short
+questions and sign in when the browser opens.
 
-## How to drive this guide
-
-This is an interactive walkthrough — **not** a doc to dump on the user all at once.
-
-**Pacing rules:**
-
-1. **One question at a time.** Never present multiple prereqs or multiple verification questions at once. After each question, stop and wait for the answer.
-2. **Ask each prereq and verification as a clear Yes/No question** (use your CLI's interactive prompt if it has one). Phrase it as the binary check, and include the one-step way to check it inline. Leave room for a "Not sure" / free-text answer.
-3. **Branch on the answer.**
-   - **Yes**: mark that item done, advance to the next prereq/step.
-   - **No**: provide the corrective steps inline (don't just link to docs — give the click path or exact commands), then re-ask.
-   - **Not sure / unrelated**: give a one-step check (a portal URL, a single CLI command), then re-ask.
-4. **Verify after every step.** Each Step has an explicit "Verification" question — ask it, take the answer, branch.
-5. **Don't skip ahead.** Even if the user seems competent, run the prereq gate first. Most failures here are prereqs (env settings, role grants).
-6. **Track progress** through the 6 prereqs and 7 steps with a checklist; keep one item in progress at a time.
-7. **Keep secrets out of chat.** Never ask the user to paste a client secret, PAT, or JWT into the conversation. Have them paste GUIDs, screenshots, and error messages only.
-
-## Outcome
-
-When all steps complete, every push to the configured branch deploys the managed apps code app to the target Power Platform environment via a Service Principal — no developer machine in the loop.
+You *can* also follow it by hand — every automated step has a manual fallback in
+a collapsed **Do it manually** block.
 
 ---
 
-## Prerequisites — ask one at a time, Yes/No format
+## For the agent driving this: how it works
 
-Do NOT present this as a checklist of 6 items in a single turn. Walk through each as its own question. The "If No" guidance under each item is meant to be delivered when the user answers No or Not sure.
+You **run the steps yourself** using the user's local `az`, `gh`, and `ms` CLIs.
+Only stop to ask the user when you genuinely need something you can't do:
+a browser sign-in, a value only they know (env id, ring), or a decision.
 
-### Prereq 1 — Azure AD permission to create app registrations
+**Rules:**
 
-Ask: *"Can you create app registrations in your tenant at portal.azure.com? Quick way to check: open portal.azure.com → Microsoft Entra ID → App registrations. Do you see a clickable **+ New registration** button at the top?"*
+1. **Automate by default.** Prefer running the commands below over handing the
+   user a script. Show the user what you ran and the result.
+2. **Never put secrets in chat.** The client secret and any token stay in local
+   shell variables and go straight into `gh secret set` / the CLI — never
+   printed, never pasted into the conversation. GUIDs (app id, env id, tenant
+   id) are fine to show.
+3. **Ask one question at a time**, only when needed, and wait for the answer.
+4. **Verify each step** before moving on; if a command fails, read the error,
+   fix it, and retry before advancing.
+5. **Track progress** with a checklist; keep one step in progress at a time.
 
-**If No:**
-- The user needs the **Application Developer** role in Microsoft Entra ID (or higher: Cloud Application Administrator, Application Administrator, Global Administrator).
-- Click path: tenant admin opens **Microsoft Entra ID** → **Roles and administrators** → searches **Application Developer** → **+ Add assignments** → adds the user.
-- Alternative: if the tenant allows users to register apps by default (check **Microsoft Entra ID** → **User settings** → "Users can register applications" = Yes), no role assignment is needed.
-- Then re-ask.
+### What you need from the user up front
 
-### Prereq 2 — Power Platform admin access to the target environment
+Ask for these (one at a time, only if you can't discover them yourself):
 
-Ask: *"Do you have admin access to the target Power Platform environment? Quick way to check: open the right PPAC for your ring (admin.powerplatform.com for prod, admin.test.powerplatform.com for test) → Environments → find the env. Can you see a Settings tab when you click into it?"*
-
-**If No:**
-- The user needs **System Administrator** on the env (for DV) or **Environment Admin** (for non-DV), OR tenant-wide Power Platform Admin.
-- Click path: tenant admin opens https://admin.microsoft.com → **Roles** → **Power Platform Admin** → assign the user.
-- Alternative: existing env admin opens the env in PPAC and adds the user as System Administrator (DV) or runs the BAP API to grant Environment Admin (non-DV — see Step 2b in this guide for the API call shape).
-- Then re-ask.
-
-### Prereq 3 — GitHub repository for the managed app
-
-Ask: *"Do you have a GitHub repo ready for the managed app, with permission to add repo Settings → Secrets and variables → Actions secrets?"*
-
-**If No:**
-- Create one at github.com/new — visibility doesn't matter for this; private is fine.
-- Permission: repo Admin or Maintain on the repo lets you manage Actions secrets.
-- If the user has Write but not Admin, ask the repo Admin to grant Admin or add the user to a team with Admin.
-- Then re-ask.
-
-### Prereq 4 — `AllowExternalArtifactDeployment` enabled on the env
-
-Ask: *"Has your tenant admin enabled `AllowExternalArtifactDeployment` on the target environment? If you're not sure, answer 'not sure' — we can confirm during the smoke test."*
-
-**If No / Not sure:**
-- This is a server-side setting; the user typically can't check it directly without running PowerShell.
-- Guide: ask the env admin (or run it yourself if you have Power Platform Admin) to enable `AllowExternalArtifactDeployment` on the target environment via PowerShell.
-- Symptom if not enabled: `ms app deploy` errors with `External artifact deployment is not enabled for this environment.`
-- It's OK to proceed without confirming this right now — we'll catch it at Step 7's deploy if it's still off. But warn the user.
-
-### Prereq 5 — `@microsoft/managed-apps-cli` installed locally (>= 0.7.0)
-
-Ask: *"Run `ms --version` in PowerShell. What does it print?"*
-
-**Branching:**
-- Prints `0.7.0` or higher → Yes, continue.
-- Prints lower (e.g. 0.6.x) → Update: `npm install -g @microsoft/managed-apps-cli@latest`. Then re-check.
-- `ms: command not found` or "not recognized" → Install: `npm install -g @microsoft/managed-apps-cli`. Make sure Node 22+ is installed first (`node --version`). Then re-check.
-
-### Prereq 6 — REST client + `az` CLI (only for non-DV environments)
-
-Ask: *"Is your target environment Dataverse-enabled, or non-DV / DV-free? If you're not sure, default to 'not sure' — we'll confirm in Step 2 and only ask about this prereq if needed."*
-
-**If DV** or **Not sure**: skip this prereq for now.
-
-**If non-DV:**
-- Ask: *"Do you have VS Code with the REST Client extension installed AND the `az` CLI working (`az --version` prints something)?"*
-- **If No:**
-  - REST Client: install VS Code → Extensions → search "REST Client" by Huachao Mao → Install.
-  - Alternative: any HTTP client works (curl, Postman, Insomnia, PowerShell `Invoke-RestMethod`). This guide provides a `.http` template optimized for the VS Code REST Client extension.
-  - `az` CLI: install from https://learn.microsoft.com/cli/azure/install-azure-cli-windows
-  - Re-ask.
+- **GitHub repo** for the app (e.g. `owner/name`). If they don't have one, offer
+  to create it with `gh repo create`.
+- **Target environment** — the ring (**Prod** or **Test**) and the
+  **environment id** (GUID). If they don't know the id, help them find it in the
+  Power Platform Admin Center, or list environments for them.
+- **App display name** (e.g. `My Managed App`).
 
 ---
 
-## Two routing questions before Step 1
+## Step 0 — Check the local tools
 
-Once all prereqs are confirmed, ask these two before starting Step 1:
-
-1. *"Which ring is your target environment — Prod or Test?"* (This sets the `cloud` value in the workflow and the BAP base URL if non-DV.)
-2. *"Is the env Dataverse-enabled or non-DV?"* (If they answered "not sure" earlier, give the check from Step 2: PPAC env Details → look for Dataverse database URL.)
-
-Capture both answers and use them throughout the rest of the walkthrough — e.g. set the `cloud:` workflow input automatically, route to Step 2a vs Step 2b without re-asking later.
-
----
-
-## Step 1 — Create the Service Principal in Azure portal
-
-Walk the user through:
-
-1. Open https://portal.azure.com → **Microsoft Entra ID** → **App registrations** → **+ New registration**
-2. Fields:
-   - **Name:** something descriptive, e.g. `github-actions-ci-managed-apps`
-   - **Supported account types:** *Accounts in this organizational directory only* (single tenant)
-   - **Redirect URI:** leave blank
-3. **Register**
-4. From the new app reg's **Overview** tab, copy and save these values:
-   - **Application (client) ID** — this becomes the GitHub secret `PP_SP_CLIENT_ID`
-   - **Directory (tenant) ID** — this becomes `PP_SP_TENANT_ID`
-   - **Object ID** (App Registration's Object ID) — note this, but **DO NOT use it for role assignment**. There's a separate Service Principal Object ID you'll need in Step 2b.
-5. Go to **Certificates & secrets** → **+ New client secret**
-   - Description: `github-actions-deploy`
-   - Expires: 6–12 months
-   - **Add** → **immediately copy the Value** (not the Secret ID). This is the only time you'll see it.
-   - This becomes the GitHub secret `PP_SP_CLIENT_SECRET`.
-
-**Verification:** ask the user to paste back (in a private channel — not chat):
-- Application (client) ID (full GUID)
-- Tenant ID (full GUID)
-- Confirm they've saved the client secret value somewhere safe (do **not** paste it)
-
-If any of the three are missing, stop and have them re-do step 4 or 5.
-
----
-
-## Step 2 — Identify the environment type
-
-The next step **branches**. Ask the user:
-
-> Is the target environment **Dataverse-enabled** (has a Dataverse database) or **non-DV / DV-free** (sandbox SKU with no Dataverse)?
-
-How they can tell:
-
-- Open the env in Power Platform Admin Center. Under **Details**, look for "Dataverse". If it shows a database with a URL like `https://...crm.dynamics.com`, it's **DV**. If it says "Dataverse not provisioned" or shows no Dataverse section, it's **non-DV**.
-- Or: if `ms app deploy` errors with messages mentioning Dataverse, application users, or system roles, you're on DV. If errors mention `InvalidDevEnvironmentOperation` or `LinkedEnvironmentForbiddenOperation`, you're likely on non-DV.
-
-Once known, go to **Step 2a** (DV) or **Step 2b** (non-DV). Do **not** mix the two paths — they use different APIs and different role names.
-
----
-
-## Step 2a — DV environment: add SPN as Application User via PPAC
-
-For Dataverse-enabled environments. Walk the user through:
-
-1. Open the Power Platform Admin Center for the target ring:
-   - Prod: https://admin.powerplatform.com
-   - Test: https://admin.test.powerplatform.com
-2. **Environments** → click on the target environment.
-3. **Settings** (top bar) → expand **Users + permissions** → **Application users**.
-4. **+ New app user**.
-5. In the side panel:
-   - Click **+ Add an app**.
-   - Search by the Application (client) ID from Step 1.
-   - Select the app reg → **Add**.
-6. Set **Business unit** to the environment's default business unit (usually the env name).
-7. Click the pencil next to **Security roles** → **Add roles** → check **both**:
-   - ✅ **System Administrator**
-   - ✅ **System Customizer**
-   - Click **Save**.
-8. **Create**.
-
-**Verification:** ask the user to confirm the new Application User appears in the list with both roles. Common mistakes to flag:
-- Choosing the wrong environment (if the same SPN deploys to multiple envs — repeat this step for each)
-- Adding only System Customizer (insufficient — needs System Administrator too for managed apps endpoints)
-- Adding a user account by accident (the search must resolve to the **app reg**, not a person)
-
-Skip to **Step 3**.
-
----
-
-## Step 2b — Non-DV environment: assign EnvironmentAdmin via BAP REST API
-
-Non-DV (sandbox-SKU, no Dataverse) environments do **not** show up in PPAC's Application Users UI — there's no Dataverse to host them. Instead, the SPN gets the `EnvironmentAdmin` role via a direct BAP API call.
-
-### 2b.1 — Get the right ObjectId (CRITICAL gotcha)
-
-In Azure AD, every app registration produces **two** objects with different Object IDs:
-
-| Object | Where to find it | Use it? |
-|---|---|---|
-| App Registration | portal.azure.com → **App registrations** → your app → Overview (the "Object ID" field) | ❌ **NO** |
-| Service Principal | portal.azure.com → **Enterprise applications** → your app → Overview (the "Object ID" field) | ✅ **YES** |
-
-The Enterprise Applications page is what shows up when you click the app reg name from the Overview's "Managed application in local directory" link. Both pages display "Object ID" but they're different GUIDs. Using the App Registration's ObjectId in the BAP call below will fail silently or with a confusing error.
-
-Have the user navigate to **Enterprise applications** and capture the **Service Principal Object ID** there. Call it `spnObjectId`.
-
-### 2b.2 — Get an admin user token
-
-The BAP API call must be made with a user token (from someone with `EnvironmentAdmin` on the target env) — the SPN can't grant itself the role.
-
-Easiest path with `az` CLI:
+Run these yourself and confirm each is present:
 
 ```powershell
-az login --tenant <your-tenant-id>
-az account get-access-token --resource https://service.powerapps.com/ --query accessToken -o tsv
+ms --version      # @microsoft/managed-apps-cli — need >= 0.7.0
+node --version    # need >= 22
+az --version      # Azure CLI
+gh auth status    # GitHub CLI, authenticated to the repo host
 ```
 
-Copy the resulting JWT — call it `userToken`. It's good for ~1 hour.
+Fixes if missing:
 
-Alternative: open PPAC in a browser, sign in, open DevTools → Network tab, find any request to `*.api.bap.microsoft.com`, copy the `Authorization: Bearer ...` header value.
+- `ms` missing / too old → `npm install -g @microsoft/managed-apps-cli@latest`
+- `az` missing → https://learn.microsoft.com/cli/azure/install-azure-cli
+- `gh` missing → https://cli.github.com , then `gh auth login`
 
-### 2b.3 — Identify the right BAP base URL for the ring
-
-| Ring | BAP base URL |
-|---|---|
-| Prod | `https://api.bap.microsoft.com` |
-| Preprod (TIP1) | `https://tip1.api.bap.microsoft.com` |
-| Test (TIP2) | `https://tip2.api.bap.microsoft.com` |
-
-### 2b.4 — Use the REST template to grant `EnvironmentAdmin`
-
-Save the following as `grant-spn-environment-admin.http` (works with VS Code REST Client extension). Replace the four `@` values with the user's actual data, then execute the POST.
-
-```http
-@baseUrl       = https://tip1.api.bap.microsoft.com
-@apiVersion    = 2021-04-01
-@tenantId      = <your tenant id GUID>
-@envId         = <target environment id GUID>
-@spnObjectId   = <SERVICE PRINCIPAL Object ID — from Enterprise Applications, NOT App Registrations>
-@userToken     = <Bearer token from `az account get-access-token`>
-
-### Step A — list current role assignments (baseline)
-GET {{baseUrl}}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{{envId}}/roleAssignments?api-version={{apiVersion}}
-Authorization: Bearer {{userToken}}
-Accept: application/json
-
-### Step B — assign EnvironmentAdmin to the SPN
-POST {{baseUrl}}/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{{envId}}/modifyRoleAssignments?api-version={{apiVersion}}
-Authorization: Bearer {{userToken}}
-Content-Type: application/json
-
-{
-  "add": [
-    {
-      "properties": {
-        "roleDefinition": {
-          "id": "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{{envId}}/roleDefinitions/EnvironmentAdmin"
-        },
-        "principal": {
-          "id": "{{spnObjectId}}",
-          "type": "ServicePrincipal",
-          "tenantId": "{{tenantId}}"
-        }
-      }
-    }
-  ],
-  "remove": []
-}
-```
-
-A copy of this template is at [`assets/grant-spn-environment-admin.http`](assets/grant-spn-environment-admin.http) in this guide — point the user there.
-
-**Expected outcome:** Step A returns the existing role assignments (probably one for the env owner). Step B returns 200 / 201 with a body confirming the new assignment for the SPN.
-
-**Verification:** re-run Step A. The SPN should now appear in the response with `EnvironmentAdmin`.
-
-Common failures:
-- **400 with "Principal not found"** → wrong ObjectId. Most often: using the App Registration's ObjectId instead of the SP's. Re-check Step 2b.1.
-- **403 Forbidden** → the user token lacks `EnvironmentAdmin` on this env. Either get the token from someone who does, or have an admin make you one first.
-- **404 environment not found** → wrong `envId` or wrong `baseUrl` for the ring. Make sure they match.
-
----
-
-## Step 3 — Smoke-test the SPN locally
-
-Same regardless of DV vs non-DV. Have the user run in PowerShell:
+Make sure the user is signed in to the right tenant:
 
 ```powershell
-$secret = Read-Host -AsSecureString "Paste client secret"
-$env:MS_CLI_SP_CLIENT_SECRET = [System.Net.NetworkCredential]::new('', $secret).Password
-
-$env:MS_CLI_USE_SP_AUTH  = 'true'
-$env:MS_CLI_SP_CLIENT_ID = '<Application (client) ID from Step 1>'
-$env:MS_CLI_SP_TENANT_ID = '<Tenant ID from Step 1>'
-$env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
-
-ms auth status
+az login --tenant <tenant-id>
 ```
 
-**Expected:**
-```
-Signed in as Service Principal: <client-id>
-```
-
-If you get a 401 or "not signed in": double-check the three SPN env vars (`MS_CLI_SP_CLIENT_ID`, `MS_CLI_SP_CLIENT_SECRET`, `MS_CLI_SP_TENANT_ID`), `MS_CLI_USE_SP_AUTH=true`, and that the secret value is correct and unexpired.
+> The user needs permission to **create app registrations** in the tenant
+> (Entra role *Application Developer* or higher, or the tenant allows app
+> registration by default) and **admin** on the target environment. If `az ad
+> app create` later fails with an authorization error, that's the missing piece.
 
 ---
 
-## Step 4 — Create the managed app (one-time, locally)
+## Step 1 — Create the service principal (agent-run)
 
-Run **locally as the user** (not as the SPN), because `ms app create` writes scaffolded files to disk and works best interactively.
+Create the app registration + service principal + a client secret with `az`, and
+push the three values straight into the repo's Actions secrets. The secret never
+leaves the local shell.
 
-1. Fresh directory:
+```powershell
+$repo   = '<owner/name>'
+$appId  = az ad app create --display-name 'github-actions-ci-managed-apps' --query appId -o tsv
+az ad sp create --id $appId | Out-Null
+$spObjectId = az ad sp show --id $appId --query id -o tsv     # SP Object ID (needed for non-DV grant)
+$tenantId   = az account show --query tenantId -o tsv
+$secret     = az ad app credential reset --id $appId --years 1 --query password -o tsv
 
-   ```powershell
-   mkdir my-managed-app
-   cd my-managed-app
-   ```
+gh secret set PP_SP_CLIENT_ID     --repo $repo --body $appId
+gh secret set PP_SP_TENANT_ID     --repo $repo --body $tenantId
+gh secret set PP_SP_CLIENT_SECRET --repo $repo --body $secret
+Remove-Variable secret
+```
 
-2. Switch back to interactive auth:
+Keep `$appId`, `$spObjectId`, and `$tenantId` for later steps. **Do not** print
+`$secret`.
 
-   ```powershell
-   Remove-Item Env:MS_CLI_USE_SP_AUTH      -ErrorAction SilentlyContinue
-   Remove-Item Env:MS_CLI_SP_CLIENT_ID     -ErrorAction SilentlyContinue
-   Remove-Item Env:MS_CLI_SP_CLIENT_SECRET -ErrorAction SilentlyContinue
-   Remove-Item Env:MS_CLI_SP_TENANT_ID     -ErrorAction SilentlyContinue
+**Verify:** `gh secret list --repo $repo` shows all three names.
 
-   ms auth login   # browser opens; sign in as the user with admin on the target env
-   ```
+<details><summary>Do it manually (Azure portal)</summary>
 
-3. Set the target cloud instance:
-
-   ```powershell
-   $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc.
-   ```
-
-4. Create the app with `--repo none` (BYOB / escape-hatch mode — required for both DV and non-DV):
-
-   ```powershell
-   ms app create --display-name "My Managed App" --repo "none"
-   ```
-
-   (Operates on the current directory. Add `--force` only if re-scaffolding a
-   non-empty directory.)
-
-5. Verify:
-   - `ms.config.json` exists with `appId`, `environmentId`, and `repoType: "none"`
-   - The Vite template was scaffolded (`package.json`, `src/`, `vite.config.ts`)
-
-6. Install dependencies and test the local build:
-
-   ```powershell
-   npm install
-   npm run build
-   ```
-
-7. Commit and push to GitHub:
-
-   ```powershell
-   git init
-   git add .
-   git commit -m "scaffold managed apps code app"
-   git branch -M main
-   git remote add origin <your github repo URL>
-   git push -u origin main
-   ```
+1. portal.azure.com → **Microsoft Entra ID** → **App registrations** → **+ New
+   registration**. Name it `github-actions-ci-managed-apps`, single tenant, no
+   redirect URI → **Register**.
+2. Overview tab → copy **Application (client) ID** and **Directory (tenant) ID**.
+3. **Certificates & secrets** → **+ New client secret** → copy the **Value**
+   immediately (shown once).
+4. In the repo: **Settings → Secrets and variables → Actions** → add
+   `PP_SP_CLIENT_ID`, `PP_SP_TENANT_ID`, `PP_SP_CLIENT_SECRET`.
+5. For the non-DV grant you also need the **Service Principal** Object ID — get
+   it from **Enterprise applications** (not App registrations) → your app →
+   Overview → Object ID.
+</details>
 
 ---
 
-## Step 5 — Configure GitHub repo secrets
+## Step 2 — Grant the service principal access to the environment
 
-In the GitHub repo: **Settings** → **Secrets and variables** → **Actions** → **New repository secret**. Add:
+The SPN needs permission on the **specific** environment. The role and API
+differ by environment type, so first determine the type.
 
-| Secret name | Value |
-|---|---|
-| `PP_SP_CLIENT_ID` | Application (client) ID from Step 1 |
-| `PP_SP_CLIENT_SECRET` | Client secret value from Step 1 |
-| `PP_SP_TENANT_ID` | Directory (tenant) ID from Step 1 |
+**Is the target environment Dataverse-enabled or non-DV?** Check the env in the
+Power Platform Admin Center → **Details**: a Dataverse database URL
+(`...crm.dynamics.com`) means **DV**; "Dataverse not provisioned" / no Dataverse
+section means **non-DV**. If unsure, proceed and let a Step 6 deploy error
+confirm (`Forbidden ... Deploy.Write` ⇒ DV path needed;
+`InvalidDevEnvironmentOperation` / `LinkedEnvironmentForbiddenOperation` ⇒
+non-DV path needed).
+
+### Non-DV environment — agent-run
+
+Run the bundled script. It obtains an admin token via `az`, grants
+`EnvironmentAdmin` to the SPN through the BAP admin API, and verifies:
+
+```powershell
+./assets/grant-spn-environment-admin.ps1 `
+  -Ring <Prod|Test> `
+  -TenantId $tenantId `
+  -EnvId <environment-id> `
+  -SpnObjectId $spObjectId
+```
+
+It prints `SUCCESS: SPN now has EnvironmentAdmin.` when done. To undo, re-run
+with `-Remove`. (Raw REST template, if you prefer:
+[`assets/grant-spn-environment-admin.http`](assets/grant-spn-environment-admin.http).)
+
+### DV environment — guided (Application User)
+
+Adding an Application User runs through Dataverse; walk the user through the UI:
+
+1. Power Platform Admin Center (Prod: https://admin.powerplatform.com , Test:
+   https://admin.test.powerplatform.com) → **Environments** → the target env.
+2. **Settings** → **Users + permissions** → **Application users** → **+ New app
+   user**.
+3. **+ Add an app** → search by the **Application (client) ID** (`$appId`) →
+   **Add**. Set **Business unit** to the env default.
+4. **Security roles** → add **both** *System Administrator* and *System
+   Customizer* → **Save** → **Create**.
+
+**Verify:** the app user appears in the list with both roles.
 
 ---
 
-## Step 6 — Add the GitHub Actions workflow
+## Step 3 — Scaffold the app and push it (agent-run)
 
-**Ask the user:** *"What's the path to the app directory inside the repo? (Default `apps/<app-name>` — should match where you ran `ms app create` in Step 4.)"*
+Create the managed app locally (interactive user auth, not the SPN), build it,
+and push to the repo.
 
-Capture the answer as `<app-path>` and use it in both `paths:` and `working-directory:` below.
+```powershell
+mkdir <app-dir>; cd <app-dir>
 
-Create `.github/workflows/deploy-<app-name>.yml` (one file per app — name it after the app so it's obvious which workflow belongs to which app):
+# ensure interactive auth (clear any SP env vars from earlier)
+Remove-Item Env:MS_CLI_USE_SP_AUTH,Env:MS_CLI_SP_CLIENT_ID,Env:MS_CLI_SP_CLIENT_SECRET,Env:MS_CLI_SP_TENANT_ID -ErrorAction SilentlyContinue
+ms auth login                              # browser opens — user signs in
+$env:MS_CLI_CLOUD_INSTANCE = '<prod|test>'
+
+ms app create --display-name '<App display name>' --repo 'none'   # BYOB mode
+npm install
+npm run build
+
+git init; git add .; git commit -m 'scaffold managed app'
+git branch -M main
+git remote add origin https://github.com/<owner/name>.git
+git push -u origin main
+```
+
+**Verify:** `ms.config.json` exists with `appId`, `environmentId`, and
+`repoType: "none"`; the build succeeded; the push landed on `main`. (The
+`environmentId` here is the env id — use it for the Step 2 grant if you didn't
+have it yet.)
+
+---
+
+## Step 4 — Add the deploy workflow (agent-run)
+
+Write `.github/workflows/deploy-<app-name>.yml`. Substitute `<app-path>` (the
+app directory inside the repo; `.` if it's the repo root) and the `cloud` value
+(`prod` or `test`).
 
 ```yaml
 name: Deploy <app-name>
@@ -392,73 +209,68 @@ on:
   push:
     branches: [main]
     paths:
-      - '<app-path>/**'                          # only run when THIS app changes
-      - '.github/workflows/deploy-<app-name>.yml'  # also re-run if the workflow itself changes
+      - '<app-path>/**'
+      - '.github/workflows/deploy-<app-name>.yml'
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-    - name: Setup Node 24
-      uses: actions/setup-node@v5
-      with:
-        node-version: '24'
+      - name: Setup Node 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
 
-    - name: Install app dependencies
-      working-directory: <app-path>
-      run: npm install
+      - name: Install app dependencies
+        working-directory: <app-path>
+        run: npm install
 
-    - name: Install ms CLI
-      uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
+      - name: Install ms CLI
+        uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 
-    - name: Pack Managed App
-      uses: microsoft/Managed-Apps/github-actions/ms-app-pack@v1
-      with:
-        working-directory: '<app-path>'
-        app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
-        client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
-        tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
-
-    - name: Deploy Managed App
-      uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
-      with:
-        working-directory: '<app-path>'
-        cloud: 'test'   # set to the ring of your target env: prod, test
-        app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
-        client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
-        tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
+      - name: Deploy Managed App
+        uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
+        with:
+          working-directory: '<app-path>'
+          cloud: '<prod|test>'
+          app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
+          client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
+          tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 ```
 
-**Why this shape:**
+Notes:
 
-- **`paths:` filter** — the workflow only runs when files inside `<app-path>/**` change. In a monorepo with multiple managed apps, edits to other apps don't trigger this one's deploy.
-- **`working-directory:` on every step** — `npm install` resolves the right `package.json`; `ms-app-pack` / `ms-app-deploy` find `ms.config.json` in the correct subdirectory. Mismatched paths are the most common workflow setup error.
-- **Self-trigger on workflow file changes** — adds the workflow YAML itself to `paths:`. Without this, editing the workflow doesn't trigger a run, which is a confusing dev loop.
-- **One workflow file per app** — name the file `deploy-<app-name>.yml`. Mixing multiple apps into one workflow file works but obscures the per-app cloud / SPN config.
-- **`ms-app-pack` is optional** — for `repoType: none` apps, `ms-app-deploy` builds and packs internally, so the separate pack step is redundant (it makes the build run twice). Keep it only if you want pack to fail fast as its own step; otherwise drop it and let deploy pack.
+- If `<app-path>` is the repo root, drop the `paths:` filter and the
+  `working-directory:` lines.
+- For `repoType: none` apps, `ms-app-deploy` builds and packs internally, so a
+  separate `ms-app-pack` step is optional (it just makes the build run twice).
+  Add it before deploy only if you want pack to fail fast on its own.
+- One workflow file per app; name it after the app so it's obvious which is
+  which.
 
-**If `<app-path>` is the repo root** (single-app repo, app files in repo root), simplify:
-- Remove the `paths:` filter (or use `paths-ignore: ['*.md', 'docs/**']` to skip irrelevant files).
-- Remove `working-directory:` from every step.
-
-**If multiple apps share the same SPN but deploy to different envs**, use separate workflow files per app, each with its own `cloud:` value and (if needed) different secret names.
-
-Commit and push the workflow file.
+Commit and push the workflow.
 
 ---
 
-## Step 7 — Trigger and verify
+## Step 5 — Trigger and verify (agent-run)
 
-1. **Actions** tab → trigger the workflow (automatic on next push, or **Run workflow** for `workflow_dispatch`).
-2. Each step should succeed:
-   - `install-ms-cli` — installs `@microsoft/managed-apps-cli@latest`
-   - `ms-app-pack` (if kept) — runs `npm run build`, prints `App packed. Artifact ready under .ms/packed/.`
-   - `ms-app-deploy` — prints `App '<name>' deployed (id: <guid>).` and a Play URL
-3. Open the Play URL — app should load.
+The Step 4 push triggers the workflow (or use **Run workflow** for
+`workflow_dispatch`). Watch it and confirm success:
+
+```powershell
+gh run watch --repo <owner/name>
+```
+
+**Success looks like:**
+
+- `install-ms-cli` installs `@microsoft/managed-apps-cli@latest`
+- `ms-app-deploy` prints `App '<name>' deployed (id: <guid>).` and a Play URL
+
+Open the Play URL — the app should load. From here, every push that touches
+`<app-path>` redeploys automatically.
 
 ---
 
@@ -466,37 +278,32 @@ Commit and push the workflow file.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `Service principal environment variables ... must be set` | All three SPN inputs not supplied to a step | Pass `app-id` / `client-secret` / `tenant-id` to **both** `ms-app-pack` and `ms-app-deploy` |
-| `npm error code E401 Incorrect or missing password` | Azure DevOps PAT scope or org mismatch | Action uses public npm by default; if overriding `registry-url` to ADO, PAT must match the feed's org and have **Packaging (Read)** scope |
-| **DV env:** `Forbidden — 'Repositories.MicrosoftApps.Deploy.Write'` | SPN added as App User but missing managed apps permission | Re-check Step 2a — both System Administrator AND System Customizer assigned. If still failing, contact support for role-to-permission clarification |
-| **Non-DV env:** `InvalidDevEnvironmentOperation` or `LinkedEnvironmentForbiddenOperation` from the controller | SPN doesn't have `EnvironmentAdmin` on the env, OR you targeted a DV env and used the non-DV path | Verify with Step 2b's "list role assignments" GET. If the SPN isn't there, retry Step 2b's POST. If the env is DV, switch to Step 2a |
-| **Non-DV env:** 400 "Principal not found" on the `modifyRoleAssignments` POST | Used App Registration's ObjectId instead of Service Principal's ObjectId | Re-read Step 2b.1 — get the SP ObjectId from **Enterprise applications**, not **App registrations** |
-| `External artifact deployment is not enabled for this environment` | Tenant admin hasn't enabled `AllowExternalArtifactDeployment` | Ask your tenant admin to enable `AllowExternalArtifactDeployment` on the environment via PowerShell |
-| `ms.config.json not found in working-directory` | Action's `working-directory` input doesn't point at the app | Set `working-directory` to the path containing `ms.config.json` |
-| Workflow runs green but the app doesn't update in the player | Browser cached an older bundle | Hard-refresh; verify the workflow's `commit-sha` output matches the latest commit |
+| `az ad app create` → authorization error | User lacks app-registration rights | Get the Entra *Application Developer* role, or have an admin create the app reg (manual fallback in Step 1) |
+| `Service principal environment variables ... must be set` | SPN inputs not passed to a step | Pass `app-id` / `client-secret` / `tenant-id` to every `ms-app-*` step |
+| **DV:** `Forbidden — 'Repositories.MicrosoftApps.Deploy.Write'` | App user missing a role | Re-check Step 2 DV — both *System Administrator* AND *System Customizer* |
+| **Non-DV:** `InvalidDevEnvironmentOperation` / `LinkedEnvironmentForbiddenOperation` | SPN lacks `EnvironmentAdmin`, or env is actually DV | Re-run the Step 2 non-DV script; if the env is DV, use the DV path instead |
+| **Non-DV:** 400 "Principal not found" | Wrong Object ID | Use the **Service Principal** Object ID (`az ad sp show --query id`), not the App registration's |
+| `External artifact deployment is not enabled for this environment` | `AllowExternalArtifactDeployment` off | Ask a tenant admin to enable it on the environment via PowerShell |
+| `ms.config.json not found in working-directory` | Wrong `working-directory` | Point it at the folder containing `ms.config.json` |
+| Workflow green but app doesn't update | Cached bundle | Hard-refresh; confirm the deployed `commit-sha` matches the latest commit |
 
 ---
 
-## What to do for each new environment
+## Appendix
 
-The SPN is a per-tenant resource; **the permission grant is per-environment**. If the same SPN deploys to multiple envs:
+**Another environment?** The SPN is per-tenant but the grant is per-environment.
+Re-run Step 2 for each new env; point the workflow at it via the `cloud` input
+(or a separate app with its own `ms.config.json`).
 
-- For each DV env → re-do Step 2a
-- For each non-DV env → re-do Step 2b
-- The workflow can target different envs by changing the `cloud` input (or by using separate apps with different `ms.config.json` files)
-
-## Notable detail — `ms app share` for principal access
-
-After deploy, the user may want to grant edit access to a colleague or another principal:
+**Share edit access** after deploy:
 
 ```powershell
 ms app share <principal-objectId> --access edit
 ```
 
-For BYOB apps (`repoType: 'none'`), this grants contributor access **at the app scope** (since there's no platform-managed repository). The CLI surfaces this automatically: `App ... has no platform-managed repository, so granting contributor access at the app scope instead of repository scope.`
+For BYOB apps (`repoType: 'none'`) this grants contributor access at the app
+scope (there's no platform-managed repository).
 
-## What this guide does NOT cover
-
-- Federated identity (OIDC) auth — not yet supported by `@microsoft/managed-apps-cli`.
-- Multi-stage promotion (dev → test → prod). Build the basic flow first.
-- GRS-managed (`--repo native`) or GHE-bound (`--repo <ghe-url>`) flows — different code paths and CI patterns.
+**Not covered here:** federated identity (OIDC) auth (not yet supported by the
+CLI), multi-stage promotion (dev → test → prod), and GRS-managed
+(`--repo native`) or GHE-bound flows.
