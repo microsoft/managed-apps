@@ -13,7 +13,6 @@ relevant one and follow its steps.
 | Skill | Use it when |
 |---|---|
 | [`agent-skills/release-guide.md`](agent-skills/release-guide.md) | Cutting a release PR — bump `package.json`, update the changelog, rebuild `dist/`, open the PR. |
-| [`agent-skills/byob-setup.md`](agent-skills/byob-setup.md) | Setting up a Bring-Your-Own-Build deploy pipeline end-to-end (service principal, per-environment permission grant, app creation, workflow wiring). |
 | [`agent-skills/architecture.md`](agent-skills/architecture.md) | Understanding the end-to-end flow — setup, local dev, CI loops, the deploy sequence, and the release/versioning model (with diagrams). |
 
 ## Build & release essentials

@@ -133,11 +133,11 @@ flowchart LR
   `ms app share <id> --access edit` grants contributor access at the **app scope**
   rather than the repository scope.
 
-### Example (validated, non-Dataverse test environment)
+### Example (non-Dataverse environment)
 
 ```pwsh
-$Env:MS_CLI_CLOUD_INSTANCE = 'test'
-ms app create --display-name "Non DV test" --repo "none"
+$Env:MS_CLI_CLOUD_INSTANCE = 'prod'   # the cloud your environment lives in
+ms app create --display-name "My managed app" --repo "none"
 npm install
 ms app deploy            # succeeds once AllowExternalArtifactDeployment is on
 ms auth login
