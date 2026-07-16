@@ -27,17 +27,17 @@
 #     with:
 #       node-version: '22'
 #   - run: npm ci
-#     working-directory: 'maaf-apps'
+#     working-directory: 'my-app'
 #   - uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 #   - uses: microsoft/Managed-Apps/github-actions/ms-app-pack@v1
 #     with:
-#       working-directory: 'maaf-apps'
+#       working-directory: 'my-app'
 #       app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
 #       client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 #   - uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
 #     with:
-#       working-directory: 'maaf-apps'
+#       working-directory: 'my-app'
 #       app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
 #       client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}

@@ -45,14 +45,14 @@
 #   - uses: actions/setup-node@v5
 #     with: { node-version: '22' }
 #   - run: npm ci
-#     working-directory: 'maaf-apps'
+#     working-directory: 'my-app'
 #   - run: npm run build
-#     working-directory: 'maaf-apps'
-#   - run: cd maaf-apps && zip -r ../app.zip dist ms.config.json
+#     working-directory: 'my-app'
+#   - run: cd my-app && zip -r ../app.zip dist ms.config.json
 #   - uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 #   - uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
 #     with:
-#       working-directory: 'maaf-apps'
+#       working-directory: 'my-app'
 #       artifact-path: '../app.zip'
 #       app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
 #       client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
@@ -64,11 +64,11 @@
 #   - uses: actions/setup-node@v5
 #     with: { node-version: '22' }
 #   - run: npm ci
-#     working-directory: 'maaf-apps'
+#     working-directory: 'my-app'
 #   - uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 #   - uses: microsoft/Managed-Apps/github-actions/ms-app-deploy@v1
 #     with:
-#       working-directory: 'maaf-apps'
+#       working-directory: 'my-app'
 #       app-id:        ${{ secrets.PP_SP_CLIENT_ID }}
 #       client-secret: ${{ secrets.PP_SP_CLIENT_SECRET }}
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}

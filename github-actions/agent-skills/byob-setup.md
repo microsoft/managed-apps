@@ -250,8 +250,9 @@ This is **not** exposed by `pac`, `ms`, or the BAP environment object. It's flip
    |---|---|
    | Production | `https://api.powerplatform.com/` |
    | Test | `https://api.test.powerplatform.com/` |
-   | Preprod | `https://api.preprod.powerplatform.com/` |
-   | Preview / Dogfood | `https://api.preview.powerplatform.com/` |
+
+   > _Microsoft-internal:_ non-production rings follow the same pattern
+   > (`https://api.<ring>.powerplatform.com/`). External customers use **Production**.
 
 3. **Capture the token** (a delegated user token for the `api.*.powerplatform.com` audience): open **admin.powerplatform.com** → **F12 → Network**, clear logs, then trigger any call to `api.*.powerplatform.com` — for a **DV env** open the environment's **Settings → Features**; for a **non-DV env** (no Settings page) just open the environment or let the **Environments** list load. Filter by `api.*.powerplatform.com`, open any request (e.g. `/settings?api-version=` or `/environments`), and copy the `authorization` header value (the part **after** `Bearer `). Tokens last ~90 min; treat them as secrets — never commit them.
 4. **Set it** with the helper at [`assets/set-allowexternalartifactdeployment.ps1`](assets/set-allowexternalartifactdeployment.ps1) (PowerShell 7):
@@ -327,18 +328,24 @@ Run **locally as the user** (not as the SPN), because `ms app create` writes sca
    ms auth login   # browser opens; sign in as the user with admin on the target env
    ```
 
-3. Set the target cloud instance **and the target environment** — both are required before `ms app create` so the app lands in the right environment:
+3. Set the target cloud instance so `ms app create` targets the right ring:
 
    ```powershell
-   $env:MS_CLI_CLOUD_INSTANCE = 'test'   # or 'prod', etc. — must match the environment's ring
-   # Pins which environment the app is created in (written to ms.config.json).
-   # Use the environmentId **GUID** (from PPAC → Environment → Details, or the deploy
-   # error text). Do NOT use the 'Default-<guid>' environment *name* form — it returns
-   # `EnvironmentNotFound` from the appframework API.
-   $env:MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID = '<your-environmentId-guid>'
+   $env:MS_CLI_CLOUD_INSTANCE = 'prod'   # the ring your environment lives in
    ```
 
-   If you skip `MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID`, the CLI may target the wrong (default) environment, and the later deploy fails against an environment where you never enabled `AllowExternalArtifactDeployment` (Step 2c) or granted the SPN.
+   > **Microsoft-internal only.** On non-production rings you must also pin the exact
+   > environment with the internal debug override below. External customers skip this —
+   > the CLI targets the environment you're signed into.
+   >
+   > ```powershell
+   > # Internal, non-prod rings only. Use the environmentId **GUID** (PPAC → Environment →
+   > # Details, or the deploy error text) — NOT the 'Default-<guid>' name form, which returns
+   > # `EnvironmentNotFound` from the appframework API.
+   > $env:MS_CLI_MAAF_DEBUG_ENVIRONMENT_ID = '<your-environmentId-guid>'
+   > ```
+
+   If you're on an internal non-prod ring and skip the override, the CLI may target the wrong (default) environment, and the later deploy fails against an environment where you never enabled `AllowExternalArtifactDeployment` (Step 2c) or granted the SPN.
 
 4. Create the app with `--repo none` (BYOB / escape-hatch mode — required for both DV and non-DV):
 

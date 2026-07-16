@@ -59,7 +59,7 @@ Step-by-step guides any operator — or coding-agent CLI (GitHub Copilot CLI, Cl
 
 ## Prerequisites
 
-- A **Service Principal** in Microsoft Entra ID with the right role on your target Power Platform environment (System Administrator + System Customizer for Dataverse-enabled environments; Environment Admin for non-Dataverse environments via the BAP REST API).
+- A **Service Principal** in Microsoft Entra ID with the right role on your target environment (System Administrator + System Customizer for Dataverse-enabled environments; Environment Admin for non-Dataverse environments via the BAP REST API).
 - **`AllowExternalArtifactDeployment`** enabled on the target environment by your tenant administrator.
 - A Managed App created with `ms app create --repo none` (BYOB / escape-hatch mode), `ms.config.json` committed in the repo.
 

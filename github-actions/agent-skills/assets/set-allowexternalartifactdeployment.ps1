@@ -16,11 +16,10 @@
     Settings -> Features; for a non-DV env (no Settings page) just open the
     environment or let the Environments list load.
 
-  Ring-aware API endpoints:
-    Production        https://api.powerplatform.com/
-    Test              https://api.test.powerplatform.com/
-    Preprod           https://api.preprod.powerplatform.com/
-    Preview / Dogfood https://api.preview.powerplatform.com/
+  API endpoint:
+    Production   https://api.powerplatform.com/
+    (Microsoft-internal non-production rings follow the same pattern,
+     https://api.<ring>.powerplatform.com/ — external customers use Production.)
 
   Usage:
     . ./set-allowexternalartifactdeployment.ps1

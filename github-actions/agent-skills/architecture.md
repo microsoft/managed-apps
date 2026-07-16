@@ -13,7 +13,7 @@ releases the actions themselves. Diagrams are Mermaid (render on GitHub).
 | `ms-app-pack` action | Wraps `ms app pack` (build + stage artifact). Optional — deploy can pack internally. |
 | `ms-app-deploy` action | Wraps `ms app deploy` (build + pack + upload + deploy). |
 | `ms.config.json` | Per-app config (`appId`, `environmentId`, `repoType`) written by `ms app create`. |
-| Power Platform environment | Deploy target; needs `AllowExternalArtifactDeployment` enabled for BYOB (`repoType: none`) deploys. |
+| Target environment | Deploy target; needs `AllowExternalArtifactDeployment` enabled for BYOB (`repoType: none`) deploys. |
 | Release workflow + [release guide](release-guide.md) | Versions and publishes the actions (this repo). |
 
 ## 1. End-to-end activity flow
