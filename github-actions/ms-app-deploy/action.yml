@@ -90,7 +90,7 @@ inputs:
   artifact-path:
     description: >
       Path to a pre-built .zip artifact to upload and deploy. Only valid for
-      repoType:'none' (escape-hatch / byoBuild) apps. Maps to `--artifact`
+      repoType:'none' (BYOB / byoBuild) apps. Maps to `--artifact`
       on the CLI. Mutually exclusive with commit-sha.
     required: false
     default: ''
