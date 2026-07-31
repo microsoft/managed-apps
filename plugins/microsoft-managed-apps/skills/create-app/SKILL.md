@@ -168,13 +168,10 @@ The CLI installed a `[credential ...]` block in `.git/config`, but GCM still nee
 
 ```bash
 cd "$PROJECT_ROOT"
-git fetch origin                                                 # browser opens; approve.
-git reset --soft origin/main
-git commit -m "Initial scaffold from 'ms app create'"
-git push -u origin HEAD
+git fetch origin # browser opens; approve.
 ```
 
-Detect this by matching `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://...d.environment.api...'`, or `push.success: false` in `--json` output. Surface the recovery commands and continue with the existing app after they succeed.
+Detect this by matching `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://...d.environment.api...'`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app after it succeeds.
 
 ### Step 8: Add Data Sources
 

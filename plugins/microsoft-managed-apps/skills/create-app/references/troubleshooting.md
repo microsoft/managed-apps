@@ -22,21 +22,13 @@ The app and local scaffold remain intact. Do **not** delete the app, remove the 
 ### Recovery
 
 ```bash
-PROJECT_ROOT="$(pwd)"
-cd "$PROJECT_ROOT"
-
 # Trigger GCM's interactive browser flow against the remote.
-git fetch origin                                                    # browser opens; approve.
-
-# Re-parent the locally committed scaffold onto the seeded remote branch, then push.
-git reset --soft origin/main
-git commit -m "Initial scaffold from 'ms app create'"
-git push -u origin HEAD
+git fetch origin # browser opens; approve.
 ```
 
 ### Detection
 
-Match `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://` followed by `.d.environment.api.`, or `push.success: false` in `--json` output. Surface the recovery sequence and continue with the existing app.
+Match `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://` followed by `.d.environment.api.`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app.
 
 ---
 

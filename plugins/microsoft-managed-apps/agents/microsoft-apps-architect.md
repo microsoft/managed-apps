@@ -112,7 +112,7 @@ Template downstream commands with `ms`.
 
 ### First-Run Git Credential Manager Trap
 
-The first `ms app create` against a fresh account can fail while fetching the native Git remote because Git Credential Manager hasn't done the interactive browser flow. Symptom: `Could not commit and push the initial scaffold` with `Authentication failed for 'https://<env-id>.d.environment.api.powerplatform.com/...'`. The app and scaffold were created: do **not** delete the app or rerun create. Recover in the project directory with `git fetch origin` (browser pops, approve), `git reset --soft origin/main`, `git commit -m "Initial scaffold from 'ms app create'"`, then `git push -u origin HEAD`.
+The first `ms app create` against a fresh account can fail while fetching the native Git remote because Git Credential Manager hasn't done the interactive browser flow. Symptom: `Could not commit and push the initial scaffold` with `Authentication failed for 'https://<env-id>.d.environment.api.powerplatform.com/...'`. The app and scaffold were created: do **not** delete the app or rerun create. Recover in the project directory with `git fetch origin` (browser pops, approve).
 
 ## Response Style
 
