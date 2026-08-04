@@ -38,11 +38,32 @@ The commands below are shown in bash syntax. If you are running PowerShell on Wi
 ```bash
 node --version                                                    # Must be v22+
 git --version                                                     # Required (used by `ms app create` to init the repo)
+git credential-manager --version                                  # Required for browser-based remote authentication
+git config --system --get-regexp '^credential(\..*)?\.helper$'    # Check system-level helpers
+git config --global --get-regexp '^credential(\..*)?\.helper$'    # Check user-level helpers
+git config --global --get user.name                               # Required for the initial scaffold commit
+git config --global --get user.email                              # Required for the initial scaffold commit
 ms --version 2>/dev/null  # Probe the bin name
 ```
 
 - **Missing Node.js or below v22**: Report "Node.js 22+ is required. Install from https://nodejs.org/ or switch with `nvm use 22`." STOP.
 - **Missing Git**: Report "Git is required — `ms app create` initializes a repo. Install from https://git-scm.com/." STOP.
+- **Missing Git Credential Manager**:
+  1. Warn: "Git Credential Manager is not installed. Without it, Git may prompt for a username instead of opening browser authentication. I can install and configure GCM for you."
+  2. Ask: "Is it okay to install Git Credential Manager on this machine?" Wait for explicit approval.
+  3. If declined, STOP and link to https://aka.ms/gcm.
+  4. If approved, install GCM using the official OS-appropriate method:
+     - Windows with WinGet: `winget install --id Git.GCM --exact --source winget --accept-package-agreements --accept-source-agreements`
+     - macOS with Homebrew: `brew install --cask git-credential-manager`
+     - Linux: use an official package from the GCM release/install documentation. Do not pipe a remote install script directly into a shell.
+  5. Run `git credential-manager configure`, then repeat the version and helper checks. If either still fails, surface the error and STOP.
+- **GCM is installed but no system or global helper entry contains `manager` or `credential-manager`**:
+  1. Warn: "Git Credential Manager is installed but Git is not configured to use it. Without this configuration, Git may prompt for a username instead of opening browser authentication."
+  2. Ask: "Is it okay to configure Git Credential Manager as Git's credential helper?" Wait for explicit approval.
+  3. If approved, run `git credential-manager configure`, then repeat both helper checks. If configuration still cannot be detected, surface the error and STOP.
+  4. If declined, STOP.
+  Ignore nonzero exit codes from an individual config-scope query when that scope has no matching entries.
+- **Missing global `user.name` or `user.email`**: Report the missing value and ask the user to configure it with `git config --global user.name "<name>"` or `git config --global user.email "<email>"`. STOP. Never invent either value.
 - **Missing `ms`**: proceed to the global install block below. Confirm with the user before running `npm install -g`.
 - **One of them resolves**: record which binary name resolved (`$BIN`); use it in every subsequent step.
 
