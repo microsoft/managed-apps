@@ -11,7 +11,7 @@
 
 ## Required Account
 
-- A Microsoft work/school account with access to a Microsoft Apps-enabled tenant.
+- A Microsoft work/school account with access to a Managed apps-enabled tenant.
 - `ms app create` resolves an environment automatically — you do not need to know or provide one. (Advanced users who already have a specific environment ID can pass it via `--environment-id`.)
 
 ## Installing `@microsoft/managed-apps-cli`
