@@ -34,7 +34,7 @@ If the memory bank exists, extract:
 
 | Information                       | Purpose                                                |
 | --------------------------------- | ------------------------------------------------------ |
-| Project path, name, version       | Know what you're working with                          |
+| Project path, name                | Know what you're working with                          |
 | Completed steps (checkboxes)      | Skip steps already done                                |
 | User preferences                  | Don't re-ask answered questions                        |
 | Created resources                 | Know what data sources/connectors exist                |
@@ -51,7 +51,7 @@ If the memory bank exists, extract:
 
 Always tell the user what you found:
 
-> "I found your project memory bank. [Summary: project name, version, what's been completed]. Let's continue from [next step]."
+> "I found your project memory bank. [Summary: project name, what's been completed]. Let's continue from [next step]."
 
 ---
 
@@ -107,7 +107,6 @@ Update after:
 | Environment Name                      | [ENVIRONMENT_NAME]                                     |
 | Environment ID                        | [ENVIRONMENT_GUID — reference only, resolved by CLI]   |
 | Remote git URL                        | [URL]                                                  |
-| Version                               | v1.0.0                                                 |
 | Created Date                          | [DATE]                                                 |
 | Status                                | [In Progress / Created / Local Dev Running / Deployed] |
 
@@ -115,7 +114,6 @@ Update after:
 
 ### Design Preferences
 - Theme: [Dark/Light]
-- Version Display: [Enabled/Disabled]
 
 ### Technical Preferences
 - Data Sources: [Dataverse, Azure DevOps, Teams, Excel, etc.]
@@ -179,7 +177,7 @@ To continue working on this project:
 
 When reading the memory bank, extract:
 
-1. **Project context**: Path, app name, environment, version.
+1. **Project context**: Path, app name, environment.
 2. **Completed work**: Check checkboxes to know what's done.
 3. **User preferences**: Apply these without re-asking.
 4. **Created resources**: Know what data sources/connectors exist.

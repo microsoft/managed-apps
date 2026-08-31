@@ -235,7 +235,7 @@ The dev server runs in the foreground. Either:
 
 Provide:
 
-- **App**: display name, app GUID, version `v1.0.0`.
+- **App**: display name, app GUID.
 - **Project path**: `$PROJECT_ROOT`.
 - **Git remote URL** (label it "Git Remote", not just "Remote" — users confuse "Remote" with a browser-openable link).
 - **Connectors wired up**: list each one added in Step 8 + which screens use it.
@@ -300,7 +300,7 @@ ms app dev
 ```
 Sample One is running locally.
 
-App: Sample One v1.0.0
+App: Sample One
 App GUID: 7ea6...
 Environment: Default-<guid> (auto-routed Developer environment)
 Cluster: prod
