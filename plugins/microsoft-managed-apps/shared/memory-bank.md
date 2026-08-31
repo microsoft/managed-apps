@@ -26,7 +26,7 @@ The memory bank is always stored at: `<PROJECT_ROOT>/memory-bank.md`
 
 1. If the user has specified a project path, check `<PROJECT_PATH>/memory-bank.md`.
 2. If continuing from a previous skill in the same session, use the known project path.
-3. If no path is known, ask the user for the project path.
+3. If no path is known, discover likely project roots from the current workspace first. Ask for the project path only when multiple candidates remain ambiguous.
 
 ### Step 2: Read and Parse Context
 
@@ -43,7 +43,7 @@ If the memory bank exists, extract:
 
 ### Step 3: Resume or Continue
 
-- **If the current skill's steps are already marked complete**: Ask if they want to modify, add more, or skip to next steps.
+- **If the current skill's steps are already marked complete**: Infer the next action from the request. Ask only when the requested action is unclear.
 - **If partially complete**: Inform the user and resume from the incomplete step.
 - **If not started**: Begin from the first step.
 

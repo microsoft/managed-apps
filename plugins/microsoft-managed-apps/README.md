@@ -47,10 +47,10 @@ The `/create-app` skill handles the global install of `@microsoft/managed-apps-c
 ## Try it
 
 ```
-/create-app
+/create-app <description here>
 ```
 
-The skill walks you through global tooling install, account selection, app scaffolding, and a local dev server you can hit in the App Player. Nothing deploys to the cloud unless you explicitly ask.
+Describe the app in the command and the skill generates its name, plans the complete requested experience for your approval, scaffolds it, builds it, and starts a local dev server in the App Player. Nothing deploys to the cloud unless you explicitly ask.
 
 ## Telemetry
 

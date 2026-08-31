@@ -40,7 +40,7 @@ PowerShell equivalent:
 $Latest = (npm view @microsoft/managed-apps-cli@latest version 2>$null).Trim()
 ```
 
-If the installed version differs from `$Latest`, ask the user before upgrading. The `@latest` tag updates regularly.
+If the installed version differs from `$Latest`, continue app creation with the compatible installed version and mention the available upgrade in the final summary. Upgrade only when the user explicitly asks; never auto-update.
 
 ### Override patterns (only with explicit user direction)
 

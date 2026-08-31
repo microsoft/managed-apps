@@ -160,7 +160,7 @@ Example: "Meeting Insights" app
 
 ## Connector Selection Checklist
 
-When a user describes their app, ask these questions:
+When a user describes their app, answer this checklist internally from the prompt and available discovery results. Ask the user only for a required value that cannot be inferred or discovered:
 
 1. **Is the app primarily a SEARCH interface?**
    - If YES → recommend Work IQ
