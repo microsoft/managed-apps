@@ -103,8 +103,8 @@ Wait for their answer. Do NOT present a multiple-choice list of app types. Once 
    - **Each data source to be added** (which `/add-*` skill, api-id, table/list/connection identifiers). These are invoked by Step 8 of this skill — list them as concrete steps, not as "next steps."
    - **App architecture**: components, pages, routing, state management — enough detail that Step 9 can generate the code without re-asking.
    - Build/verify steps and the final `ms app dev` hand-off.
-3. Present the complete inferred plan and ask for approval once. Include `allowedPrompts` from [prerequisites-reference.md](./references/prerequisites-reference.md) when the host requires them. For a sufficiently detailed app prompt, this should be the only product-design question in the workflow.
-4. Wait for approval, then exit plan mode with `ExitPlanMode` and implement the approved plan. Additional questions are allowed only when a required value cannot be inferred or discovered, or when mandated by the safety guardrails (for example, global installation or account switching).
+3. Present the complete inferred plan. Include `allowedPrompts` from [prerequisites-reference.md](./references/prerequisites-reference.md) when the host requires them.
+4. Once the plan is approved, implement it. Additional questions are allowed only when a required value cannot be inferred or discovered, or when mandated by the safety guardrails (for example, global installation or account switching).
 
 ### Step 5: Auth
 
