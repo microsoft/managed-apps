@@ -131,10 +131,13 @@ If environment routing fails, surface the actual error to the user rather than a
 
 ### Step 7: Scaffold
 
-Derive a folder name from the display name (lowercase, hyphens, no spaces — e.g. "Sample One" → `sample-one`), then inspect the **current working directory**, including hidden entries:
+Derive a folder slug from the display name (lowercase, hyphens, no spaces — e.g. "Sample One" → `sample-one`), then inspect the **current working directory**, including hidden entries, and pick the target:
 
-- **Current directory is empty:** set `FOLDER_NAME="."` and scaffold directly into it. Do not ask for a path or app name.
-- **Current directory is not empty:** keep the inferred folder name as `FOLDER_NAME`. If that child path already exists, select the first available numbered variant (`sample-one-2`, `sample-one-3`, etc.); never overwrite an existing directory. Tell the user: _"Found current folder is not empty. I'll create the app in this subfolder: `<FOLDER_NAME>`."_ Continue immediately without asking for confirmation.
+- **Directory is empty:** set `FOLDER_NAME="."` and scaffold directly into it. Do not ask for a path or app name.
+- **Current directory is a Microsoft App root** (it contains `ms.config.json`): never scaffold inside it — that would nest an app and a Git repository inside another one. Create the new app as a **sibling**, so `FOLDER_NAME` is the slug under the parent directory (e.g. `../sample-one`).
+- **Any other non-empty directory:** use the slug as a child folder.
+
+In both non-empty cases, if the chosen path already exists, select the first available numbered variant (`sample-one-2`, `sample-one-3`, etc.); never overwrite an existing directory. State the chosen location and continue immediately without asking for confirmation, e.g. _"Found current folder is not empty. I'll create the app in: `<FOLDER_NAME>`."_ — or, for the sibling case, _"This folder is an existing Microsoft App, so I'll create the new app alongside it in: `<FOLDER_NAME>`."_
 
 ```bash
 $BIN app create "$FOLDER_NAME" \
@@ -149,6 +152,8 @@ After the command succeeds, enter the target directory unless it is `.`, then se
 [ "$FOLDER_NAME" = "." ] || cd "$FOLDER_NAME"
 PROJECT_ROOT="$(pwd)"
 ```
+
+Now that `PROJECT_ROOT` exists, write the approved plan to `$PROJECT_ROOT/app_generated_plan.md` per [planning-policy.md](${CLAUDE_PLUGIN_ROOT}/shared/planning-policy.md) — before any implementation, so it is committed with the rest of the generated app.
 
 Capture from the output: the app GUID, the environment ID/name resolved by the CLI, and the remote git URL. (The environment ID appears in the App Player URL and is needed for that link — it's an internal detail, not something to surface to the user.)
 

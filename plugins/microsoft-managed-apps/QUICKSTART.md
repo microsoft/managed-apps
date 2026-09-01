@@ -49,7 +49,7 @@ Your copilot will:
 3. Run `ms app create` to scaffold the project.
 4. Start `ms app dev` so you can play the app locally in the App Player.
 
-If the folder is not empty, the skill will create the app in an inferred subfolder and tell you which folder it selected.
+If the folder is not empty, the skill will create the app in an inferred subfolder and tell you which folder it selected. If you run it from inside an existing Microsoft App, it creates the new app alongside that app instead of nested inside it.
 
 Nothing deploys to the cloud at this point — local dev only.
 
