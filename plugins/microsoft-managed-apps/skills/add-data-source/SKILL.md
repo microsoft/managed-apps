@@ -14,7 +14,20 @@ model: sonnet
 
 This is the **single implementation** for all connector-binding skills.
 
-Specialized `/add-*` skills are thin wrappers that call this skill with presets. If this skill is called from a wrapper, **do not delegate back**.
+**Delegation model:**
+- Specialized `/add-*` skills (e.g., `/add-office365`, `/add-workiq`) delegate to this skill with presets
+- If this skill is called from a wrapper, **do not delegate back** 
+- If this skill is called directly, complete the workflow without delegation
+
+**After the connector is added:**
+- If invoked via a specialized skill → Refer to that specialized skill's documentation for usage patterns (it was already provided)
+- If invoked directly → Identify which specialized skill matches your use case and refer to its documentation for:
+  - Correct import paths for generated services
+  - Best practices for using the connector
+  - Common patterns and implementation examples
+  - Error handling guidance
+
+This ensures developers have complete context for implementing features, not just adding the connector.
 
 ## Workflow
 
@@ -74,6 +87,25 @@ Try sources in this order; stop at the first one that yields a value:
    d. If `ms connector list --search "<term>"` returns no results, fall back to `ms connector list` with no filter, surface a representative slice, and ask the user to refine the term. Do not proceed with a guessed api-id.
 
 5. **Validation.** Once an api-id is chosen, confirm it's real before spending a build cycle on it: `$BIN connector list-actions --connector <api-id> --search ""` should succeed. If the CLI replies that the api-id is unknown, drop back to step 4 — don't keep retrying with the same value.
+
+#### Work IQ intent hint
+
+When user intent is about **knowledge retrieval / grounded Microsoft 365 search summaries** (for example: "analyze M365 content", "search my email and Teams", "knowledge-grounded query"), default to:
+
+- `api-id`: `shared_a365copilotchatmcp`
+- `mode`: `action`
+
+⚠️ **IMPORTANT:** If the user is adding Work IQ via `/add-data-source`, **ask them to use `/add-workiq` instead.**
+
+**Why:** Work IQ uses MCP (Model Context Protocol), a stateful protocol that requires special handling. The `/add-workiq` skill provides:
+- Complete `McpSession` wrapper class (handles session initialization, auto-retry, response parsing)
+- Best practices for structuring prompts
+- Error handling patterns
+- Multi-turn conversation support
+
+**Guidance:** "I can add the connector, but for Work IQ I recommend using `/add-workiq` — it provides a production-ready `McpSession` class and comprehensive patterns to avoid common errors. Would you like to use `/add-workiq` instead?"
+
+If they insist on `/add-data-source`, proceed but **after adding the connector, refer them to the `/add-workiq` skill documentation** so they understand the McpSession requirement.
 
 #### 2b. Resolve `mode`
 
@@ -139,3 +171,4 @@ If `memory-bank.md` exists, record `api-id`, mode, and parameters used.
 | `/add-onedrive`      | `shared_onedriveforbusiness`    | `action`   |
 | `/add-azuredevops`   | `shared_visualstudioteamservices` | `action` |
 | `/add-mcscopilot`    | `microsoftcopilotstudio`        | `action`   |
+| `/add-workiq`        | `shared_a365copilotchatmcp`     | `action`   |

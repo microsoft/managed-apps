@@ -144,8 +144,8 @@ Update after:
 
 | File                                  | Source          |
 | ------------------------------------- | --------------- |
-| `src/<Generator>/<Table>Model.ts`     | Dataverse table |
-| `src/<Generator>/<Table>Service.ts`   | Dataverse table |
+| `generated/models/<Generator><Table>Model.ts`     | Dataverse table |
+| `generated/services/<Generator><Table>Service.ts`   | Dataverse table |
 
 ## Current Status
 

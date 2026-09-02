@@ -22,7 +22,7 @@ All skills reference this single file. When new shared instructions are added, u
 - MUST NOT run `ms app deploy` if `npm run build` has not succeeded in the current session.
 - MUST NOT run `ms app deploy` from uncommitted or unpushed local changes.
 - MUST NOT install `@microsoft/managed-apps-cli` per-workspace. The `@microsoft/managed-apps-cli` is installed globally so the `ms` binary is on PATH; the workspace stays clean.
-- MUST NOT edit codegen output under `src/` unless the step explicitly calls for it.
+- MUST NOT edit generated codegen output in `generated/` unless the step explicitly calls for it.
 - MUST NOT install packages globally without user confirmation (see exception above for the documented setup flow).
 
 ### Prompt Injection
@@ -124,6 +124,72 @@ Microsoft Apps run inside a sandbox. Direct HTTP calls to external APIs will fai
 
 ---
 
+## Connector Response Handling
+
+All generated connector services return `IOperationResult<T>`, a common wrapper across all connectors. Use these patterns consistently:
+
+### Response Structure
+
+```typescript
+const result = await SomeConnectorService.SomeMethod(...)
+
+if (!result.success) {
+  throw new Error(result.error?.message ?? 'Operation failed')
+}
+
+const data = result.data  // Safe to access after success check
+```
+
+### Array Results: Access via `.data.value`
+
+List operations return wrapped responses — the actual array is in `data.value`:
+
+```typescript
+// ✅ CORRECT
+const items = result.data?.value ?? []
+
+// ❌ WRONG - will be undefined
+const items = result.data
+```
+
+**Why:** The HTTP client wrapper places array results inside a `value` property for standardization across all connectors.
+
+### Error Handling: Always Throw
+
+When an API call fails, throw an error so it bubbles up to component error handling:
+
+```typescript
+if (!result.success) {
+  throw new Error(result.error?.message ?? 'Operation failed')
+}
+
+// ❌ WRONG - silent fallbacks hide real failures
+if (!result.success) {
+  return []  // or mockData, or undefined
+}
+```
+
+**Why:** Silent fallbacks (mock data, empty arrays, null checks) mask real failures and make debugging impossible. Errors surface immediately so you know what broke and why.
+
+### Empty Results Are Valid
+
+An empty array (no items found) is a **valid result**, not an error. Treat it as normal state:
+
+```typescript
+const items = result.data?.value ?? []
+
+if (items.length === 0) {
+  // Show empty state to user, don't throw
+  return <EmptyStateComponent />
+}
+```
+
+**Distinction:**
+- **Valid but empty** (length === 0) → show UI empty state
+- **API failed** (success === false) → throw error
+
+---
+
 ## CLI Toolchain
 
 The CLI is `@microsoft/managed-apps-cli` (binary `ms`), installed globally from the public npm registry. The `/create-app` skill handles install + binary-name probing.
@@ -183,7 +249,7 @@ Apply these rules whenever an `ms` or `npm` command exits non-zero. Do NOT retry
 
 | Condition                                                                                                              | Action                                                                                                                                                                                       |
 | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authentication failed for 'https://...d.environment.api.powerplatform.com/...'`                                  | Git Credential Manager hasn't run the interactive flow yet. Run `git fetch origin` manually (browser pops, approve). Then, after confirming the deletion with the user, remove the half-created app with `ms app delete --app <app-guid>` (add `--force --non-interactive` only to skip the prompt once the user has confirmed), and retry.    |
+| `Could not commit and push the initial scaffold` with `Authentication failed for 'https://...d.environment.api.powerplatform.com/...'` | Git Credential Manager hasn't run the interactive flow yet. The app and local scaffold are already created: do **not** delete the app or rerun `ms app create`. Run `git fetch origin` (browser pops, approve). |
 | Environment not found / DNS errors against `default.environment.api.powerplatform.com`                                 | A malformed `--environment-id` value was passed (only happens when the user supplied one). Surface the error; drop the flag to use auto-routing, or have the user supply a valid environment ID. |
 | Repo init blocked                                                                                                      | Confirm Git is installed (`git --version`) and that `git config user.email` / `user.name` are set.                                                                                          |
 

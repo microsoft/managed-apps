@@ -53,20 +53,20 @@ Generated service files (e.g., `Office365OutlookService.ts`) can be thousands of
 
 1. **List available methods** with Grep:
    ```
-   Grep pattern="async \w+" path="src/<service-folder>/<Connector>Service.ts"
+   Grep pattern="async \w+" path="generated/services/<Connector>Service.ts"
    ```
 
 2. **Find a specific method** and read just that section:
    ```
-   Grep pattern="async GetEventsCalendarViewV2" path="src/<service-folder>/Office365OutlookService.ts" -A 20
+   Grep pattern="async GetEventsCalendarViewV2" path="generated/services/Office365OutlookService.ts" -A 20
    ```
 
 3. **Find parameter types** in the models file:
    ```
-   Grep pattern="interface CalendarEventHtmlClient" path="src/<service-folder>/Office365OutlookModel.ts" -A 30
+   Grep pattern="interface CalendarEventHtmlClient" path="generated/models/Office365OutlookModel.ts" -A 30
    ```
 
-This avoids context-window bloat. Exact subdirectory layout under `src/` is owned by `@microsoft/apps-actions` — codegen output lands directly under `src/` alongside handwritten code.
+This avoids context-window bloat. Generated services and models land in `generated/` at the project root (e.g., `generated/services/Office365OutlookService.ts`, `generated/models/Office365OutlookModel.ts`). Import them from your `src/` files using relative paths like `../../generated/services/<ServiceName>`.
 
 ## Sub-Skill Invocation
 

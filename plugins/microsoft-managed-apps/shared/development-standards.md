@@ -39,4 +39,4 @@ Standards that apply to all Microsoft Apps skills.
 
 - The template uses strict mode — unused imports cause build failures (TS6133).
 - Remove any imports you don't use before building.
-- Don't edit codegen output under `src/` (the layout is owned by `@microsoft/apps-actions`).
+- Don't edit generated codegen output in `generated/` (the layout is owned by `@microsoft/apps-actions`).

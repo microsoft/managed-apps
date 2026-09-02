@@ -153,51 +153,42 @@ PROJECT_ROOT="$(pwd)"
 
 Capture from the output: the app GUID, the environment ID/name resolved by the CLI, and the remote git URL. (The environment ID appears in the App Player URL and is needed for that link — it's an internal detail, not something to surface to the user.)
 
-#### First-run Git Credential Manager trap
+#### First-run Git Credential Manager recovery
 
 On the **first ever** `ms app create` for a fresh account (or after the GCM cache expires for the relevant remote), the local-setup step fails with:
 
 ```
 fatal: Authentication failed for 'https://<env-id>.d.environment.api.powerplatform.com/appframework/git/repositories/<repo-guid>/'
-App '<name>' was created, but local setup failed: Command failed: git fetch origin
+Could not commit and push the initial scaffold. Your app and local scaffold are ready.
 ```
 
-The CLI installed a `[credential ...]` block in `.git/config` but GCM still needs an interactive browser flow once.
+The CLI installed a `[credential ...]` block in `.git/config`, but GCM still needs an interactive browser flow once. The app and scaffold are already created; do **not** delete the app or rerun `ms app create`.
 
 **Recovery sequence** (the app exists in the service but is empty locally):
 
-Before running recovery, ask for explicit user confirmation because this sequence deletes the scaffolded folder and recreates it.
-
 ```bash
 cd "$PROJECT_ROOT"
-git fetch origin                                                 # browser opens; approve.
-# Set APP_ID to the created app GUID from the create output (or `ms app list --json`) before delete.
-$BIN app delete --app "$APP_ID" --force --non-interactive       # remove the half-formed app
-[ -n "$APP_ID" ] && [ -n "$PROJECT_ROOT" ] || { echo "Missing APP_ID or PROJECT_ROOT; refusing cleanup."; exit 1; }
-# Guardrail: never allow cleanup when project root is home or filesystem root.
-[ "$PROJECT_ROOT" != "$HOME" ] && [ "$PROJECT_ROOT" != "/" ] || { echo "Refusing cleanup at unsafe path: $PROJECT_ROOT"; exit 1; }
-cd ..
-rm -rf "$FOLDER_NAME"
-# Re-run `ms app create` — auth is now cached, second run completes end-to-end.
-$BIN app create "$FOLDER_NAME" \
-  --display-name "$DISPLAY_NAME" \
-  --non-interactive
-cd "$FOLDER_NAME"
-PROJECT_ROOT="$(pwd)"
+git fetch origin # browser opens; approve.
 ```
 
-Detect the trap by matching `Authentication failed for 'https://...d.environment.api...'` in the create output. Surface the suspected trap and proposed recovery, then wait for explicit user approval before running the destructive cleanup steps.
+Detect this by matching `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://...d.environment.api...'`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app after it succeeds.
 
 ### Step 8: Add Data Sources
 
 For every connector identified in Step 3 / Step 4, invoke the matching skill **now**, in this session, before any UI code is generated:
 
-- A specific `/add-*` skill when one exists (`/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`).
+- A specific `/add-*` skill when one exists (`/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`).
 - `/add-data-source` (with api-id) for anything else.
+
+For Work IQ knowledge/search scenarios, prefer `/add-workiq` (maps to `shared_a365copilotchatmcp`) over generic `/add-data-source`.
 
 Run them sequentially. After each one:
 
-- Confirm the typed services were generated under `src/` (the add-skills regenerate TypeScript clients).
+- Confirm the typed services were generated under `generated/` at the project root. The add-* skills regenerate TypeScript clients.
+- **For implementation guidance**, refer to the specialized skill's documentation:
+  - `/add-office365` → See "Office 365 Connector: Method Selection Guide" for correct import paths, calendar discovery, and API patterns
+  - `/add-workiq` → See "Work IQ Integration: MCP Session Pattern" for session management and response parsing
+  - Other `/add-*` skills have similar guidance
 - Capture the connection ID + service path so Step 9 can import them.
 
 **Forward all captured context to each sub-skill so its own gather-info prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-data-source` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, etc.). The plan you got the user to approve in Step 4 already contains those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, and the project root. If a sub-skill still needs an input you didn't capture, that's a Step 4 gap — go back and ask the user once, then update the plan, rather than letting the sub-skill ask interactively.

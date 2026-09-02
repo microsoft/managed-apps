@@ -12,8 +12,8 @@ See [Types of columns - Choice](https://learn.microsoft.com/en-us/power-platform
 
 The generated models include enum mappings you can import:
 ```typescript
-// Generated in models - maps numeric value to string label
-import { TableNameFieldName } from '../generated/models/TableNameModel';
+// Generated in generated/models/ - maps numeric value to string label
+import { TableNameFieldName } from '../../generated/models/TableNameModel';
 // e.g., { 0: 'Active', 1: 'Inactive', 2: 'Pending' }
 const label = TableNameFieldName[numericValue];
 ```

@@ -130,7 +130,7 @@ await SharePointOnlineService.PatchItem({
 After running `ms app add data-source --connector shared_sharepointonline --as table --dataset "<site-url>" --table "<list>"`, the generated `SharePointOnlineService.ts` provides methods that work across all bound lists. The `dataset` (site URL) and `table` (list name) parameters select which list to operate on:
 
 ```typescript
-import { SharePointOnlineService } from "./SharePointOnlineService";
+import { SharePointOnlineService } from '../../generated/services/SharePointOnlineService';
 
 // List all items
 const result = await SharePointOnlineService.GetItems({
@@ -169,4 +169,4 @@ await SharePointOnlineService.DeleteItem({
 });
 ```
 
-Use `Grep` to find specific methods in `src/SharePointOnlineService.ts` (generated files can be very large — see [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md#inspecting-large-generated-files)).
+Use `Grep` to find specific methods in `generated/services/SharePointOnlineService.ts` (generated files can be very large — see [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md#inspecting-large-generated-files)).

@@ -1,0 +1,13 @@
+# Build outputs from gulp + esbuild
+node_modules/
+out/
+
+# dist/ is committed for GitHub Actions consumers — it's referenced from
+# each action.yml's `main:` field and must be present at the tagged ref.
+# Do NOT add 'dist/' here.
+
+# Editor / OS
+.DS_Store
+*.tsbuildinfo
+*.log
+.vscode/
