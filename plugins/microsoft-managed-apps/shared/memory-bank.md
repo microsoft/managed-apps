@@ -136,9 +136,20 @@ Update after:
 
 ### Data Sources
 
-| Source       | Type      | Details                      |
-| ------------ | --------- | ---------------------------- |
-| [TABLE_NAME] | Dataverse | Columns: name, status, ...   |
+| Source       | Type      | Details                      | Shared? | allowedActions            |
+| ------------ | --------- | ---------------------------- | ------- | ------------------------- |
+| [TABLE_NAME] | Dataverse | Columns: name, status, ...   | No      | n/a                       |
+| [TABLE_NAME] | SQL Server | Table: Orders               | Yes     | `get`, `patch`            |
+| [CONNECTOR]  | Office 365 Outlook | (entire connector)  | Yes     | `SendEmailV2`             |
+| [CONNECTOR]  | Teams     | (entire connector)           | Yes     | **policy pending**        |
+
+Record `allowedActions` for every **shared** reference (one with a non-empty
+`sharedConnectionId`) so the agreed least-privilege set survives across sessions and isn't
+re-litigated on the next add. Non-shared references record `n/a`.
+
+Use **policy pending** when the reference is shared but the actions haven't been decided yet
+(typically added during `/create-app`, before app code exists). `/deploy` gates on these, so a
+pending entry is a to-do, not a silent gap.
 
 ### Generated Files
 

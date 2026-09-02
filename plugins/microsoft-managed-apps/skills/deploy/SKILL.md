@@ -16,7 +16,7 @@ Before any deploy, sync source control first: stage all changes, create a commit
 
 ## Workflow
 
-1. Memory Bank → 2. Verify Project + Env → 3. Pick Path → 4. Build Verification → 5. Git Sync (Add + Commit + Push) → 6. Confirm + Deploy → 7. Update Memory Bank
+1. Memory Bank → 2. Verify Project + Env → 3. Pick Path → 4. Shared Connection Policy Preflight → 5. Build Verification → 6. Git Sync (Add + Commit + Push) → 7. Confirm + Deploy → 8. Update Memory Bank
 
 ---
 
@@ -46,7 +46,47 @@ Ask the user which path:
 
 `ms app build -c <sha>` + `ms app build-status -o <build-id>` is a third (older) two-step variant for the cloud-built path. The `build` subcommand is marked deprecated in the CLI source but still works; use it only when the user wants an explicit build-id to track. Otherwise, `ms app deploy` is the single-step replacement.
 
-### Step 4: Build Verification
+### Step 4: Shared Connection Policy Preflight
+
+`ms app deploy` validates that every **shared** connection reference declares `allowedActions`,
+and fails the deploy when one doesn't. Catch it here — before spending a build and a push on a
+deploy that can't succeed.
+
+```bash
+node -e '
+const fs = require("fs");
+const refs = JSON.parse(fs.readFileSync("ms.config.json", "utf8")).connectionReferences || {};
+const ok = (a) => Array.isArray(a) && a.length > 0 && a.every((x) => String(x).trim());
+let bad = 0;
+for (const [name, r] of Object.entries(refs)) {
+  if (!String(r.sharedConnectionId || "").trim()) continue;
+  const t = Object.entries(r.dataSets || {}).flatMap(([d, s]) =>
+    Object.entries(s.dataSources || {}).map(([k, v]) => [d + "/" + k, v]));
+  if (t.length) {
+    for (const [p, v] of t) if (!ok(v.allowedActions)) { bad++; console.log("MISSING per-table allowedActions: " + name + " -> " + p); }
+  } else if (!ok(r.allowedActions)) { bad++; console.log("MISSING connector-level allowedActions: " + name); }
+}
+console.log(bad ? bad + " issue(s): fix before deploy" : "OK: all shared references declare allowedActions");
+'
+```
+
+This mirrors the CLI's own validation and works in bash and PowerShell alike (Node 22+ is a
+project prerequisite; `jq` is not).
+
+Any `MISSING` line means the deploy will fail. **Stop and fix it** rather than proceeding:
+
+- `per-table` → the reference has dataset tables. Every table needs its own non-empty list
+  from `"get"` / `"post"` / `"patch"` / `"delete"`.
+- `connector-level` → no dataset tables. Declare Action IDs from
+  `ms connector list-actions --connector <api-id> --json`.
+
+Infer the least-privilege set from what `src/` actually calls, propose it, and confirm with the
+user before writing. Do **not** grant everything to get past the gate, and do **not** delete
+`sharedConnectionId`. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+
+`OK` means every shared reference is covered — continue.
+
+### Step 5: Build Verification
 
 ```bash
 npm run build
@@ -61,7 +101,7 @@ Failure handling per [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/share
 
 Verify the build output directory (`./dist` by default, or whatever `--build-path` resolved to during `ms app create`) is populated before continuing.
 
-### Step 5: Git Sync (Add + Commit + Push)
+### Step 6: Git Sync (Add + Commit + Push)
 
 Deploy must use a pushed commit. Always sync local changes first.
 
@@ -84,7 +124,7 @@ chore: prepare deploy
 
 If `git commit` reports "nothing to commit", continue to push/verify the current `HEAD`.
 
-### Step 6: Confirm + Deploy
+### Step 7: Confirm + Deploy
 
 **Always ask explicitly before deploy** — there is no baseline-deploy exemption in this plugin:
 
@@ -121,7 +161,7 @@ If the user wants to verify the code before making it live, remind them they can
 $BIN app play --mode preview   # opens the latest code on main (no deploy needed)
 ```
 
-### Step 7: Update Memory Bank
+### Step 8: Update Memory Bank
 
 If `memory-bank.md` exists:
 
@@ -139,9 +179,10 @@ If no memory bank exists, create one per [memory-bank.md](${CLAUDE_PLUGIN_ROOT}/
 | Error                                                  | Fix                                                                                                                                       |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `ms app deploy`: 401 / token expired                     | `$BIN auth login` and retry.                                                                                                              |
+| `ms app deploy`: `Invalid ms.config.json for shared connection policy enforcement` | A shared connection reference is missing `allowedActions`. The listed issues name the reference (and dataset/table) at fault. Declare them per [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) and retry. Never remove `sharedConnectionId` to bypass this. |
 | `ms app deploy`: env mismatch                            | Active CLI env doesn't match `ms.config.json`. Either re-create/redeploy against the matching environment, or update `ms.config.json`. |
 | `git push`: no upstream configured                      | Run `git push -u origin HEAD`, then retry deploy.                                                                                         |
 | `git commit`: author identity unknown                   | Configure Git identity (`git config --global user.name` / `git config --global user.email`) and retry commit.                            |
-| `ms app deploy`: commit not in remote                  | Ensure Step 5 completed and push succeeded, then retry.                                                                                   |
+| `ms app deploy`: commit not in remote                  | Ensure Step 6 (Git Sync) completed and push succeeded, then retry.                                                                        |
 | `ms app build-status`: 404                             | Build was submitted to a different cluster than you're querying. Verify the `--cloud` value matches the cluster used at build time.    |
 | `ms app deploy`: 403 / not authorized on environment     | The account lacks Maker permissions in the target env. Confirm with `$BIN app list --json` — if the app doesn't appear, you're not authorized. |

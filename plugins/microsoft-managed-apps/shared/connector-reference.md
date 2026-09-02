@@ -39,6 +39,24 @@ explicitly. If no connection exists yet, **run the command once interactively** 
 So interactively you do NOT need to pre-create connections or pass `--connection-id`; you only
 need it to bypass the picker or to script a non-interactive run.
 
+### Shared connections require an action policy
+
+When the connection's authentication type is shareable, the CLI **automatically** records a
+`sharedConnectionId` on the connection reference it writes to `ms.config.json`. Nobody opts
+into this — an ordinary `ms app add data-source` can produce a shared reference.
+
+A shared reference must declare `allowedActions`, or `ms app pack` / `ms app deploy` fails
+validation. So after every add, read `ms.config.json` back and check the reference you just
+created:
+
+- `sharedConnectionId` empty / absent → nothing to do.
+- `sharedConnectionId` set → declare the actions before moving on.
+
+Per-table `allowedActions` (`"get"` / `"post"` / `"patch"` / `"delete"`) for tabular
+references, connector-level Action IDs for action connectors. Full rules, the least-privilege
+inference procedure, and failure recovery live in
+[allowed-actions.md](./allowed-actions.md).
+
 ### Dataverse is different
 
 The tabular Dataverse connector (`--connector dataverse`) doesn't use the connection-id model —
@@ -79,3 +97,7 @@ When a connector skill is invoked from another skill (e.g., `/create-app` plans 
 ## Build After, Don't Deploy
 
 Every `/add-*` skill runs `npm run build` after the `ms app add ...` call to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
+
+The one thing every `/add-*` skill must do *before* that build is the shared-connection check
+above — a missing `allowedActions` doesn't surface as a build error, it surfaces much later as
+a deploy failure.

@@ -10,6 +10,8 @@ model: sonnet
 
 **Reference:** [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
 
+**Reference:** [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
+
 # Add Data Source (Canonical)
 
 This is the **single implementation** for all connector-binding skills.
@@ -34,8 +36,9 @@ This ensures developers have complete context for implementing features, not jus
 1. Verify workspace + auth.
 2. Resolve `api-id` (discover via `ms connector list` if the user didn't supply one), `mode`, and required arguments.
 3. Run the matching `ms app add ...` command.
-4. Run `npm run build`.
-5. Record the binding in `memory-bank.md` if present.
+4. Check for a shared connection and declare `allowedActions` if so.
+5. Run `npm run build`.
+6. Record the binding in `memory-bank.md` if present.
 
 ---
 
@@ -147,15 +150,77 @@ available connections and then errors. Dataverse (`--connector dataverse --as ta
 > **SQL stored procedures** have no `ms app add procedure` command and `--sql-stored-procedure` is not
 > accepted by `ms app add data-source`; binding a specific stored procedure is not currently supported.
 
-### Step 4: Build
+### Step 4: Shared Connection Policy (`allowedActions`)
+
+**Do this before the build, on every add.** The CLI writes `sharedConnectionId` automatically
+when the connection's auth type is shareable, so this can trigger without the user asking for
+it — and it doesn't surface as a build error, it surfaces later as a deploy failure.
+
+**4a. Read the config back** and check the reference that was just written. Node 22+ is a
+project prerequisite, so this works in bash and PowerShell alike:
+
+```bash
+node -e '
+const fs = require("fs");
+const refs = JSON.parse(fs.readFileSync("ms.config.json", "utf8")).connectionReferences || {};
+const ok = (a) => Array.isArray(a) && a.length > 0 && a.every((x) => String(x).trim());
+let bad = 0;
+for (const [name, r] of Object.entries(refs)) {
+  if (!String(r.sharedConnectionId || "").trim()) continue;
+  const t = Object.entries(r.dataSets || {}).flatMap(([d, s]) =>
+    Object.entries(s.dataSources || {}).map(([k, v]) => [d + "/" + k, v]));
+  if (t.length) {
+    for (const [p, v] of t) if (!ok(v.allowedActions)) { bad++; console.log("MISSING per-table allowedActions: " + name + " -> " + p); }
+  } else if (!ok(r.allowedActions)) { bad++; console.log("MISSING connector-level allowedActions: " + name); }
+}
+console.log(bad ? bad + " issue(s): fix before deploy" : "OK: all shared references declare allowedActions");
+'
+```
+
+If it prints `OK`, **skip to Step 5** — the connection isn't shared, or is already covered.
+
+**4b. If it is shared, determine the shape:**
+
+| Reference has…                      | Declare                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| dataset tables (`dataSets`)         | per-table `allowedActions` — every table, from `"get"` / `"post"` / `"patch"` / `"delete"` |
+| no dataset tables                   | connector-level `allowedActions` — Action IDs from `ms connector list-actions --connector <api-id> --json` (`id`, `behavior: Allow` only) |
+
+**4c. Infer least privilege, then confirm.** Grep `src/` for calls into the generated service
+and map them to values (read/list → `get`, create → `post`, update → `patch`, delete →
+`delete`). Present the inferred list and ask the user to confirm or adjust:
+
+> "`<reference>` is a shared connection, so it needs an action policy before deploy. From the
+> code, I'd declare `<inferred>`. Anything else it should be allowed to do?"
+
+**Never grant the full set just to pass validation.**
+
+**Deferral — when there is no app code yet.** If `src/` has no calls into this service because
+the app hasn't been written yet (the usual case when `/create-app` invokes this skill before
+generating the UI), do **not** guess and do **not** prompt. Instead:
+
+- Leave `allowedActions` unset for now. `ms app dev` does not validate it, so local iteration
+  is unaffected — only `ms app pack` / `ms app deploy` do.
+- Record the reference as **shared, policy pending** in `memory-bank.md`.
+- Note it in your summary so the decision happens once the app code exists.
+
+`/deploy` re-runs this same check as a preflight gate, so a deferred policy is caught before it
+can reach a failing deploy — not silently forgotten.
+
+**4d. Write the confirmed values into `ms.config.json`** (skip when deferring).
+
+Full rules, worked examples, and failure recovery: [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+
+### Step 5: Build
 
 ```bash
 npm run build
 ```
 
-### Step 5: Memory Update
+### Step 6: Memory Update
 
-If `memory-bank.md` exists, record `api-id`, mode, and parameters used.
+If `memory-bank.md` exists, record `api-id`, mode, parameters used, and — when the reference is
+shared — the `allowedActions` that were agreed, so the next session doesn't re-litigate them.
 
 ---
 

@@ -27,6 +27,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `shared/planning-policy.md`         | When to enter plan mode and what to include in the plan.                                        |
 | `shared/memory-bank.md`             | Memory bank schema + read/update protocol.                                                      |
 | `shared/development-standards.md`   | Versioning, theme, CLI install pattern, build rules, TypeScript strict mode.                    |
+| `shared/allowed-actions.md`         | `allowedActions` authoring for shared connection references — required before pack/deploy.      |
 | `shared/version-check.md`           | Daily plugin-version check against the marketplace.                                             |
 
 ### Adding new shared instructions
