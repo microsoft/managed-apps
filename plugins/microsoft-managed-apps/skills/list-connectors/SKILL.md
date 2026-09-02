@@ -85,7 +85,37 @@ $BIN connector list-actions --connector shared_office365 --search Mail
 $BIN connector list-actions --connector shared_sharepointonline --search GetItems
 ```
 
-Output is a list of operation names and their summaries. Use it to confirm an api-id supports the user's intent before invoking the relevant `/add-*` skill.
+Output is a table with three columns:
+
+| Column      | Meaning                                                                 |
+| ----------- | ----------------------------------------------------------------------- |
+| `Summary`   | Human-readable description (prefixed `[Deprecated]` where applicable).  |
+| `Behavior`  | `Allow` or `Deny` — whether org DLP policy permits the operation.       |
+| `Action ID` | The operation identifier.                                              |
+
+Allowed actions sort first. Use this to confirm an api-id supports the user's intent before
+invoking the relevant `/add-*` skill.
+
+For scripting, `--json` returns objects with `id`, `summary`, `behavior`, and `deprecated`:
+
+```bash
+$BIN connector list-actions --connector <api-id> --json
+```
+
+**These `id` values are exactly what goes into connector-level `allowedActions`** in
+`ms.config.json` when a connection reference is shared. Use only entries whose `behavior` is
+`Allow` — a `Deny` action is already blocked by policy, so listing it grants nothing and
+misleads whoever reads the config next.
+
+Read the JSON output directly, or filter it if `jq` is available:
+
+```bash
+$BIN connector list-actions --connector <api-id> --json | jq -r '.[] | select(.behavior == "Allow") | .id'
+```
+
+> This applies to **action** connectors only. Tabular data sources take a fixed vocabulary of
+> `"get"` / `"post"` / `"patch"` / `"delete"` per table — never operation IDs from this
+> command. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
 
 ---
 

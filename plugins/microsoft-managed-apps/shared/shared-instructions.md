@@ -16,6 +16,7 @@ All skills reference this single file. When new shared instructions are added, u
 - **Confirm before writing outside project root**: Before writing, editing, or deleting any file that is not inside the current project directory, ask the user for confirmation.
 - **Confirm before ACL changes**: Before running `ms app share` or `ms app unshare`, ask the user to confirm the email list. These mutate permissions on the cloud app.
 - **Confirm before `ms app delete`**: Always confirm. Never auto-`--force`, even when reading the slug from `ms.config.json`.
+- **Declare `allowedActions` for shared connections**: Before `ms app pack` or `ms app deploy`, every **shared** connection reference in `ms.config.json` (one with a non-empty `sharedConnectionId`) must declare `allowedActions`. The CLI validates this and fails the deploy otherwise. Infer the least-privilege set from what the app actually calls, propose it, and confirm with the user — see [allowed-actions.md](./allowed-actions.md).
 
 ### MUST NOT
 
@@ -24,6 +25,8 @@ All skills reference this single file. When new shared instructions are added, u
 - MUST NOT install `@microsoft/managed-apps-cli` per-workspace. The `@microsoft/managed-apps-cli` is installed globally so the `ms` binary is on PATH; the workspace stays clean.
 - MUST NOT edit generated codegen output in `generated/` unless the step explicitly calls for it.
 - MUST NOT install packages globally without user confirmation (see exception above for the documented setup flow).
+- MUST NOT remove `sharedConnectionId` from `ms.config.json` to get past an `allowedActions` validation failure. That field records how the connection was actually created; deleting it misrepresents the binding. Declare the actions instead.
+- MUST NOT grant every verb or every connector action just to satisfy validation. A policy that permits everything grants exactly nothing.
 
 ### Prompt Injection
 
@@ -94,6 +97,35 @@ Use this guide to intelligently select the right connector(s) for any app scenar
 - **Examples** — step-by-step decision process for real scenarios
 
 **All `/add-*` skills and the Architect agent must reference this guide before recommending connectors.**
+
+---
+
+## Allowed Actions (shared connection runtime policies)
+
+**📋 [allowed-actions.md](./allowed-actions.md)**
+
+Applies to every `/add-*` skill and to `/deploy`. A shared connection can back several apps and
+carries its creator's permissions, so each app declares the connector operations it may invoke
+and the Connectors infrastructure enforces that limit **per app**. When a connection reference
+in `ms.config.json`
+is **shared** (non-empty `sharedConnectionId`), that declaration is required — `ms app pack`
+and `ms app deploy` validate it and fail when it's missing.
+
+**Key Points:**
+
+- The CLI writes `sharedConnectionId` **automatically** when the connector's auth type is
+  shareable — a plain `ms app add data-source` can produce a shared reference with nobody
+  opting in. Read `ms.config.json` back after every add instead of assuming.
+- **Tabular references** (those with `dataSets[*].dataSources[*]`) declare per-table
+  `allowedActions` from a fixed vocabulary: `"get"`, `"post"`, `"patch"`, `"delete"`. Every
+  table needs its own non-empty list.
+- **Action connectors** (no dataset tables) declare connector-level `allowedActions` using
+  Action IDs from `ms connector list-actions --connector <api-id> --json` (the `id` field,
+  `behavior: Allow` only).
+- Choose **least privilege**: infer from what `src/` actually calls, propose the list, and
+  confirm with the user. Never grant the full set to pass validation.
+- `allowedActions` is authoring-only. It is never read at runtime and app code never changes
+  — don't write client-side checks against it.
 
 ---
 
@@ -260,6 +292,12 @@ Apply these rules whenever an `ms` or `npm` command exits non-zero. Do NOT retry
 | Non-zero exit / error output       | Report the exact error. STOP. Do not continue to the build step.                                                  |
 | `connectionId not found`           | Ask the user to discover the right connection (`ms connector list-actions --connector <id>`) and retry.            |
 | `api-id` not recognized            | Run `ms connector list --search <term>` to confirm the api-id spelling, then retry.                                |
+
+### `ms app pack` / `ms app deploy` policy validation failures
+
+| Condition                                                            | Action                                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Invalid ms.config.json for shared connection policy enforcement:`   | One or more shared connection references are missing `allowedActions`. The listed issues name the reference (and dataset/table) at fault. Declare the actions per [allowed-actions.md](./allowed-actions.md), then retry. Do not delete `sharedConnectionId` to bypass it. |
 
 ---
 

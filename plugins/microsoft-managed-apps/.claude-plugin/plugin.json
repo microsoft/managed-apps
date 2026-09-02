@@ -1,6 +1,6 @@
 {
   "name": "microsoft-managed-apps",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "[Preview] Create and manage Microsoft Managed Apps using the @microsoft/managed-apps-cli (ms) toolchain.",
   "author": {
     "name": "Microsoft",

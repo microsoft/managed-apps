@@ -190,6 +190,7 @@ Run them sequentially. After each one:
   - `/add-workiq` → See "Work IQ Integration: MCP Session Pattern" for session management and response parsing
   - Other `/add-*` skills have similar guidance
 - Capture the connection ID + service path so Step 9 can import them.
+- **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
 
 **Forward all captured context to each sub-skill so its own gather-info prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-data-source` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, etc.). The plan you got the user to approve in Step 4 already contains those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, and the project root. If a sub-skill still needs an input you didn't capture, that's a Step 4 gap — go back and ask the user once, then update the plan, rather than letting the sub-skill ask interactively.
 
