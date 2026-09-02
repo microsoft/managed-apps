@@ -1,6 +1,6 @@
 ---
 name: add-excel
-description: Adds Excel Online (Business) by delegating to `/add-connector` with `api-id=shared_excelonlinebusiness` and table mode. Use when binding Excel tables.
+description: Adds Excel Online (Business) by delegating to `/add-data-source` with `api-id=shared_excelonlinebusiness` and table mode. Use when binding Excel tables.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Excel Online (Business) (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_excelonlinebusiness`
 - `mode`: `table`

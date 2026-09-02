@@ -127,7 +127,7 @@ await SharePointOnlineService.PatchItem({
 
 ## Generated Service Patterns
 
-After running `ms app add connector --connector shared_sharepointonline --as table --dataset "<site-url>" --table "<list>"`, the generated `SharePointOnlineService.ts` provides methods that work across all bound lists. The `dataset` (site URL) and `table` (list name) parameters select which list to operate on:
+After running `ms app add data-source --connector shared_sharepointonline --as table --dataset "<site-url>" --table "<list>"`, the generated `SharePointOnlineService.ts` provides methods that work across all bound lists. The `dataset` (site URL) and `table` (list name) parameters select which list to operate on:
 
 ```typescript
 import { SharePointOnlineService } from '../../generated/services/SharePointOnlineService';

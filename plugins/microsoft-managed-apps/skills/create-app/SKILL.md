@@ -95,7 +95,7 @@ Once you have their description:
 2. **Ask about data.** Focus on what the app needs to do, not specific technologies:
    - "What data does your app need to work with?"
    - "Does it need to search existing information, manage its own data, or both?"
-   - Based on the answers, identify the connector(s) and the matching `/add-*` skill (or `/add-connector` with an api-id) that will be invoked in Step 8. Capture **all** info those skills will need (connection IDs, table/list names, api-id, environment URL, etc.) — you will run them yourself, not hand them off.
+   - Based on the answers, identify the connector(s) and the matching `/add-*` skill (or `/add-data-source` with an api-id) that will be invoked in Step 8. Capture **all** info those skills will need (connection IDs, table/list names, api-id, environment URL, etc.) — you will run them yourself, not hand them off.
 3. **Ask about UI:** key screens, layout, interactions, theme preference. Capture enough detail to actually generate the components in Step 9.
 4. Resolve all ambiguity now — easier than re-planning mid-scaffold. The user should approve the plan once and not be asked to approve sub-steps later.
 
@@ -178,9 +178,9 @@ Detect this by matching `Could not commit and push the initial scaffold` togethe
 For every connector identified in Step 3 / Step 4, invoke the matching skill **now**, in this session, before any UI code is generated:
 
 - A specific `/add-*` skill when one exists (`/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`).
-- `/add-connector` (with api-id) for anything else.
+- `/add-data-source` (with api-id) for anything else.
 
-For Work IQ knowledge/search scenarios, prefer `/add-workiq` (maps to `shared_a365copilotchatmcp`) over generic `/add-connector`.
+For Work IQ knowledge/search scenarios, prefer `/add-workiq` (maps to `shared_a365copilotchatmcp`) over generic `/add-data-source`.
 
 Run them sequentially. After each one:
 
@@ -191,7 +191,7 @@ Run them sequentially. After each one:
   - Other `/add-*` skills have similar guidance
 - Capture the connection ID + service path so Step 9 can import them.
 
-**Forward all captured context to each sub-skill so its own gather-info prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, etc.). The plan you got the user to approve in Step 4 already contains those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, and the project root. If a sub-skill still needs an input you didn't capture, that's a Step 4 gap — go back and ask the user once, then update the plan, rather than letting the sub-skill ask interactively.
+**Forward all captured context to each sub-skill so its own gather-info prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-data-source` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, etc.). The plan you got the user to approve in Step 4 already contains those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, and the project root. If a sub-skill still needs an input you didn't capture, that's a Step 4 gap — go back and ask the user once, then update the plan, rather than letting the sub-skill ask interactively.
 
 The intent of this step is no per-connector approval prompts: the approved plan from Step 4 covers them. If a sub-skill fails (auth, missing connection, wrong api-id), surface the error verbatim and stop; do not silently proceed with a half-wired app.
 

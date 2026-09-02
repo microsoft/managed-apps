@@ -68,7 +68,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `/add-azuredevops` | Azure DevOps work items / pipelines.                                      |
 | `/add-mcscopilot`  | Microsoft Copilot Studio agents.                                          |
 | `/add-workiq`      | Work IQ Copilot MCP for Microsoft 365 knowledge-grounded search/chat.     |
-| `/add-connector`   | Generic fallback for any other connector.                                 |
+| `/add-data-source` | Generic fallback for any other connector.                                 |
 | `/list-connectors` | Enumerate connectors / bound data sources for discovery.                  |
 
 ### Workflow
@@ -76,7 +76,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 ```
 /create-app
    └── /dev (default loop)
-   └── /add-connector (or specific /add-*)
+   └── /add-data-source (or specific /add-*)
    └── /deploy (explicit, requires confirmation)
    └── /share, /delete-app (explicit, require confirmation)
 ```

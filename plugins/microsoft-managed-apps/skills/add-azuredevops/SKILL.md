@@ -1,6 +1,6 @@
 ---
 name: add-azuredevops
-description: Adds Azure DevOps by delegating to `/add-connector` with `api-id=shared_visualstudioteamservices` and action mode. Use when adding Azure DevOps integration.
+description: Adds Azure DevOps by delegating to `/add-data-source` with `api-id=shared_visualstudioteamservices` and action mode. Use when adding Azure DevOps integration.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Azure DevOps (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_visualstudioteamservices`
 - `mode`: `action`
