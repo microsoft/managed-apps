@@ -1,6 +1,6 @@
 ---
 name: list-connectors
-description: Lists connectors reachable in the active environment and the connection-bound data sources already wired into a Microsoft App. Use when discovering connectors and their operations before adding data sources.
+description: Lists connectors available in the active environment — including whether each is allowed or blocked by your organization's policy — plus the connection-bound data sources already wired into a Microsoft App. Use when discovering connectors and their operations before adding data sources.
 user-invocable: true
 allowed-tools: Read, Bash, AskUserQuestion
 model: sonnet
@@ -10,10 +10,11 @@ model: sonnet
 
 # List Connectors
 
-Two read-only views, depending on what the user is asking:
+Three read-only views, depending on what the user is asking:
 
-1. **What data sources are already bound to *this* app?** → `ms app show --json` (inspects `ms.config.json`).
-2. **What connectors are reachable in the active environment?** → `ms connector list-actions --connector <id>` for a specific connector, or browse the public reference for available api-ids.
+1. **What connectors are available, and which are allowed vs blocked by org policy?** → `ms connector list` (lists every connector in the environment with a `Policy Status` of `Allowed` or `Blocked`).
+2. **What data sources are already bound to *this* app?** → `ms app show --json` (inspects `ms.config.json`).
+3. **What operations does a specific connector expose?** → `ms connector list-actions --connector <id>`, or browse the public reference for available api-ids.
 
 ## Workflow
 
@@ -36,10 +37,23 @@ $BIN auth status                                      # confirm the active UPN
 
 Ask (or infer):
 
+- **available**: list connectors available in the environment and whether each is allowed or blocked by org policy (`ms connector list`).
 - **app**: enumerate data sources already wired into the current project (requires `ms.config.json` in cwd).
 - **connector**: list the operations exposed by a specific connector — useful when planning an `/add-*` invocation.
 
-### Step 4a: App-bound data sources
+### Step 4a: Available connectors + policy status
+
+```bash
+BIN=ms
+$BIN connector list [--search <term>]
+```
+
+Output is a table of connectors with a `Policy Status` column (`Allowed` or `Blocked`) and a
+`Tabular` column. Use it to confirm a connector is available and **not blocked by your
+organization's DLP policy** before planning an `/add-*` invocation. Add `--search <term>` to
+narrow a large catalog.
+
+### Step 4b: App-bound data sources
 
 ```bash
 test -f ms.config.json || { echo "Not in a Microsoft App workspace."; exit 1; }
@@ -56,7 +70,7 @@ Parse the response for the data-source list and print a summary:
 
 Use this to spot drift (e.g., `ms.config.json` claims a data source that no longer exists in the env).
 
-### Step 4b: Discover operations on a connector
+### Step 4c: Discover operations on a connector
 
 The CLI prompts for / creates connections inline when an `/add-*` skill runs, so users rarely need to look up connection IDs ahead of time. The more useful query is "what can this connector do?":
 
@@ -77,7 +91,7 @@ Output is a list of operation names and their summaries. Use it to confirm an ap
 
 ## When the user wants a connection ID
 
-The CLI creates or reuses connections **inline** while `ms app add connector` runs — you don't
+The CLI creates or reuses connections **inline** while `ms app add data-source` runs — you don't
 need a connection ID to start an `/add-*` skill. Two cases need a bit more care:
 
 - **`--non-interactive`**: the CLI can't open a browser or run the SSO flow, so it can't create
@@ -90,6 +104,6 @@ need a connection ID to start an `/add-*` skill. Two cases need a bit more care:
 - **SQL (`shared_sql`)**: each SQL connection points at a different database, so when scripting
   non-interactively pass the `--connection-id` for the right database explicitly.
 
-To **create** a connection that doesn't exist yet, just run `ms app add connector` interactively:
+To **create** a connection that doesn't exist yet, just run `ms app add data-source` interactively:
 the CLI handles consent + sign-in (silent SSO, or a browser dialog), creates the connection,
 prints its Connection ID, and binds it — no maker portal needed.

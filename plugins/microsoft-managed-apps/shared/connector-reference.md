@@ -5,12 +5,15 @@ Applies to all `/add-*` skills.
 ## Connections — created inline by the CLI
 
 There is **no separate "create connection" command**. Connections are created and resolved
-inline by `ms app add connector` (the single add command — there is no `ms app add action` /
+inline by `ms app add data-source` (the single add command — there is no `ms app add action` /
 `ms app add table` / `ms app add procedure`):
 
 ```bash
-ms app add connector --connector <api-id> [--as table|action] [--connection-id <id> | -c <id>]
+ms app add data-source --connector <api-id> [--as table|action] [--connection-id <id> | -c <id>]
 ```
+
+> **Deprecated alias:** `ms app add connector` is the former name of this command. It still works
+> but is **deprecated** — prefer `ms app add data-source` (same handler and flags).
 
 When you run it, the CLI resolves a connection for `<api-id>` as follows:
 
@@ -39,7 +42,7 @@ need it to bypass the picker or to script a non-interactive run.
 ### Dataverse is different
 
 The tabular Dataverse connector (`--connector dataverse`) doesn't use the connection-id model —
-`ms app add connector --connector dataverse --as table --table <name>` resolves the active
+`ms app add data-source --connector dataverse --as table --table <name>` resolves the active
 environment's Dataverse automatically. No `--connection-id` is required (or accepted). (The
 separate `shared_commondataserviceforapps` connector instead pairs `--table` with
 `--dataverse-environment-id`.)

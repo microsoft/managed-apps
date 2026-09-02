@@ -1,6 +1,6 @@
 ---
 name: add-onedrive
-description: Adds OneDrive for Business by delegating to `/add-connector` with `api-id=shared_onedriveforbusiness` and action mode. Use when integrating OneDrive files.
+description: Adds OneDrive for Business by delegating to `/add-data-source` with `api-id=shared_onedriveforbusiness` and action mode. Use when integrating OneDrive files.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add OneDrive for Business (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_onedriveforbusiness`
 - `mode`: `action`

@@ -1,6 +1,6 @@
 ---
 name: add-office365
-description: Adds Office 365 Outlook by delegating to `/add-connector` with `api-id=shared_office365` and action mode. Use when integrating Outlook mail/calendar.
+description: Adds Office 365 Outlook by delegating to `/add-data-source` with `api-id=shared_office365` and action mode. Use when integrating Outlook mail/calendar.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Office 365 Outlook (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_office365`
 - `mode`: `action`

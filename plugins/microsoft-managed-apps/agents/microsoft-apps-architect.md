@@ -68,13 +68,13 @@ ms --version           # Bin name has flipped between dev builds
 | Send emails, read inbox, manage calendar             | Office 365 Outlook (`/add-office365`) | Native calendar API with CRUD |
 | Search M365 knowledge-grounded content               | Work IQ (`/add-workiq`)               | Semantic cross-M365 search/chat |
 | Invoke a Copilot Studio agent                        | MCS Copilot (`/add-mcscopilot`)       | Agent invocation |
-| Connect to any other service                         | Generic (`/add-connector`)            | Fallback for unlisted connectors |
+| Connect to any other service                         | Generic (`/add-data-source`)            | Fallback for unlisted connectors |
 
 **See** [Connector Decision Guide](../shared/connector-decision-guide.md) for decision trees, common app patterns, and scenario examples.
 
 ### Generated Code Pattern
 
-`ms app add connector` (with `--as table` or `--as action`) writes generated TypeScript to the `generated/` directory at the project root. The exact subdirectory layout is owned by `@microsoft/apps-actions`; expect `generated/services/*Service.ts` and `generated/models/*Model.ts` files. Import them from your `src/` code using relative paths like `../../generated/services/<ServiceName>`. Always use these generated services for data access.
+`ms app add data-source` (with `--as table` or `--as action`) writes generated TypeScript to the `generated/` directory at the project root. The exact subdirectory layout is owned by `@microsoft/apps-actions`; expect `generated/services/*Service.ts` and `generated/models/*Model.ts` files. Import them from your `src/` code using relative paths like `../../generated/services/<ServiceName>`. Always use these generated services for data access.
 
 ### Scaffolding
 

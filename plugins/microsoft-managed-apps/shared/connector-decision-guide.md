@@ -23,8 +23,8 @@ ms connector list-actions --connector shared_office365 --search Mail
 
 ### **Via Plugin Skills**
 
-- **`/add-connector`** — Generic connector skill. Ask for a keyword ("salesforce", "slack", "jira", "workiq") and it will search, present options, and add the connector.
-- **`/list-connections`** — View connectors already bound to your app, or explore operations on a specific connector
+- **`/add-data-source`** — Generic connector skill. Ask for a keyword ("salesforce", "slack", "jira", "workiq") and it will search, present options, and add the connector.
+- **`/list-connectors`** — View available connectors and whether they are blocked or allowed by your organization
 
 ### **Via Specific Skills**
 
@@ -35,7 +35,7 @@ For common connectors, shortcuts exist:
 - **`/add-dataverse`** — Dataverse tables
 - **`/add-mcscopilot`** — Copilot Studio agents
 - **`/add-workiq`** — Work IQ Copilot MCP (M365 knowledge-grounded search/chat)
-- (See full list in `/add-connector` help)
+- (See full list in `/add-data-source` help)
 
 ### **Via Microsoft Docs**
 
@@ -256,7 +256,7 @@ When the user describes their app goal or data need:
 4. Explain why each is chosen (reference the rules above)
 5. Invoke the appropriate `/add-*` skills in order
 
-### **For `/add-connector` (Canonical Skill)**
+### **For `/add-data-source` (Canonical Skill)**
 
 This skill handles ANY connector, including those not listed in this guide. When called:
 
@@ -271,9 +271,9 @@ This skill handles ANY connector, including those not listed in this guide. When
 
 3. **If uncertain about availability**:
    - Check Microsoft connectors documentation: https://learn.microsoft.com/en-us/connectors/
-   - Use `/list-connections` skill to browse available connectors
+   - Use `/list-connectors` skill to browse available connectors
 
-**This guide covers the most common cases, but `/add-connector` works with any Microsoft connector — not just the 10 listed above.**
+**This guide covers the most common cases, but `/add-data-source` works with any Microsoft connector — not just the 10 listed above.**
 
 ### **For Microsoft Apps Architect Agent**
 
@@ -309,7 +309,7 @@ Decision Process:
   3. Action needed? → NO (search-only)
   4. AI needed? → NO
 
-→ Recommend: `/add-connector` (then optionally `/add-sharepoint` if file management needed)
+→ Recommend: `/add-data-source` (then optionally `/add-sharepoint` if file management needed)
 ```
 
 ### **Example 3: User says "I need to build a system to store customer records and generate AI summaries of their interactions"**
