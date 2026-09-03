@@ -6,13 +6,50 @@
 | --------------------- | --------------- | --------------------------------------------------- | ---------------------------------------------------------------------------- |
 | Node.js               | **v22+**        | `node --version`                                    | https://nodejs.org/                                                          |
 | Git                   | Any 2.x         | `git --version`                                     | https://git-scm.com/ — required (`ms app create` initializes a repo).        |
-| Git Credential Manager | Bundled with Git for Windows | `git credential-manager --version`     | First `ms app create` triggers an interactive browser flow against the remote git endpoint. See [troubleshooting.md](./troubleshooting.md#first-run-git-credential-manager-trap). |
+| Git Credential Manager | Current release | `git credential-manager --version`                 | Required for browser-based remote authentication. Bundled with Git for Windows; otherwise install from https://aka.ms/gcm. |
+| GCM credential helper | Configured at system or global scope | `git config --system --get-regexp '^credential(\..*)?\.helper$'` and `git config --global --get-regexp '^credential(\..*)?\.helper$'` | Combined output must contain `manager` or `credential-manager`. Run `git credential-manager configure` if it does not. |
+| Git author name       | Configured globally | `git config --global --get user.name`              | Required for the initial scaffold commit.                                    |
+| Git author email      | Configured globally | `git config --global --get user.email`             | Required for the initial scaffold commit.                                    |
 | `@microsoft/managed-apps-cli` | `@latest` tag      | `ms --version` | Install globally only — see below. |
 
 ## Required Account
 
 - A Microsoft work/school account with access to a Microsoft Apps-enabled tenant.
 - `ms app create` resolves an environment automatically — you do not need to know or provide one. (Advanced users who already have a specific environment ID can pass it via `--environment-id`.)
+
+## Git prerequisite checks
+
+Run these checks before `ms app create`:
+
+```bash
+git credential-manager --version
+git config --system --get-regexp '^credential(\..*)?\.helper$'
+git config --global --get-regexp '^credential(\..*)?\.helper$'
+git config --global --get user.name
+git config --global --get user.email
+```
+
+- If GCM is missing, warn that Git may fall back to a username prompt and ask for approval to install it. On approval, use the official OS-appropriate installation method, run `git credential-manager configure`, and repeat the checks. If declined, stop.
+- If GCM exists but the combined system/global helper output does not contain `manager` or `credential-manager`, warn the user and ask for approval to run `git credential-manager configure`. Repeat the checks after configuration. An individual scope returning no entries is not itself a failure.
+- If either author value is empty, ask the user for the correct value before configuring it. Never infer an email address or name.
+
+### GCM repair commands
+
+Use these only after explicit user approval:
+
+```bash
+# Windows with WinGet
+winget install --id Git.GCM --exact --source winget \
+  --accept-package-agreements --accept-source-agreements
+
+# macOS with Homebrew
+brew install --cask git-credential-manager
+
+# After installation, or when GCM is installed but not configured
+git credential-manager configure
+```
+
+For Linux, use an official package from the [GCM installation documentation](https://aka.ms/gcm). Do not pipe a remote install script directly into a shell. Always repeat the GCM version and system/global helper checks after a repair.
 
 ## Installing `@microsoft/managed-apps-cli`
 
@@ -59,6 +96,8 @@ When using plan mode, include these in `allowedPrompts`:
 {
   "allowedPrompts": [
     { "tool": "Bash", "prompt": "check tool versions (node, git, ms)" },
+    { "tool": "Bash", "prompt": "check Git Credential Manager, credential helper, and author identity" },
+    { "tool": "Bash", "prompt": "install or configure Git Credential Manager and Git author identity" },
     { "tool": "Bash", "prompt": "install @microsoft/managed-apps-cli globally" },
     { "tool": "Bash", "prompt": "ms auth status / ms auth login" },
     { "tool": "Bash", "prompt": "ms app create / ms app delete (recovery)" },
