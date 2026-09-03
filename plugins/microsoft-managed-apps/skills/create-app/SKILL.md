@@ -89,7 +89,7 @@ If the user has not described what they want to build (i.e., `/create-app` was i
 
 Wait for their answer. Do NOT present a multiple-choice list of app types. Once the app idea is known, infer the rest:
 
-1. **Generate the display name.** Derive a short title from the user's prompt (usually 2-5 title-cased words) and use it with `--display-name`. Do not ask the user to name or confirm it. Derive the folder slug from this title.
+1. **Generate the display name.** If the user already gave a name, use it verbatim. Otherwise derive a short title from the user's prompt (usually 2-5 title-cased words) and use it with `--display-name`. Either way, do not ask the user to name or confirm it. Derive the folder slug from this title.
 2. **Plan the complete requested experience.** Include every capability the user clearly describes. Infer the screens, navigation, interactions, and visual styling needed to make those capabilities usable; use a single responsive screen only when it can support the full request cleanly. Do not ask separate questions about layout, theme, or architecture. Present these decisions in the plan for approval.
 3. **Infer data needs from user intent.**. Add the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a connector. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
 4. **Discover before asking.** When a connector is needed, infer its api-id and mode from the connector decision guide, and let the CLI discover or create connections where supported. Ask one focused question only if a required tenant-specific identifier cannot be discovered (for example, which of several matching SharePoint lists to use).
@@ -131,7 +131,9 @@ If environment routing fails, surface the actual error to the user rather than a
 
 ### Step 7: Scaffold
 
-Derive a folder slug from the display name (lowercase, hyphens, no spaces — e.g. "Sample One" → `sample-one`), then inspect the **current working directory**, including hidden entries, and pick the target:
+**If the user explicitly provided a folder name, use it verbatim** — do not generate one, and skip the inference below. Create it as a child of the current directory, unless the current directory is already named that (then set `FOLDER_NAME="."`). If they gave a full path, use that path as-is. Only fall back to a numbered variant if the target already exists, and say so.
+
+Otherwise, derive a folder slug from the display name (lowercase, hyphens, no spaces — e.g. "Sample One" → `sample-one`), then inspect the **current working directory**, including hidden entries, and pick the target:
 
 - **Directory is empty:** set `FOLDER_NAME="."` and scaffold directly into it. Do not ask for a path or app name.
 - **Current directory is a Microsoft App root** (it contains `ms.config.json`): never scaffold inside it — that would nest an app and a Git repository inside another one. Create the new app as a **sibling**, so `FOLDER_NAME` is the slug under the parent directory (e.g. `../sample-one`).
