@@ -302,20 +302,24 @@ Wait for their decision — do not silently switch branches or merge on their be
    ```
    If push fails (e.g., needs upstream), retry with the upstream set explicitly: `git push -u origin main`. Surface auth errors verbatim and stop on failure.
 
-3. **Run the cloud preview.**
+3. **If preview is requested, run the cloud preview.**
    ```bash
    $BIN app play --mode preview
    ```
    This builds the app from `main` on demand and returns a preview URL hosted in the user's environment — no deploy required.
 
-   **If the command fails** (cloud build error, expired auth, region issue, missing env), surface the error verbatim, stop, and **do not proceed to Step 4**. A failed preview means we don't yet have proof the cloud build is healthy, so asking about `/deploy` would be premature. Propose the targeted fix (re-auth, retry) and wait for the user's next signal.
+   **If the command fails** (cloud build error, expired auth, region issue, missing env), surface the error verbatim, stop, and propose the targeted fix (re-auth, retry). Wait for the user's next signal.
 
    On success, hand the URL to the user **as a markdown link**.
 
-4. **Ask whether to deploy** (only after a successful preview URL is in their hands):
-   > "Preview is live at the URL above — open it and confirm it looks right in the cloud. When you're ready, I can run `/deploy` to publish this to the live URL. Want me to deploy now?"
+4. **Ask whether to preview or deploy** (after commit/push and before any live publish):
+   > "Choose one:
+   > 1) Keep iterating in local dev (changes load live in the browser).
+   > 2) Ask to preview (commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies).
+   > 3) Say deploy (commit + push, then explicitly promote a successful build live).
+   > 4) Say other (stop here with no preview or deploy yet)."
 
-   Wait for explicit confirmation. If the user wants more changes first, go back to local-dev iteration; the preview gate will fire again the next time they signal readiness. If they confirm, hand off to `/deploy`.
+   Wait for explicit confirmation. If they choose local iteration, return to local-dev edits. If they ask to preview, run Step 3 and hand them the preview URL. If they ask to deploy, hand off to `/deploy`. If they say other, stop with no preview/deploy action.
 
 This gate lives between local-dev iteration and `/deploy`. Skills that hand off a local URL (`/create-app`, `/dev`) reference this section so users follow the same iterate → preview → deploy loop everywhere.
 

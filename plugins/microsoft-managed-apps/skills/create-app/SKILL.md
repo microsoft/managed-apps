@@ -245,10 +245,14 @@ Provide:
 - **What this URL is**: a live preview of the running app. Edits made in this chat will hot-reload there in real time — the user does **not** need to restart anything to see changes.
 - **Next steps** (in this exact framing):
   1. Tell me what to change — I'll edit the code and you'll see it update live in the browser.
-  2. When you're happy with how it looks and behaves, say so. I'll commit + push your changes, run `ms app play --mode preview` to give you a cloud preview URL hosted in your environment, and *then* ask if you want me to `/deploy` to the live URL.
+  2. Then choose one:
+     1) Keep iterating in local dev — changes load live in the browser.
+     2) Ask to preview — I'll commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies.
+     3) Or tell me to deploy — I'll commit + push, then explicitly promote a successful build live.
+     4) Say other — I'll stop here with no preview or deploy yet.
 - **Important**: explicitly note that **nothing has been deployed to the cloud yet** — current state is local dev only.
 
-When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, `ms app play --mode preview`, hand off the preview URL, then ask about `/deploy`. Do not skip the preview gate.
+When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, then present the 4 options in order: keep iterating locally, preview in Microsoft-hosted environment, deploy live, or stop here. Do not skip the preview gate.
 
 Do **not** list `/add-*` skills as next steps here; data sources were already wired in Step 8. (If the user later wants an additional connector, they can ask and you'll invoke the right `/add-*` mid-iteration.)
 
@@ -314,7 +318,9 @@ Nothing has been deployed to the cloud. The app (with its connectors and UI
 already wired up) runs from your machine via `ms app dev`. The browser tab
 hot-reloads as I make code changes — just tell me what to adjust.
 
-When you're happy with it, tell me. I'll commit + push your changes, run
-`ms app play --mode preview` to give you a cloud preview URL in your
-environment, and then ask if you want me to /deploy.
+When you're happy with it, tell me. Then choose one:
+1) Keep iterating in local dev (changes load live in the browser).
+2) Ask to preview (I'll commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies).
+3) Say deploy (I'll commit + push, then explicitly promote a successful build live).
+4) Say other (I'll stop here with no preview or deploy yet).
 ```

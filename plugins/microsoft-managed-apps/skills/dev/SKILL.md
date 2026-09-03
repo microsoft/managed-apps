@@ -80,9 +80,13 @@ Do **not** show the git remote URL in the dev summary — it's an internal detai
 
 Then add a one-liner reminder of the iterate → preview → deploy loop:
 
-> "The browser tab hot-reloads as I edit code — tell me what to change. When you're happy with it, I'll commit + push your changes, run `ms app play --mode preview` for a cloud preview URL in your environment, and then ask if you want me to `/deploy`."
+> "The browser tab hot-reloads as I edit code — tell me what to change. Then choose one of these options:
+> 1. Keep iterating in local dev (changes load live in the browser).
+> 2. Ask to preview (I'll commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies).
+> 3. Say deploy (I'll commit + push, then explicitly promote a successful build live).
+> 4. Say other (I'll stop here with no preview or deploy yet)."
 
-When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, preview, then ask about `/deploy`.
+When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, then present the same 4 options (keep iterating, preview, deploy, or stop here) in that order.
 
 If the dev server prints an error during startup (port conflict, missing `ms.config.json`, expired auth), stop the background task, surface the error verbatim, and propose the targeted fix:
 
