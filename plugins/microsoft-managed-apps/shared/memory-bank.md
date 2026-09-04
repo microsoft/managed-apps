@@ -26,7 +26,7 @@ The memory bank is always stored at: `<PROJECT_ROOT>/memory-bank.md`
 
 1. If the user has specified a project path, check `<PROJECT_PATH>/memory-bank.md`.
 2. If continuing from a previous skill in the same session, use the known project path.
-3. If no path is known, ask the user for the project path.
+3. If no path is known, discover likely project roots from the current workspace first. Ask for the project path only when multiple candidates remain ambiguous.
 
 ### Step 2: Read and Parse Context
 
@@ -34,7 +34,7 @@ If the memory bank exists, extract:
 
 | Information                       | Purpose                                                |
 | --------------------------------- | ------------------------------------------------------ |
-| Project path, name, version       | Know what you're working with                          |
+| Project path, name                | Know what you're working with                          |
 | Completed steps (checkboxes)      | Skip steps already done                                |
 | User preferences                  | Don't re-ask answered questions                        |
 | Created resources                 | Know what data sources/connectors exist                |
@@ -43,7 +43,7 @@ If the memory bank exists, extract:
 
 ### Step 3: Resume or Continue
 
-- **If the current skill's steps are already marked complete**: Ask if they want to modify, add more, or skip to next steps.
+- **If the current skill's steps are already marked complete**: Infer the next action from the request. Ask only when the requested action is unclear.
 - **If partially complete**: Inform the user and resume from the incomplete step.
 - **If not started**: Begin from the first step.
 
@@ -51,7 +51,7 @@ If the memory bank exists, extract:
 
 Always tell the user what you found:
 
-> "I found your project memory bank. [Summary: project name, version, what's been completed]. Let's continue from [next step]."
+> "I found your project memory bank. [Summary: project name, what's been completed]. Let's continue from [next step]."
 
 ---
 
@@ -107,7 +107,6 @@ Update after:
 | Environment Name                      | [ENVIRONMENT_NAME]                                     |
 | Environment ID                        | [ENVIRONMENT_GUID — reference only, resolved by CLI]   |
 | Remote git URL                        | [URL]                                                  |
-| Version                               | v1.0.0                                                 |
 | Created Date                          | [DATE]                                                 |
 | Status                                | [In Progress / Created / Local Dev Running / Deployed] |
 
@@ -115,7 +114,6 @@ Update after:
 
 ### Design Preferences
 - Theme: [Dark/Light]
-- Version Display: [Enabled/Disabled]
 
 ### Technical Preferences
 - Data Sources: [Dataverse, Azure DevOps, Teams, Excel, etc.]
@@ -179,7 +177,7 @@ To continue working on this project:
 
 When reading the memory bank, extract:
 
-1. **Project context**: Path, app name, environment, version.
+1. **Project context**: Path, app name, environment.
 2. **Completed work**: Check checkboxes to know what's done.
 3. **User preferences**: Apply these without re-asking.
 4. **Created resources**: Know what data sources/connectors exist.

@@ -22,7 +22,7 @@ Before any deploy, sync source control first: stage all changes, create a commit
 
 ### Step 1: Check Memory Bank
 
-Read `memory-bank.md` for app slug, GUID, environment, and version.
+Read `memory-bank.md` for app slug, GUID, and environment.
 
 ### Step 2: Verify Project + Env
 
@@ -125,7 +125,6 @@ $BIN app play --mode preview   # opens the latest code on main (no deploy needed
 
 If `memory-bank.md` exists:
 
-- Increment version (e.g., `v1.0.0` → `v1.1.0`) per [development-standards.md](${CLAUDE_PLUGIN_ROOT}/shared/development-standards.md). Bump the version display in the app UI too.
 - Update "Last deployed" timestamp.
 - Record the deploy path used (standard / traced).
 - Capture the commit SHA at deploy time.

@@ -63,10 +63,9 @@ The memory bank persists context across sessions. Every skill reads it at start 
 
 **📋 [development-standards.md](./development-standards.md)**
 
-Standards for versioning, theme, build workflow, and TypeScript strict mode.
+Standards for theme, build workflow, and TypeScript strict mode.
 
 **Key Points:**
-- Always display the app version in the UI; increment on each deploy.
 - Default to dark theme (user can override).
 - Always `npm run build` before `ms app deploy` — never skip the build.
 - Always `git add -A`, commit, and push before `ms app deploy`.

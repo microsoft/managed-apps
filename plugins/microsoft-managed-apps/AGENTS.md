@@ -26,7 +26,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `shared/shared-instructions.md`     | Meta file aggregating all cross-cutting concerns — every skill links to it.                     |
 | `shared/planning-policy.md`         | When to enter plan mode and what to include in the plan.                                        |
 | `shared/memory-bank.md`             | Memory bank schema + read/update protocol.                                                      |
-| `shared/development-standards.md`   | Versioning, theme, CLI install pattern, build rules, TypeScript strict mode.                    |
+| `shared/development-standards.md`   | Theme, CLI install pattern, build rules, TypeScript strict mode.                                |
 | `shared/version-check.md`           | Daily plugin-version check against the marketplace.                                             |
 
 ### Adding new shared instructions
