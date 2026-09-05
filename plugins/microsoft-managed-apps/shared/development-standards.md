@@ -1,6 +1,6 @@
 # Development Standards
 
-Standards that apply to all Microsoft Apps skills.
+Standards that apply to all Managed apps skills.
 
 ## Theme
 
@@ -26,7 +26,7 @@ Standards that apply to all Microsoft Apps skills.
 
 ## Build & Deploy
 
-- **Default loop is `ms app dev`**, not deploy. Microsoft Apps run locally against the App Player with hot reload; deploy only when the user asks.
+- **Default loop is `ms app dev`**, not deploy. Managed apps run locally against the App Player with hot reload; deploy only when the user asks.
 - When the user does want to ship:
   - Local-built (primary): `npm run build`, then `git add -A && git commit && git push`, then `ms app deploy`.
   - Cloud-built: `git add -A && git commit && git push`, then `ms app deploy [--commit <sha>]`.

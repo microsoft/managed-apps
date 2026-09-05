@@ -1,6 +1,6 @@
 ---
 name: list-apps
-description: Discovers Microsoft Apps in the active environment via `ms app list --json` and optional `ms app show --json`. Use when listing or locating apps.
+description: Discovers Managed apps in the active environment via `ms app list --json` and optional `ms app show --json`. Use when listing or locating apps.
 user-invocable: true
 allowed-tools: Read, Grep, Bash, AskUserQuestion
 model: sonnet
