@@ -1,6 +1,6 @@
 ---
 name: create-app
-description: Creates Microsoft Apps using React and Vite. Use when scaffolding a new app with `ms app create` and ending on local dev with `ms app dev`.
+description: Creates Managed apps using React and Vite. Use when scaffolding a new app with `ms app create` and ending on local dev with `ms app dev`.
 user-invocable: true
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, EnterPlanMode, ExitPlanMode, Skill
 model: opus

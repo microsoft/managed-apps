@@ -275,7 +275,7 @@ This skill handles ANY connector, including those not listed in this guide. When
 
 **This guide covers the most common cases, but `/add-data-source` works with any Microsoft connector — not just the 10 listed above.**
 
-### **For Microsoft Apps Architect Agent**
+### **For Managed apps Architect Agent**
 
 When recommending connectors for an app design:
 1. Always start with the user's end goal (not available connectors)
