@@ -1,18 +1,18 @@
 # Microsoft Managed Apps
 
 > [!NOTE]
-> Microsoft Managed Apps is in **public preview**. APIs, templates, and tooling may change before general availability.
+> The Microsoft Managed Apps SDK is in **public preview**. APIs, templates, and tooling may change before general availability.
 
-Microsoft Managed Apps lets you build custom web applications using standard web technologies — React, TypeScript, and Vite.
+The Microsoft Managed Apps SDK lets you build custom web applications using standard web technologies — React, TypeScript, and Vite.
 <!-- TODO: confirm the official one-line product description before publishing. -->
 
 This repository hosts the official first-party project **templates** and is the home for **public issues**. The tooling itself ships as npm packages under the `@microsoft/managed-apps` scope:
 
 | Package | Description |
 | --- | --- |
-| [`@microsoft/managed-apps`](https://www.npmjs.com/package/@microsoft/managed-apps) | SDK for building Microsoft Managed Apps |
-| [`@microsoft/managed-apps-cli`](https://www.npmjs.com/package/@microsoft/managed-apps-cli) | Command-line interface for building and managing Microsoft Managed Apps |
-| [`@microsoft/managed-apps-vite-plugin`](https://www.npmjs.com/package/@microsoft/managed-apps-vite-plugin) | Vite plugin for Microsoft Managed Apps |
+| [`@microsoft/managed-apps`](https://www.npmjs.com/package/@microsoft/managed-apps) | SDK for building managed apps |
+| [`@microsoft/managed-apps-cli`](https://www.npmjs.com/package/@microsoft/managed-apps-cli) | Command-line interface for building and managing managed apps |
+| [`@microsoft/managed-apps-vite-plugin`](https://www.npmjs.com/package/@microsoft/managed-apps-vite-plugin) | Vite plugin for managed apps |
 
 ## Getting started
 
