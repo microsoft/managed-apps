@@ -7,4 +7,4 @@
 # Order matters: the last matching pattern takes precedence.
 
 # Default owners for everything in the repo.
-* @microsoft/microsoft-managed-apps @Chamu-Rajasekera
+* @microsoft/microsoft-managed-apps
