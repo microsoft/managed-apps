@@ -70,6 +70,7 @@ Standards for theme, build workflow, and TypeScript strict mode.
 
 **Key Points:**
 - Default to dark theme (user can override).
+- Before the first operational `ms` command in every skill, run the CLI freshness gate and ask whether to upgrade when npm `@latest` is newer.
 - Always `npm run build` before `ms app deploy` — never skip the build.
 - Always `git add -A`, commit, and push before `ms app deploy`.
 - Remove unused imports before building (TS6133 strict mode).

@@ -28,19 +28,9 @@ npm install -g @microsoft/managed-apps-cli@latest
 
 Install globally so the `ms` binary is on PATH. Subsequent `ms` invocations resolve the binary from the global install path.
 
-### Daily refresh
+### Refresh check
 
-```bash
-LATEST=$(npm view @microsoft/managed-apps-cli@latest version 2>/dev/null | tr -d '\r')
-```
-
-PowerShell equivalent:
-
-```powershell
-$Latest = (npm view @microsoft/managed-apps-cli@latest version 2>$null).Trim()
-```
-
-If the installed version differs from `$Latest`, continue app creation with the compatible installed version and mention the available upgrade in the final summary. Upgrade only when the user explicitly asks; never auto-update.
+Before the first operational `ms` command in every skill, follow the [CLI freshness gate](../../../shared/development-standards.md#cli-freshness-gate). If npm `@latest` is newer than the installed version, ask whether to update the global CLI and wait for the answer before proceeding. Never auto-update.
 
 ### Override patterns (only with explicit user direction)
 

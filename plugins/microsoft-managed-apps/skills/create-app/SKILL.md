@@ -64,20 +64,9 @@ ms --version
 
 Record the resolved bin name as `$BIN`.
 
-#### Daily `@latest` refresh check
+#### `@latest` refresh check
 
-If `ms` was already installed, compare the local version to the latest published version and offer to upgrade (the `@latest` tag updates regularly):
-
-```bash
-INSTALLED=$( ($BIN --version 2>/dev/null) | tr -d '\r' )
-LATEST=$(npm view @microsoft/managed-apps-cli@latest version 2>/dev/null | tr -d '\r')
-
-if [ -n "$LATEST" ] && [ "$INSTALLED" != "$LATEST" ]; then
-  echo "Installed: $INSTALLED — latest: $LATEST — upgrade recommended."
-fi
-```
-
-Do not interrupt app creation to offer an optional upgrade. Continue with the installed compatible version and mention the available upgrade in the final summary. Upgrade only when the user explicitly asks for it; never auto-update.
+If `ms` was already installed, run the CLI freshness gate in [development-standards.md](${CLAUDE_PLUGIN_ROOT}/shared/development-standards.md#cli-freshness-gate) now. When npm `@latest` is newer, pause app creation and ask whether to update before proceeding. Never auto-update.
 
 ### Step 3: Infer App Spec
 

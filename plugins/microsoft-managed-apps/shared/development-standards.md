@@ -21,8 +21,22 @@ Standards that apply to all managed apps skills.
   npm install -g @microsoft/managed-apps-cli@latest
   ```
 - The CLI is published on the public npm registry: https://www.npmjs.com/package/@microsoft/managed-apps-cli
-- Pin to the `@latest` tag and re-check on each skill invocation — the `@latest` tag updates regularly.
+- Pin to the `@latest` tag.
 - After install, probe the binary name (`ms` (single supported binary)).
+
+### CLI freshness gate
+
+Run this gate once at the start of every skill invocation, before the first operational `ms` command. The `ms --version` probe is part of the gate:
+
+1. Read the installed version with `ms --version`.
+2. Read the latest stable version with `npm view @microsoft/managed-apps-cli@latest version`.
+3. Compare the versions using semver rules. Do not treat an installed version newer than `@latest` as outdated.
+4. If `@latest` is newer, tell the user both versions and ask: _"`@microsoft/managed-apps-cli` {installed} is installed, but {latest} is available. Update the global CLI before proceeding?"_ Wait for the answer.
+   - If approved, run `npm install -g @microsoft/managed-apps-cli@latest`, then verify `ms --version` reports the expected version before continuing.
+   - If declined, acknowledge the choice and continue with the installed version.
+5. If the registry lookup fails, report that the latest version could not be checked and continue with the installed CLI. Do not silently claim it is current.
+
+The upgrade prompt satisfies the global-install confirmation requirement; do not ask for a second confirmation.
 
 ## Build & Deploy
 
