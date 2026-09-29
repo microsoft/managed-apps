@@ -64,20 +64,9 @@ ms --version
 
 Record the resolved bin name as `$BIN`.
 
-#### Daily `@latest` refresh check
+#### `@latest` refresh check
 
-If `ms` was already installed, compare the local version to the latest published version and offer to upgrade (the `@latest` tag updates regularly):
-
-```bash
-INSTALLED=$( ($BIN --version 2>/dev/null) | tr -d '\r' )
-LATEST=$(npm view @microsoft/managed-apps-cli@latest version 2>/dev/null | tr -d '\r')
-
-if [ -n "$LATEST" ] && [ "$INSTALLED" != "$LATEST" ]; then
-  echo "Installed: $INSTALLED — latest: $LATEST — upgrade recommended."
-fi
-```
-
-Do not interrupt app creation to offer an optional upgrade. Continue with the installed compatible version and mention the available upgrade in the final summary. Upgrade only when the user explicitly asks for it; never auto-update.
+If `ms` was already installed, run the CLI freshness gate in [development-standards.md](${CLAUDE_PLUGIN_ROOT}/shared/development-standards.md#cli-freshness-gate) now. When npm `@latest` is newer, pause app creation and ask whether to update before proceeding. Never auto-update.
 
 ### Step 3: Infer App Spec
 
@@ -199,7 +188,7 @@ Run them sequentially. After each one:
 - Capture the connection ID + service path so Step 9 can import them.
 - **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
 
-**Forward all captured context to each sub-skill so its own gather-info prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, and the project root. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
+**Forward all captured context to each sub-skill so its own prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, CLI freshness, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, project root, and the CLI freshness gate outcome plus known versions. A sub-skill receiving the CLI freshness outcome must not check or prompt again. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
 
 The intent of this step is no per-connector approval prompts: the approved plan from Step 4 covers them. If a sub-skill fails (auth, missing connection, wrong api-id), surface the error verbatim and stop; do not silently proceed with a half-wired app.
 
