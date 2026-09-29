@@ -26,15 +26,17 @@ Standards that apply to all managed apps skills.
 
 ### CLI freshness gate
 
-Run this gate once at the start of every skill invocation, before the first operational `ms` command. The `ms --version` probe is part of the gate:
+Run this gate once per top-level workflow, before its first operational `ms` command. The `ms --version` probe is part of the gate:
 
 1. Read the installed version with `ms --version`.
 2. Read the latest stable version with `npm view @microsoft/managed-apps-cli@latest version`.
 3. Compare the versions using semver rules. Do not treat an installed version newer than `@latest` as outdated.
 4. If `@latest` is newer, tell the user both versions and ask: _"`@microsoft/managed-apps-cli` {installed} is installed, but {latest} is available. Update the global CLI before proceeding?"_ Wait for the answer.
    - If approved, run `npm install -g @microsoft/managed-apps-cli@latest`, then verify `ms --version` reports the expected version before continuing.
-   - If declined, acknowledge the choice and continue with the installed version.
+   - If declined, acknowledge the choice and continue with the installed version for the rest of the workflow.
 5. If the registry lookup fails, report that the latest version could not be checked and continue with the installed CLI. Do not silently claim it is current.
+
+Record the gate outcome in workflow context (`current`, `updated`, `declined`, or `unavailable`) together with the installed and latest versions when known. Forward that context to every nested skill. A nested skill that receives an outcome must reuse it and skip both the registry check and upgrade prompt. A separately invoked skill starts a new top-level workflow and runs the gate again.
 
 The upgrade prompt satisfies the global-install confirmation requirement; do not ask for a second confirmation.
 

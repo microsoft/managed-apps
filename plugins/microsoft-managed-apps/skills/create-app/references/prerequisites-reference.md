@@ -30,7 +30,7 @@ Install globally so the `ms` binary is on PATH. Subsequent `ms` invocations reso
 
 ### Refresh check
 
-Before the first operational `ms` command in every skill, follow the [CLI freshness gate](../../../shared/development-standards.md#cli-freshness-gate). If npm `@latest` is newer than the installed version, ask whether to update the global CLI and wait for the answer before proceeding. Never auto-update.
+Before the first operational `ms` command in a top-level workflow, follow the [CLI freshness gate](../../../shared/development-standards.md#cli-freshness-gate). If npm `@latest` is newer than the installed version, ask whether to update the global CLI and wait for the answer before proceeding. Preserve the outcome for nested skills so they do not check or prompt again. Never auto-update.
 
 ### Override patterns (only with explicit user direction)
 
