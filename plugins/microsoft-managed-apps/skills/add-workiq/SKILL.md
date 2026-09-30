@@ -1,6 +1,6 @@
 ---
 name: add-workiq
-description: Adds Work IQ Copilot MCP by delegating to /add-connector with api-id=shared_a365copilotchatmcp and action mode. Use when users need Microsoft 365 knowledge-grounded Work IQ search/chat.
+description: Adds Work IQ Copilot MCP by delegating to /add-data-source with api-id=shared_a365copilotchatmcp and action mode. Use when users need Microsoft 365 knowledge-grounded Work IQ search/chat.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Work IQ Copilot MCP (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_a365copilotchatmcp`
 - `mode`: `action`

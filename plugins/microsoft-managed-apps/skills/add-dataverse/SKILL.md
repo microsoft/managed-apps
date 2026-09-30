@@ -1,6 +1,6 @@
 ---
 name: add-dataverse
-description: Adds Dataverse by delegating to `/add-connector` with `api-id=dataverse` and table mode. Use when binding Dataverse tables.
+description: Adds Dataverse by delegating to `/add-data-source` with `api-id=dataverse` and table mode. Use when binding Dataverse tables.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: opus
@@ -10,11 +10,11 @@ model: opus
 
 # Add Dataverse (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `dataverse`
 - `mode`: `table`

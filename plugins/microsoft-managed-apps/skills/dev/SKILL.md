@@ -78,15 +78,11 @@ Restart:   /dev (from this project folder)
 
 Do **not** show the git remote URL in the dev summary — it's an internal detail that confuses users who expect a browser-openable link. The only URL to surface is the App Player URL printed by `ms app dev` (the domain varies by cloud/region — always use the exact URL the CLI outputs, never hardcode the host).
 
-Then add a one-liner reminder of the iterate → preview → deploy loop:
+Then add a one-line reminder of the iterate → preview → deploy loop:
 
-> "The browser tab hot-reloads as I edit code — tell me what to change. Then choose one of these options:
-> 1. Keep iterating in local dev (changes load live in the browser).
-> 2. Ask to preview (I'll commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies).
-> 3. Say deploy (I'll commit + push, then explicitly promote a successful build live).
-> 4. Say other (I'll stop here with no preview or deploy yet)."
+> "The browser tab hot-reloads as I edit code — tell me what to change. When you're ready, choose whether to keep iterating, preview the pushed commit in your Microsoft-hosted environment, deploy it live, or stop without doing either."
 
-When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, then present the same 4 options (keep iterating, preview, deploy, or stop here) in that order.
+When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md). Present the options before changing Git state. Preview the pushed commit only when selected, and do not prompt for deployment after returning a preview URL.
 
 If the dev server prints an error during startup (port conflict, missing `ms.config.json`, expired auth), stop the background task, surface the error verbatim, and propose the targeted fix:
 
@@ -97,6 +93,6 @@ If the dev server prints an error during startup (port conflict, missing `ms.con
 | `Authentication failed` (token expired)               | Run `$BIN auth login` (interactive) and retry.                                              |
 | `Failed to fetch app metadata for <app-id>`           | App was deleted in the service. Confirm with `$BIN app list --json` and restore or recreate.|
 
-Do NOT push or deploy from this skill, even if the user mentions it mid-session — bounce them to `/deploy` (which requires explicit confirmation).
+Do not run `ms app deploy` from this skill. Follow the Ready-to-Ship Gate for conversational readiness, and hand an explicit deploy choice to `/deploy`, which requires confirmation.
 
-> **Sharing a cloud preview:** The App Player URL from `ms app dev` is local-only. Once code is pushed to main, use `/play` (`ms app play --mode preview`) to open a cloud-hosted preview URL that works for others without a deploy.
+> **Sharing a cloud preview:** The App Player URL from `ms app dev` is local-only. After pushing, use `/play`: preview `main` with `ms app play --mode preview`, or preview another branch's pushed commit with `ms app play --mode preview --commit <sha>`.

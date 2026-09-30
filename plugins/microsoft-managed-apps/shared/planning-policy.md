@@ -41,10 +41,15 @@ Before exiting plan mode, ensure your plan covers:
 
 ## Plan Dump for Debugging
 
-**After the plan is finalized and before calling `ExitPlanMode`, write a file `<PROJECT_ROOT>/app_generated_plan.md`** containing:
+Write a file `<PROJECT_ROOT>/app_generated_plan.md` containing:
 
 1. **User Request** — the original user prompt / app description that triggered planning.
 2. **Generated Plan** — the full plan presented to the user for approval.
+
+### When to write it
+
+- **Existing project** (`PROJECT_ROOT` already exists): write it after the plan is finalized and before calling `ExitPlanMode`.
+- **New app creation**: `PROJECT_ROOT` does not exist yet, write it immediately **after** the app is scaffolded and `PROJECT_ROOT` is set, before implementing the app. It is then tracked in the app's Git repository.
 
 ### Format
 

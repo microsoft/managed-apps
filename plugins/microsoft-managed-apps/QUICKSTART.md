@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Build and run a Microsoft App using just your coding copilot. No prior Microsoft Apps knowledge needed.
+Build and run a Microsoft App using just your coding copilot. No prior managed apps knowledge needed.
 
 ---
 
@@ -15,7 +15,7 @@ node --version   # should print v22.x.x or higher
 ```
 
 **Git**
-Microsoft Apps stores app code in a remote git repository, and `ms app create` initializes the local repo. Install from [git-scm.com](https://git-scm.com). Git for Windows includes Git Credential Manager, which the first `ms app create` will exercise.
+Managed apps store app code in a remote git repository, and `ms app create` initializes the local repo. Install from [git-scm.com](https://git-scm.com). Git for Windows includes Git Credential Manager, which the first `ms app create` will exercise.
 
 That's it for now — `/create-app` installs the `ms` CLI itself globally on its first run.
 
@@ -49,7 +49,7 @@ Your copilot will:
 3. Run `ms app create` to scaffold the project.
 4. Start `ms app dev` so you can play the app locally in the App Player.
 
-If the folder is not empty, the skill will stop and ask you to switch to an empty folder (or explicitly confirm overwrite behavior).
+If the folder is not empty, the skill will create the app in an inferred subfolder and tell you which folder it selected. If you run it from inside an existing Microsoft App, it creates the new app alongside that app instead of nested inside it.
 
 Nothing deploys to the cloud at this point — local dev only.
 
@@ -76,13 +76,14 @@ Your copilot will recommend data sources based on what your app needs to do. To 
 | Read/write an Excel workbook         | `/add-excel`       |
 | Upload or download files             | `/add-onedrive`    |
 | Send emails or manage calendar       | `/add-office365`   |
+| Read user profiles or profile photos | `/add-office365-users` |
 | Send Teams messages                  | `/add-teams`       |
 | Query Azure DevOps work items        | `/add-azuredevops` |
 | Invoke a Copilot Studio agent        | `/add-mcscopilot`  |
 | Search M365 knowledge with Work IQ   | `/add-workiq`      |
-| Something else (any other connector) | `/add-connector`   |
+| Something else (any other connector) | `/add-data-source` |
 
-Each command runs `ms app add connector --connector <api-id>` against the right connector, regenerates typed TypeScript services under `src/`, and verifies the build. Your local `ms app dev` hot-reloads the new services.
+Each command runs `ms app add data-source --connector <api-id>` against the right connector, regenerates typed TypeScript services under `src/`, and verifies the build. Your local `ms app dev` hot-reloads the new services.
 
 ### Ship to the Cloud
 

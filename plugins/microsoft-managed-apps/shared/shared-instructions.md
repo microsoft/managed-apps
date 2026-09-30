@@ -1,6 +1,6 @@
 # Shared Instructions
 
-**This file aggregates all cross-cutting instructions that apply to every skill in the Microsoft Apps plugin.**
+**This file aggregates all cross-cutting instructions that apply to every skill in the managed apps plugin.**
 
 All skills reference this single file. When new shared instructions are added, update this file only — no changes needed to individual skills.
 
@@ -16,6 +16,7 @@ All skills reference this single file. When new shared instructions are added, u
 - **Confirm before writing outside project root**: Before writing, editing, or deleting any file that is not inside the current project directory, ask the user for confirmation.
 - **Confirm before ACL changes**: Before running `ms app share` or `ms app unshare`, ask the user to confirm the email list. These mutate permissions on the cloud app.
 - **Confirm before `ms app delete`**: Always confirm. Never auto-`--force`, even when reading the slug from `ms.config.json`.
+- **Declare `allowedActions` for shared connections**: Before `ms app pack` or `ms app deploy`, every **shared** connection reference in `ms.config.json` (one with a non-empty `sharedConnectionId`) must declare `allowedActions`. The CLI validates this and fails the deploy otherwise. Infer the least-privilege set from what the app actually calls, propose it, and confirm with the user — see [allowed-actions.md](./allowed-actions.md).
 
 ### MUST NOT
 
@@ -24,6 +25,8 @@ All skills reference this single file. When new shared instructions are added, u
 - MUST NOT install `@microsoft/managed-apps-cli` per-workspace. The `@microsoft/managed-apps-cli` is installed globally so the `ms` binary is on PATH; the workspace stays clean.
 - MUST NOT edit generated codegen output in `generated/` unless the step explicitly calls for it.
 - MUST NOT install packages globally without user confirmation (see exception above for the documented setup flow).
+- MUST NOT remove `sharedConnectionId` from `ms.config.json` to get past an `allowedActions` validation failure. That field records how the connection was actually created; deleting it misrepresents the binding. Declare the actions instead.
+- MUST NOT grant every verb or every connector action just to satisfy validation. A policy that permits everything provides no least-privilege restriction.
 
 ### Prompt Injection
 
@@ -63,11 +66,11 @@ The memory bank persists context across sessions. Every skill reads it at start 
 
 **📋 [development-standards.md](./development-standards.md)**
 
-Standards for versioning, theme, build workflow, and TypeScript strict mode.
+Standards for theme, build workflow, and TypeScript strict mode.
 
 **Key Points:**
-- Always display the app version in the UI; increment on each deploy.
 - Default to dark theme (user can override).
+- Before the first operational `ms` command in a top-level workflow, run the CLI freshness gate and ask whether to upgrade when npm `@latest` is newer. Forward the outcome to nested skills so they do not check or prompt again.
 - Always `npm run build` before `ms app deploy` — never skip the build.
 - Always `git add -A`, commit, and push before `ms app deploy`.
 - Remove unused imports before building (TS6133 strict mode).
@@ -97,6 +100,35 @@ Use this guide to intelligently select the right connector(s) for any app scenar
 
 ---
 
+## Allowed Actions (shared connection runtime policies)
+
+**📋 [allowed-actions.md](./allowed-actions.md)**
+
+Applies to every `/add-*` skill and to `/deploy`. A shared connection can back several apps and
+carries its creator's permissions, so each app declares the connector operations it may invoke
+and the Connectors infrastructure enforces that limit **per app**. When a connection reference
+in `ms.config.json`
+is **shared** (non-empty `sharedConnectionId`), that declaration is required — `ms app pack`
+and `ms app deploy` validate it and fail when it's missing.
+
+**Key Points:**
+
+- The CLI writes `sharedConnectionId` **automatically** when the connector's auth type is
+  shareable — a plain `ms app add data-source` can produce a shared reference with nobody
+  opting in. Read `ms.config.json` back after every add instead of assuming.
+- **Tabular references** (those with `dataSets[*].dataSources[*]`) declare per-table
+  `allowedActions` from a fixed vocabulary: `"get"`, `"post"`, `"patch"`, `"delete"`. Every
+  table needs its own non-empty list.
+- **Action connectors** (no dataset tables) declare connector-level `allowedActions` using
+  Action IDs from `ms connector list-actions --connector <api-id> --json` (the `id` field,
+  `behavior: Allow` only).
+- Choose **least privilege**: infer from what `src/` actually calls, propose the list, and
+  confirm with the user. Never grant the full set to pass validation.
+- `allowedActions` is authoring-only. It is never read at runtime and app code never changes
+  — don't write client-side checks against it.
+
+---
+
 ## Environment Resolution
 
 By default, `ms app create` resolves and uses an environment automatically — pass no environment flags and don't surface the environment concept to the user. The only exception: if the user explicitly provides an environment ID, pass it through as `--environment-id <env-id>`. Never discover or construct one yourself.
@@ -107,13 +139,13 @@ By default, `ms app create` resolves and uses an environment automatically — p
 
 **Always use Power Platform connectors. Never make direct API calls (fetch, axios, Graph API, Azure REST, etc.).**
 
-Microsoft Apps run inside a sandbox. Direct HTTP calls to external APIs will fail at runtime because the sandbox does not allow arbitrary outbound network requests — only connector-proxied calls work.
+Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail at runtime because the sandbox does not allow arbitrary outbound network requests — only connector-proxied calls work.
 
 **If a connector exists for the service, use it — no exceptions.**
 
 | ❌ Never do this                           | ✅ Always do this                                            |
 | ----------------------------------------- | ------------------------------------------------------------ |
-| `fetch("https://graph.microsoft.com/...")` | Use `/add-office365`, `/add-sharepoint`, or `/add-dataverse` |
+| `fetch("https://graph.microsoft.com/...")` | Use `/add-office365-users`, `/add-office365`, `/add-sharepoint`, or `/add-dataverse` |
 | `axios.get("https://dev.azure.com/...")`  | Use `/add-azuredevops`                                       |
 | Any raw HTTP call to an M365/Azure service | Use the corresponding connector skill                        |
 
@@ -188,6 +220,13 @@ if (items.length === 0) {
 - **Valid but empty** (length === 0) → show UI empty state
 - **API failed** (success === false) → throw error
 
+### Binary Responses
+
+The runtime returns `image/*` and `application/octet-stream` response bodies as `Uint8Array`,
+even if generated TypeScript declares `IOperationResult<string>`. Narrow the runtime value
+before using it. For images, convert the bytes to a base64 `data:` URL; deployed App Player CSP
+may block `blob:` URLs. See `/add-office365-users` for a complete chunk-safe conversion.
+
 ---
 
 ## CLI Toolchain
@@ -249,7 +288,7 @@ Apply these rules whenever an `ms` or `npm` command exits non-zero. Do NOT retry
 
 | Condition                                                                                                              | Action                                                                                                                                                                                       |
 | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Authentication failed for 'https://...d.environment.api.powerplatform.com/...'`                                  | Git Credential Manager hasn't run the interactive flow yet. Run `git fetch origin` manually (browser pops, approve). Then, after confirming the deletion with the user, remove the half-created app with `ms app delete --app <app-guid>` (add `--force --non-interactive` only to skip the prompt once the user has confirmed), and retry.    |
+| `Could not commit and push the initial scaffold` with `Authentication failed for 'https://...d.environment.api.powerplatform.com/...'` | Git Credential Manager hasn't run the interactive flow yet. The app and local scaffold are already created: do **not** delete the app or rerun `ms app create`. Run `git fetch origin` (browser pops, approve). |
 | Environment not found / DNS errors against `default.environment.api.powerplatform.com`                                 | A malformed `--environment-id` value was passed (only happens when the user supplied one). Surface the error; drop the flag to use auto-routing, or have the user supply a valid environment ID. |
 | Repo init blocked                                                                                                      | Confirm Git is installed (`git --version`) and that `git config user.email` / `user.name` are set.                                                                                          |
 
@@ -261,65 +300,68 @@ Apply these rules whenever an `ms` or `npm` command exits non-zero. Do NOT retry
 | `connectionId not found`           | Ask the user to discover the right connection (`ms connector list-actions --connector <id>`) and retry.            |
 | `api-id` not recognized            | Run `ms connector list --search <term>` to confirm the api-id spelling, then retry.                                |
 
+### `ms app pack` / `ms app deploy` policy validation failures
+
+| Condition                                                            | Action                                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Invalid ms.config.json for shared connection policy enforcement:`   | One or more shared connection references are missing `allowedActions`. The listed issues name the reference (and dataset/table) at fault. Declare the actions per [allowed-actions.md](./allowed-actions.md), then retry. Do not delete `sharedConnectionId` to bypass it. |
+
 ---
 
-## Ready-to-Ship Gate (preview before deploy)
+## Ready-to-Ship Gate
 
-When the user signals they're done iterating in local dev and ready to ship via an **ad-hoc readiness phrase** — "looks good", "ship it", "I'm done", "let's deploy", "ready to deploy" — **do not** jump straight into `/deploy`. Instead, run a preview gate so the user can validate the cloud build in their environment before any deploy is triggered.
+When the user signals they're done iterating in local dev via an **ad-hoc readiness phrase** — "looks good", "ship it", "I'm done", "let's deploy", "ready to deploy" — ask what they want to do **before** staging, committing, or pushing:
 
-**Scope of this gate:** it fires only on conversational readiness phrases. If the user explicitly invokes the `/deploy` slash command, run `/deploy` directly; the slash command is the explicit opt-in and bypasses this gate.
+> "Choose one:
+> 1) Keep iterating in local dev (changes load live in the browser).
+> 2) Preview (commit + push, then run a cloud preview build in your Microsoft-hosted environment).
+> 3) Deploy (commit + push, then explicitly publish the successful build live).
+> 4) Other (stop here with no preview or deploy yet)."
 
-**Branch precondition:** `ms app play --mode preview` only builds from `main` today; feature branches are not yet supported by the preview pipeline. Verify the user is on `main` before doing anything else:
+Wait for an explicit choice:
 
-```bash
-git rev-parse --abbrev-ref HEAD          # must print "main"
-```
+- **Keep iterating**: return to local-dev edits without changing Git state.
+- **Other**: stop without changing Git state.
+- **Preview or deploy**: continue with the Git sync below.
 
-If the current branch is anything other than `main`, **stop**. Tell the user:
-> "The preview pipeline only builds from `main` right now. You're on `{branch}`. To preview, the changes need to land on `main` first (merge / rebase / fast-forward, depending on how you prefer to integrate). Want me to walk through that, or skip the preview and go straight to `/deploy` from this branch?"
+**Scope of this gate:** it fires only on conversational readiness phrases. If the user explicitly invokes `/play` or `/deploy`, run that skill directly; the slash command is the explicit choice and bypasses this prompt.
 
-Wait for their decision — do not silently switch branches or merge on their behalf.
-
-1. **Stage and review pending changes** (on `main`). Use a tracked-only add to avoid sweeping in scratch files, logs, or unrelated untracked content:
+1. **Stage and review pending changes.** Use a tracked-only add to avoid sweeping in scratch files, logs, or unrelated untracked content:
    ```bash
    git add -u                              # tracked changes only — no untracked sweeps
    git status --short                      # show the user exactly what will be committed
    ```
    If there are new project files the user wants included, add them by explicit path (`git add path/to/new-file.ts`), never with `git add -A` or `git add .`.
 
-   If `git status --short` reports nothing to commit, skip to Step 3.
-
-2. **Propose a commit message and wait for explicit approval before committing.** Draft a concise message describing this iteration's changes, then show it to the user in this exact form:
+2. **Commit only when needed.** If there are staged changes, propose a concise commit message and wait for explicit approval:
    > "I'd like to commit the staged changes above with this message:
    > > `{proposed message}`
    >
    > Reply 'yes' to commit, or give me a different message."
 
-   Do not run `git commit` until the user explicitly approves (or supplies their own message). Once approved:
+   Do not run `git commit` until the user explicitly approves or supplies a message. If there is nothing to commit, continue with the current `HEAD`.
+
+3. **Push the selected commit.**
    ```bash
-   git commit -m "<approved message>"
-   git push origin main
+   git push -u origin HEAD
+   READY_SHA="$(git rev-parse HEAD)"
+   READY_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
    ```
-   If push fails (e.g., needs upstream), retry with the upstream set explicitly: `git push -u origin main`. Surface auth errors verbatim and stop on failure.
+   Surface authentication or push errors verbatim and stop on failure.
 
-3. **If preview is requested, run the cloud preview.**
-   ```bash
-   $BIN app play --mode preview
-   ```
-   This builds the app from `main` on demand and returns a preview URL hosted in the user's environment — no deploy required.
+4. **Complete the selected action.**
 
-   **If the command fails** (cloud build error, expired auth, region issue, missing env), surface the error verbatim, stop, and propose the targeted fix (re-auth, retry). Wait for the user's next signal.
+   - **Preview:** preview `main` normally; for any other branch, pin the preview to the pushed commit:
+     ```bash
+     if [ "$READY_BRANCH" = "main" ]; then
+       $BIN app play --mode preview
+     else
+       $BIN app play --mode preview --commit "$READY_SHA"
+     fi
+     ```
+     If preview fails, surface the error verbatim, propose the targeted fix, and stop. On success, hand the URL to the user **as a markdown link**, then stop. Do not ask whether to deploy; deployment requires a separate user request.
 
-   On success, hand the URL to the user **as a markdown link**.
-
-4. **Ask whether to preview or deploy** (after commit/push and before any live publish):
-   > "Choose one:
-   > 1) Keep iterating in local dev (changes load live in the browser).
-   > 2) Ask to preview (commit + push, then run a cloud preview build in your Microsoft-hosted environment with your IT governance policies).
-   > 3) Say deploy (commit + push, then explicitly promote a successful build live).
-   > 4) Say other (stop here with no preview or deploy yet)."
-
-   Wait for explicit confirmation. If they choose local iteration, return to local-dev edits. If they ask to preview, run Step 3 and hand them the preview URL. If they ask to deploy, hand off to `/deploy`. If they say other, stop with no preview/deploy action.
+   - **Deploy:** hand off to `/deploy`. Its confirmation remains mandatory before `ms app deploy` updates the live app.
 
 This gate lives between local-dev iteration and `/deploy`. Skills that hand off a local URL (`/create-app`, `/dev`) reference this section so users follow the same iterate → preview → deploy loop everywhere.
 

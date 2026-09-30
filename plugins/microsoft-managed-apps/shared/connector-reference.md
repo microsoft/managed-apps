@@ -5,12 +5,15 @@ Applies to all `/add-*` skills.
 ## Connections — created inline by the CLI
 
 There is **no separate "create connection" command**. Connections are created and resolved
-inline by `ms app add connector` (the single add command — there is no `ms app add action` /
+inline by `ms app add data-source` (the single add command — there is no `ms app add action` /
 `ms app add table` / `ms app add procedure`):
 
 ```bash
-ms app add connector --connector <api-id> [--as table|action] [--connection-id <id> | -c <id>]
+ms app add data-source --connector <api-id> [--as table|action] [--connection-id <id> | -c <id>]
 ```
+
+> **Deprecated alias:** `ms app add connector` is the former name of this command. It still works
+> but is **deprecated** — prefer `ms app add data-source` (same handler and flags).
 
 When you run it, the CLI resolves a connection for `<api-id>` as follows:
 
@@ -36,10 +39,28 @@ explicitly. If no connection exists yet, **run the command once interactively** 
 So interactively you do NOT need to pre-create connections or pass `--connection-id`; you only
 need it to bypass the picker or to script a non-interactive run.
 
+### Shared connections require an action policy
+
+When the connection's authentication type is shareable, the CLI **automatically** records a
+`sharedConnectionId` on the connection reference it writes to `ms.config.json`. Nobody opts
+into this — an ordinary `ms app add data-source` can produce a shared reference.
+
+A shared reference must declare `allowedActions`, or `ms app pack` / `ms app deploy` fails
+validation. So after every add, read `ms.config.json` back and check the reference you just
+created:
+
+- `sharedConnectionId` empty / absent → nothing to do.
+- `sharedConnectionId` set → declare the actions before moving on.
+
+Per-table `allowedActions` (`"get"` / `"post"` / `"patch"` / `"delete"`) for tabular
+references, connector-level Action IDs for action connectors. Full rules, the least-privilege
+inference procedure, and failure recovery live in
+[allowed-actions.md](./allowed-actions.md).
+
 ### Dataverse is different
 
 The tabular Dataverse connector (`--connector dataverse`) doesn't use the connection-id model —
-`ms app add connector --connector dataverse --as table --table <name>` resolves the active
+`ms app add data-source --connector dataverse --as table --table <name>` resolves the active
 environment's Dataverse automatically. No `--connection-id` is required (or accepted). (The
 separate `shared_commondataserviceforapps` connector instead pairs `--table` with
 `--dataverse-environment-id`.)
@@ -65,6 +86,17 @@ Generated service files (e.g., `Office365OutlookService.ts`) can be thousands of
 
 This avoids context-window bloat. Generated services and models land in `generated/` at the project root (e.g., `generated/services/Office365OutlookService.ts`, `generated/models/Office365OutlookModel.ts`). Import them from your `src/` files using relative paths like `../../generated/services/<ServiceName>`.
 
+## Binary connector responses
+
+The runtime decodes `image/*` and `application/octet-stream` responses into `Uint8Array`, even
+when a generated service signature declares `IOperationResult<string>`. Treat the returned
+`data` as `unknown` and narrow it at runtime.
+
+For images rendered in the deployed App Player, prefer a base64 `data:` URL. Do not assume
+`blob:` URLs are permitted by the deployed content security policy. The
+`/add-office365-users` skill contains the complete chunk-safe conversion and profile-photo
+pattern.
+
 ## Sub-Skill Invocation
 
 When a connector skill is invoked from another skill (e.g., `/create-app` plans `/add-office365`):
@@ -76,3 +108,7 @@ When a connector skill is invoked from another skill (e.g., `/create-app` plans 
 ## Build After, Don't Deploy
 
 Every `/add-*` skill runs `npm run build` after the `ms app add ...` call to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
+
+The one thing every `/add-*` skill must do *before* that build is the shared-connection check
+above — a missing `allowedActions` doesn't surface as a build error, it surfaces much later as
+a deploy failure.

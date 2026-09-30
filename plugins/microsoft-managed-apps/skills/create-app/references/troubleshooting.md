@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## First-Run Git Credential Manager Trap
+## First-Run Git Credential Manager Recovery
 
 **The most common failure on the first `ms app create` for a new account.**
 
@@ -10,48 +10,25 @@
 
 ```
 fatal: Authentication failed for 'https://<env-id>.d.environment.api.powerplatform.com/appframework/git/repositories/<repo-guid>/'
-App '<name>' was created, but local setup failed: Command failed: git fetch origin
+Could not commit and push the initial scaffold. Your app and local scaffold are ready.
 ```
 
 ### Cause
 
-`ms app create` provisions the app in the service and writes a `[credential ...]` block to `.git/config` pointing at the right OAuth client + scopes. But Git Credential Manager has to run its interactive browser flow at least once to mint a token for the remote endpoint. On the very first run for that user/tenant/cluster combo, GCM hasn't done that flow, so `git fetch origin` 401s before the local template scaffold can complete.
+`ms app create` provisions the app and writes a `[credential ...]` block to `.git/config` pointing at the right OAuth client + scopes. But Git Credential Manager has to run its interactive browser flow at least once to mint a token for the remote endpoint. On the very first run for that user/tenant/cluster combo, GCM hasn't done that flow, so `git fetch origin` can 401 while reconciling the already-created local scaffold with the remote.
 
-The result: the app exists in the service catalog, but the local directory is empty (or has only an auto-init `README.md`).
+The app and local scaffold remain intact. Do **not** delete the app, remove the project directory, or rerun `ms app create`.
 
 ### Recovery
 
-Before running recovery, ask for explicit user confirmation because this sequence deletes files in the current project folder.
-
 ```bash
-PROJECT_ROOT="$(pwd)"
-cd "$PROJECT_ROOT"
-
 # Trigger GCM's interactive browser flow against the remote.
-git fetch origin                                                    # browser opens; approve.
-
-# Delete the half-formed app from the service.
-# Set APP_ID to the created app GUID from the create output (or `ms app list --json`) first.
-$BIN app delete --app "$APP_ID" --force --non-interactive
-
-# Clean slate.
-[ -n "$APP_ID" ] && [ -n "$PROJECT_ROOT" ] || { echo "Missing APP_ID or PROJECT_ROOT; refusing cleanup."; exit 1; }
-[ "$PROJECT_ROOT" != "$HOME" ] && [ "$PROJECT_ROOT" != "/" ] || { echo "Refusing cleanup at unsafe path: $PROJECT_ROOT"; exit 1; }
-find "$PROJECT_ROOT" -mindepth 1 -maxdepth 1 \
-	! -name '.git' \
-	! -name '.DS_Store' \
-	! -name 'Thumbs.db' \
-	! -name '.vscode' \
-	-exec rm -rf {} +
-cd "$PROJECT_ROOT"
-
-# Re-run create. Auth is now cached, so the second attempt completes end-to-end.
-$BIN app create --display-name "$DISPLAY_NAME" --non-interactive
+git fetch origin # browser opens; approve.
 ```
 
 ### Detection
 
-Match the substring `Authentication failed for 'https://` followed by `.d.environment.api.` in the `ms app create` output. When detected, surface the recovery sequence and ask for explicit approval before running destructive cleanup.
+Match `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://` followed by `.d.environment.api.`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app.
 
 ---
 
@@ -61,7 +38,7 @@ Match the substring `Authentication failed for 'https://` followed by `.d.enviro
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `defau.lt.environment.api.powerplatform.com: no such host` (or similar DNS error) | A malformed `--environment-id` value was passed (this only happens when the user supplied one). | Surface the error. Drop the explicit `--environment-id` and let `ms app create` auto-route, or have the user supply a valid environment ID. |
 | `Could not provision a Developer environment for your tenant (status 403)`        | Routing service rejected the account. Tenant Governance may block Developer envs.      | Surface the error to the user — provisioning is blocked at the tenant level and the plugin cannot work around it. The user (or their tenant admin) needs to resolve the governance/access issue. |
-| `Directory not empty; pass --force`                                               | Current project folder has prior files.                                                 | Run `/create-app` from an empty folder, or confirm using `--force` only when you intend to overwrite.                    |
+| `Directory not empty; pass --force`                                               | The selected target folder has prior files.                                             | Pick another target per [Step 7: Scaffold](../SKILL.md) (child folder, or a sibling when inside an existing app) and retry. Use `--force` only when the user explicitly asks for it. |
 | Repo init fails (`fatal: not in a git repository`)                                | Git is missing or `git config user.email` / `user.name` are unset.                     | Install Git; run `git config --global user.email "<you>@microsoft.com"` and `... user.name "<You>"`.                       |
 
 ## Common Build / Dev Failures

@@ -37,7 +37,7 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#documentation-icon"></use>
           </svg>
-          <h2>Microsoft Managed Apps Documentation</h2>
+          <h2>Microsoft managed apps Documentation</h2>
           <p>Build and ship managed apps</p>
           <ul>
             <li>
@@ -76,7 +76,7 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#social-icon"></use>
           </svg>
-          <h2>Connect with Microsoft Managed Apps</h2>
+          <h2>Connect with Microsoft managed apps</h2>
           <p>The project and its packages</p>
           <ul>
             <li>
