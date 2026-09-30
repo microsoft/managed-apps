@@ -14,7 +14,7 @@
 
 ## Required Account
 
-- A Microsoft work/school account with access to a Microsoft Apps-enabled tenant.
+- A Microsoft work/school account with access to a managed apps-enabled tenant.
 - `ms app create` resolves an environment automatically — you do not need to know or provide one. (Advanced users who already have a specific environment ID can pass it via `--environment-id`.)
 
 ## Git prerequisite checks
@@ -65,19 +65,9 @@ npm install -g @microsoft/managed-apps-cli@latest
 
 Install globally so the `ms` binary is on PATH. Subsequent `ms` invocations resolve the binary from the global install path.
 
-### Daily refresh
+### Refresh check
 
-```bash
-LATEST=$(npm view @microsoft/managed-apps-cli@latest version 2>/dev/null | tr -d '\r')
-```
-
-PowerShell equivalent:
-
-```powershell
-$Latest = (npm view @microsoft/managed-apps-cli@latest version 2>$null).Trim()
-```
-
-If the installed version differs from `$Latest`, ask the user before upgrading. The `@latest` tag updates regularly.
+Before the first operational `ms` command in a top-level workflow, follow the [CLI freshness gate](../../../shared/development-standards.md#cli-freshness-gate). If npm `@latest` is newer than the installed version, ask whether to update the global CLI and wait for the answer before proceeding. Preserve the outcome for nested skills so they do not check or prompt again. Never auto-update.
 
 ### Override patterns (only with explicit user direction)
 

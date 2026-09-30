@@ -1,6 +1,6 @@
 ---
 name: add-teams
-description: Adds Microsoft Teams by delegating to `/add-connector` with `api-id=shared_teams` and action mode. Use when integrating Teams messaging.
+description: Adds Microsoft Teams by delegating to `/add-data-source` with `api-id=shared_teams` and action mode. Use when integrating Teams messaging.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Teams (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `shared_teams`
 - `mode`: `action`

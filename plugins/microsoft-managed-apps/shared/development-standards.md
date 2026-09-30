@@ -1,6 +1,6 @@
 # Development Standards
 
-Standards that apply to all Microsoft Apps skills.
+Standards that apply to all managed apps skills.
 
 ## Theme
 
@@ -21,12 +21,28 @@ Standards that apply to all Microsoft Apps skills.
   npm install -g @microsoft/managed-apps-cli@latest
   ```
 - The CLI is published on the public npm registry: https://www.npmjs.com/package/@microsoft/managed-apps-cli
-- Pin to the `@latest` tag and re-check on each skill invocation — the `@latest` tag updates regularly.
+- Pin to the `@latest` tag.
 - After install, probe the binary name (`ms` (single supported binary)).
+
+### CLI freshness gate
+
+Run this gate once per top-level workflow, before its first operational `ms` command. The `ms --version` probe is part of the gate:
+
+1. Read the installed version with `ms --version`.
+2. Read the latest stable version with `npm view @microsoft/managed-apps-cli@latest version`.
+3. Compare the versions using semver rules. Do not treat an installed version newer than `@latest` as outdated.
+4. If `@latest` is newer, tell the user both versions and ask: _"`@microsoft/managed-apps-cli` {installed} is installed, but {latest} is available. Update the global CLI before proceeding?"_ Wait for the answer.
+   - If approved, run `npm install -g @microsoft/managed-apps-cli@latest`, then verify `ms --version` reports the expected version before continuing.
+   - If declined, acknowledge the choice and continue with the installed version for the rest of the workflow.
+5. If the registry lookup fails, report that the latest version could not be checked and continue with the installed CLI. Do not silently claim it is current.
+
+Record the gate outcome in workflow context (`current`, `updated`, `declined`, or `unavailable`) together with the installed and latest versions when known. Forward that context to every nested skill. A nested skill that receives an outcome must reuse it and skip both the registry check and upgrade prompt. A separately invoked skill starts a new top-level workflow and runs the gate again.
+
+The upgrade prompt satisfies the global-install confirmation requirement; do not ask for a second confirmation.
 
 ## Build & Deploy
 
-- **Default loop is `ms app dev`**, not deploy. Microsoft Apps run locally against the App Player with hot reload; deploy only when the user asks.
+- **Default loop is `ms app dev`**, not deploy. Managed apps run locally against the App Player with hot reload; deploy only when the user asks.
 - When the user does want to ship:
   - Local-built (primary): `npm run build`, then `git add -A && git commit && git push`, then `ms app deploy`.
   - Cloud-built: `git add -A && git commit && git push`, then `ms app deploy [--commit <sha>]`.

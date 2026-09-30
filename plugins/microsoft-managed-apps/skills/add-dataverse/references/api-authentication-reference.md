@@ -2,7 +2,7 @@
 
 Direct Dataverse Web API access for table / schema management. Uses Azure CLI authentication (`az account get-access-token`).
 
-The `ms app add connector --connector dataverse --as table --table <name>` flow does NOT use this — Dataverse table *binding* goes through the CLI and the active `ms` auth context. This reference is for the schema-management path (`add-dataverse` Step 3) where the skill talks to the Dataverse Web API directly to create / extend tables before binding them.
+The `ms app add data-source --connector dataverse --as table --table <name>` flow does NOT use this — Dataverse table *binding* goes through the CLI and the active `ms` auth context. This reference is for the schema-management path (`add-dataverse` Step 3) where the skill talks to the Dataverse Web API directly to create / extend tables before binding them.
 
 ## Prerequisites
 

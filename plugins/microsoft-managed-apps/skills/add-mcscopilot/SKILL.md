@@ -1,6 +1,6 @@
 ---
 name: add-mcscopilot
-description: Adds Microsoft Copilot Studio by delegating to `/add-connector` with `api-id=microsoftcopilotstudio` and action mode. Use when integrating Copilot Studio agents.
+description: Adds Microsoft Copilot Studio by delegating to `/add-data-source` with `api-id=microsoftcopilotstudio` and action mode. Use when integrating Copilot Studio agents.
 user-invocable: true
 allowed-tools: Read, AskUserQuestion, Skill
 model: sonnet
@@ -10,11 +10,11 @@ model: sonnet
 
 # Add Microsoft Copilot Studio (Wrapper)
 
-This skill is a thin wrapper. Use `/add-connector` as the single implementation path.
+This skill is a thin wrapper. Use `/add-data-source` as the single implementation path.
 
 ## Delegation contract
 
-Invoke `/add-connector` with:
+Invoke `/add-data-source` with:
 
 - `api-id`: `microsoftcopilotstudio`
 - `mode`: `action`

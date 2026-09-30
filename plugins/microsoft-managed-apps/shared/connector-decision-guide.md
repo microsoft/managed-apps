@@ -23,19 +23,20 @@ ms connector list-actions --connector shared_office365 --search Mail
 
 ### **Via Plugin Skills**
 
-- **`/add-connector`** — Generic connector skill. Ask for a keyword ("salesforce", "slack", "jira", "workiq") and it will search, present options, and add the connector.
-- **`/list-connections`** — View connectors already bound to your app, or explore operations on a specific connector
+- **`/add-data-source`** — Generic connector skill. Ask for a keyword ("salesforce", "slack", "jira", "workiq") and it will search, present options, and add the connector.
+- **`/list-connectors`** — View available connectors and whether they are blocked or allowed by your organization
 
 ### **Via Specific Skills**
 
 For common connectors, shortcuts exist:
 - **`/add-office365`** — Office 365 Outlook (calendar, email)
+- **`/add-office365-users`** — Office 365 Users (profiles, managers, direct reports, people search, profile photos)
 - **`/add-teams`** — Teams messages
 - **`/add-sharepoint`** — SharePoint lists/documents
 - **`/add-dataverse`** — Dataverse tables
 - **`/add-mcscopilot`** — Copilot Studio agents
 - **`/add-workiq`** — Work IQ Copilot MCP (M365 knowledge-grounded search/chat)
-- (See full list in `/add-connector` help)
+- (See full list in `/add-data-source` help)
 
 ### **Via Microsoft Docs**
 
@@ -68,6 +69,7 @@ Does the app need to search across M365 (email, files, calendar, contacts)?
   │
   └─ NO, or need specific list filtering → Use the specific connector
       Example: "List calendar events in December" → Office365
+      Example: "Show my direct reports with profile photos" → Office 365 Users
       Example: "Find all tasks assigned to me" → Azure DevOps
       Example: "Search documents with keyword" → SharePoint
 ```
@@ -81,6 +83,7 @@ Does the app need to search across M365 (email, files, calendar, contacts)?
 ```
 What type of data?
   ├─ Calendar events, emails, inbox → Office 365 Outlook (`/add-office365`)
+  ├─ User profiles, managers, direct reports, profile photos → Office 365 Users (`/add-office365-users`)
   ├─ Teams messages, channels → Teams (`/add-teams`)
   ├─ SharePoint lists, documents → SharePoint (`/add-sharepoint`)
   ├─ Files (upload, download, version) → OneDrive (`/add-onedrive`)
@@ -160,7 +163,7 @@ Example: "Meeting Insights" app
 
 ## Connector Selection Checklist
 
-When a user describes their app, ask these questions:
+When a user describes their app, answer this checklist internally from the prompt and available discovery results. Ask the user only for a required value that cannot be inferred or discovered:
 
 1. **Is the app primarily a SEARCH interface?**
    - If YES → recommend Work IQ
@@ -172,6 +175,7 @@ When a user describes their app, ask these questions:
 
 3. **What service/data does the app work with?** (Pick from the matrix above)
    - Calendar → Office365
+   - People, profiles, org relationships → Office 365 Users
    - Messages → Teams
    - Documents → SharePoint or OneDrive
    - Lists → Dataverse or SharePoint
@@ -243,6 +247,20 @@ Connectors Recommended:
   3. Optional: Work IQ (`/add-workiq`) — search customer conversations
 ```
 
+### **Pattern 6: People or Team Directory**
+```
+User Goal: "Show selected employees or everyone who reports to me with profile photos"
+
+Connector Recommended:
+  1. Office 365 Users (`/add-office365-users`) — profiles, reporting relationships, and photos
+
+Implementation:
+  - Resolve the manager ID or UPN with `MyProfile_V2('id,userPrincipalName')`, then call `DirectReports_V2(managerId, ...)`
+  - Use `UserProfile_V2(upn, ...)` for explicitly selected users
+  - Use `UserPhotoMetadata` followed by `UserPhoto_V2`
+  - Convert runtime `Uint8Array` photo data to a CSP-safe base64 `data:` URL
+```
+
 ---
 
 ## Implementation Guidance for Skills
@@ -256,7 +274,7 @@ When the user describes their app goal or data need:
 4. Explain why each is chosen (reference the rules above)
 5. Invoke the appropriate `/add-*` skills in order
 
-### **For `/add-connector` (Canonical Skill)**
+### **For `/add-data-source` (Canonical Skill)**
 
 This skill handles ANY connector, including those not listed in this guide. When called:
 
@@ -271,11 +289,11 @@ This skill handles ANY connector, including those not listed in this guide. When
 
 3. **If uncertain about availability**:
    - Check Microsoft connectors documentation: https://learn.microsoft.com/en-us/connectors/
-   - Use `/list-connections` skill to browse available connectors
+   - Use `/list-connectors` skill to browse available connectors
 
-**This guide covers the most common cases, but `/add-connector` works with any Microsoft connector — not just the 10 listed above.**
+**This guide covers the most common cases, but `/add-data-source` works with any Microsoft connector — not just the commonly listed connectors above.**
 
-### **For Microsoft Apps Architect Agent**
+### **For managed apps Architect Agent**
 
 When recommending connectors for an app design:
 1. Always start with the user's end goal (not available connectors)
@@ -309,7 +327,7 @@ Decision Process:
   3. Action needed? → NO (search-only)
   4. AI needed? → NO
 
-→ Recommend: `/add-connector` (then optionally `/add-sharepoint` if file management needed)
+→ Recommend: `/add-data-source` (then optionally `/add-sharepoint` if file management needed)
 ```
 
 ### **Example 3: User says "I need to build a system to store customer records and generate AI summaries of their interactions"**
@@ -325,6 +343,19 @@ Decision Process:
    - `/add-dataverse` (store customer records)
    - `/add-mcscopilot` (generate summaries)
    - Optional: `/add-office365` (if fetching customer emails)
+```
+
+### **Example 4: User says "Show everyone who reports to me with their profile photo"**
+
+```
+Decision Process:
+  1. Is it semantic search? → NO
+  2. Service? → Microsoft 365 user directory and org relationships
+  3. Action needed? → READ
+  4. Binary content? → YES (profile photos)
+
+→ Recommend: `/add-office365-users`
+→ Use CSP-safe base64 data URLs for the connector's binary photo responses
 ```
 
 ---

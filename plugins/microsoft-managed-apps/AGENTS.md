@@ -1,10 +1,10 @@
 # Microsoft Managed Apps Plugin — Development Guidelines
 
-This file provides instructions for assistants working on the Microsoft Apps plugin itself (not for end-users of the plugin).
+This file provides instructions for assistants working on the managed apps plugin itself (not for end-users of the plugin).
 
 ## Overview
 
-The Microsoft Apps plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to scaffold, develop, and ship Microsoft Apps end-to-end. It provides skills for:
+The managed apps plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to scaffold, develop, and ship managed apps end-to-end. It provides skills for:
 
 - Creating a new app (`/create-app`) — global install of the CLI, scaffold, local dev loop.
 - Iterating locally (`/dev`) — `ms app dev`, hot reload against the App Player.
@@ -26,7 +26,8 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `shared/shared-instructions.md`     | Meta file aggregating all cross-cutting concerns — every skill links to it.                     |
 | `shared/planning-policy.md`         | When to enter plan mode and what to include in the plan.                                        |
 | `shared/memory-bank.md`             | Memory bank schema + read/update protocol.                                                      |
-| `shared/development-standards.md`   | Versioning, theme, CLI install pattern, build rules, TypeScript strict mode.                    |
+| `shared/development-standards.md`   | Theme, CLI install pattern, build rules, TypeScript strict mode.                                |
+| `shared/allowed-actions.md`         | `allowedActions` authoring for shared connection references — required before pack/deploy.      |
 | `shared/version-check.md`           | Daily plugin-version check against the marketplace.                                             |
 
 ### Adding new shared instructions
@@ -63,12 +64,13 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `/add-sharepoint`  | SharePoint Online lists/documents.                                        |
 | `/add-excel`       | Excel Online (Business) workbooks.                                        |
 | `/add-office365`   | Office 365 Outlook (calendar, email).                                     |
+| `/add-office365-users` | Office 365 Users (profiles, org relationships, profile photos).       |
 | `/add-teams`       | Teams messaging.                                                          |
 | `/add-onedrive`    | OneDrive for Business files.                                              |
 | `/add-azuredevops` | Azure DevOps work items / pipelines.                                      |
 | `/add-mcscopilot`  | Microsoft Copilot Studio agents.                                          |
 | `/add-workiq`      | Work IQ Copilot MCP for Microsoft 365 knowledge-grounded search/chat.     |
-| `/add-connector`   | Generic fallback for any other connector.                                 |
+| `/add-data-source` | Generic fallback for any other connector.                                 |
 | `/list-connectors` | Enumerate connectors / bound data sources for discovery.                  |
 
 ### Workflow
@@ -76,7 +78,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 ```
 /create-app
    └── /dev (default loop)
-   └── /add-connector (or specific /add-*)
+   └── /add-data-source (or specific /add-*)
    └── /deploy (explicit, requires confirmation)
    └── /share, /delete-app (explicit, require confirmation)
 ```
