@@ -20,6 +20,17 @@
         }
       ]
     },
+    "projectId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "appDisplayName": {
       "type": "string"
     },
@@ -45,31 +56,51 @@
     "buildEntryPoint": {
       "type": "string"
     },
+    "buildType": {
+      "type": "string",
+      "enum": [
+        "build",
+        "none"
+      ]
+    },
     "data": {
-      "description": "Schema source file configuration. If db.schemaPath is also configured, both path values must match exactly without normalization.",
+      "description": "App data configuration. schemaPath is optional; a schema is loaded only when it is set. If db is also configured, both schemaPath values must be omitted or match exactly without normalization.",
       "type": "object",
       "properties": {
         "schemaPath": {
           "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
         }
       },
-      "required": [
-        "schemaPath"
-      ],
+      "additionalProperties": false
+    },
+    "state": {
+      "description": "App state schema configuration. schemaPath is optional and used by ms project state commands.",
+      "type": "object",
+      "properties": {
+        "schemaPath": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
       "additionalProperties": false
     },
     "db": {
       "deprecated": true,
-      "description": "Legacy alias for data. If data.schemaPath is also configured, both path values must match exactly without normalization.",
+      "description": "Legacy alias for data. If data is also configured, both schemaPath values must be omitted or match exactly without normalization.",
       "type": "object",
       "properties": {
         "schemaPath": {
           "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
         }
       },
-      "required": [
-        "schemaPath"
-      ],
       "additionalProperties": false
     },
     "iconPath": {

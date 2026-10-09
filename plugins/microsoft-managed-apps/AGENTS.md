@@ -60,6 +60,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 
 | Skill              | What it adds                                                              |
 | ------------------ | ------------------------------------------------------------------------- |
+| `/state`           | Built-in app state schema via `ms project state` and generated TypeScript services. |
 | `/add-dataverse`   | Dataverse tables (typed services).                                        |
 | `/add-sharepoint`  | SharePoint Online lists/documents.                                        |
 | `/add-excel`       | Excel Online (Business) workbooks.                                        |

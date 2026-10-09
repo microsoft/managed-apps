@@ -80,16 +80,16 @@ Wait for their answer. Do NOT present a multiple-choice list of app types. Once 
 
 1. **Generate the display name.** If the user already gave a name, use it verbatim. Otherwise derive a short title from the user's prompt (usually 2-5 title-cased words) and use it with `--display-name`. Either way, do not ask the user to name or confirm it. Derive the folder slug from this title.
 2. **Plan the complete requested experience.** Include every capability the user clearly describes. Infer the screens, navigation, interactions, and visual styling needed to make those capabilities usable; use a single responsive screen only when it can support the full request cleanly. Do not ask separate questions about layout, theme, or architecture. Present these decisions in the plan for approval.
-3. **Infer data needs from user intent.**. Add the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a connector. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
-4. **Discover before asking.** When a connector is needed, infer its api-id and mode from the connector decision guide, and let the CLI discover or create connections where supported. Ask one focused question only if a required tenant-specific identifier cannot be discovered (for example, which of several matching SharePoint lists to use).
-5. **Consolidate assumptions into the plan.** Include the generated name, requested capabilities, inferred UI, and any connector choice in one complete plan. Do not ask separate questions to confirm each assumption.
+3. **Infer data needs from user intent.** Add built-in app state or the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a data source. Use `/state` for the app's own typed persisted records when `ms feature status --name state` reports enabled. Use connectors for external systems, tenant data, shared business data, or when the state feature is disabled. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
+4. **Discover before asking.** When a connector is needed, infer its api-id and mode from the connector decision guide, and let the CLI discover or create connections where supported. When built-in app state is appropriate, invoke `/state` for the detailed schema/codegen workflow rather than duplicating it here. Ask one focused question only if a required tenant-specific identifier cannot be discovered (for example, which of several matching SharePoint lists to use) or if the state-vs-connector choice materially changes the app.
+5. **Consolidate assumptions into the plan.** Include the generated name, requested capabilities, inferred UI, and any state schema or connector choice in one complete plan. Do not ask separate questions to confirm each assumption.
 
 ### Step 4: Plan
 
 1. Enter plan mode with `EnterPlanMode`.
 2. Design the **complete** implementation approach the user will approve in one shot:
    - Display name (let the CLI resolve the environment automatically; only pass `--environment-id` if the user explicitly provided one).
-   - **Each data source to be added** (which `/add-*` skill, api-id, table/list/connection identifiers). These are invoked by Step 8 of this skill — list them as concrete steps, not as "next steps."
+   - **Each state collection or data source to be added** (which `/state` or `/add-*` skill, schema collections/properties, api-id, table/list/connection identifiers). These are invoked by Step 8 of this skill — list them as concrete steps, not as "next steps."
    - **App architecture**: components, pages, routing, state management — enough detail that Step 9 can generate the code without re-asking.
    - Build/verify steps and the final `ms app dev` hand-off.
 3. Present the complete inferred plan. Include `allowedPrompts` from [prerequisites-reference.md](./references/prerequisites-reference.md) when the host requires them.
@@ -168,10 +168,11 @@ git fetch origin # browser opens; approve.
 
 Detect this by matching `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://...d.environment.api...'`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app after it succeeds.
 
-### Step 8: Add Data Sources
+### Step 8: Add State and Data Sources
 
-For every connector identified in Step 3 / Step 4, invoke the matching skill **now**, in this session, before any UI code is generated:
+For every built-in state collection or connector identified in Step 3 / Step 4, invoke the matching skill **now**, in this session, before any UI code is generated:
 
+- `/state` when the app needs its own typed persisted records and `ms feature status --name state` reports enabled. If `/state` reports that the feature is disabled, update the plan to use an appropriate connector alternative instead.
 - A specific `/add-*` skill when one exists (`/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`).
 - `/add-data-source` (with api-id) for anything else.
 
@@ -179,27 +180,28 @@ For Work IQ knowledge/search scenarios, prefer `/add-workiq` (maps to `shared_a3
 
 Run them sequentially. After each one:
 
-- Confirm the typed services were generated under `generated/` at the project root. The add-* skills regenerate TypeScript clients.
+- Confirm the typed services were generated: `/state` writes `generated-typescript/` beside the configured state schema; add-* skills generate under `generated/` at the project root.
 - **For implementation guidance**, refer to the specialized skill's documentation:
+  - `/state` → Prefer generated state services, validators, and query helpers when codegen covers the scenario
   - `/add-office365` → See "Office 365 Connector: Method Selection Guide" for correct import paths, calendar discovery, and API patterns
   - `/add-office365-users` → See "Office 365 Users: Method Selection Guide" for profile, reporting relationship, and CSP-safe profile photo patterns
   - `/add-workiq` → See "Work IQ Integration: MCP Session Pattern" for session management and response parsing
   - Other `/add-*` skills have similar guidance
-- Capture the connection ID + service path so Step 9 can import them.
+- Capture the generated service path, and the connection ID when applicable, so Step 9 can import them.
 - **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
 
-**Forward all captured context to each sub-skill so its own prompts are suppressed.** The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, CLI freshness, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: api-id, connection ID or name, table/list/site identifiers, environment URL, project root, and the CLI freshness gate outcome plus known versions. A sub-skill receiving the CLI freshness outcome must not check or prompt again. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
+**Forward all captured context to each sub-skill so its own prompts are suppressed.** The `/state` skill needs the approved collections/properties and the CLI freshness gate outcome. The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, CLI freshness, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: state collections/properties, api-id, connection ID or name, table/list/site identifiers, environment URL, project root, and the CLI freshness gate outcome plus known versions. A sub-skill receiving the CLI freshness outcome must not check or prompt again. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
 
 The intent of this step is no per-connector approval prompts: the approved plan from Step 4 covers them. If a sub-skill fails (auth, missing connection, wrong api-id), surface the error verbatim and stop; do not silently proceed with a half-wired app.
 
-If Step 3 / Step 4 identified zero data sources, skip this step. Otherwise, this step must complete before Step 9 starts.
+If Step 3 / Step 4 identified zero state collections or data sources, skip this step. Otherwise, this step must complete before Step 9 starts.
 
 ### Step 9: Implement the App
 
 Generate the code that delivers the experience described in the approved plan:
 
 - Components, pages, routing, state management.
-- Wire each component to the typed services produced in Step 8 (no raw `fetch` / `axios` / Graph calls — see [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)).
+- Wire each component to the typed services produced in Step 8. For connectors, avoid raw `fetch` / `axios` / Graph calls and use generated connector services. For `/state`, prefer generated state services when codegen covers the scenario while allowing deliberate direct state requests when they are the better fit.
 - Apply the inferred theme and UI decisions documented in the approved plan.
 - Replace template placeholder content; the user must see *their* app at the local URL, not "Hello World."
 
