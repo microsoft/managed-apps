@@ -53,11 +53,14 @@ feature.
 ## ⚠️ Local testing requires local gateway mode
 
 Generated state services require the Managed Apps local gateway path during local development.
-Before testing data behavior locally, install the latest `@microsoft/managed-apps-vite-plugin` and
-opt the app into local gateway mode. `devMode: 'localGateway'` was added in plugin 0.4.2, so older
-versions won't start the local gateway.
+Before testing data behavior locally, make sure the app has `@microsoft/managed-apps-vite-plugin`
+0.4.2 or later (the version that added `devMode: 'localGateway'`; older versions won't start the
+local gateway), then opt the app into local gateway mode.
 
-Install the latest Vite plugin with the app's package manager:
+Check the installed version first, for example with `npm ls @microsoft/managed-apps-vite-plugin`
+(or read `version` in `node_modules/@microsoft/managed-apps-vite-plugin/package.json`). If it is
+0.4.2 or later, skip the install. If it is missing or older, install the latest with the app's
+package manager:
 
 ```bash
 npm install -D @microsoft/managed-apps-vite-plugin@latest
@@ -94,7 +97,7 @@ functions, proxies, or CORS/auth workarounds). Fix the Vite plugin/local gateway
 | Code generation | `ms project state generate-code` | handwritten model/service/validator files in the generated output folder |
 | App data access | generated services, models, validators, and typed query helpers | treating direct state requests as the default when codegen covers the scenario |
 | File attachments | direct upload to `/.ms/state/attachments`, then save the returned URL through a generated service | storing file bytes inside items |
-| Testing data behavior | latest Vite plugin + `managedApps({ devMode: 'localGateway' })` + `ms app dev`; Preview for pre-deploy validation | local dev without local gateway mode |
+| Testing data behavior | Vite plugin 0.4.2+ + `managedApps({ devMode: 'localGateway' })` + `ms app dev`; Preview for pre-deploy validation | local dev without local gateway mode |
 
 The generated services own request shapes, ETags, typed filters, paging, validation hooks, per-user
 scope behavior, and service route details. App code should compose those services with UI/business
@@ -364,7 +367,7 @@ ms project state generate-code --json
 Then:
 
 - confirm `ms.config.json` has `enabled: true` on its state (or `data`/`db`) section;
-- confirm the app uses the latest `@microsoft/managed-apps-vite-plugin` (0.4.2 or later);
+- confirm the app has `@microsoft/managed-apps-vite-plugin` 0.4.2 or later;
 - confirm `vite.config.ts` calls `managedApps({ devMode: 'localGateway' })` or preserves existing
   options while adding `devMode: 'localGateway'`;
 - run the narrowest relevant build/typecheck/lint for the app or package;
