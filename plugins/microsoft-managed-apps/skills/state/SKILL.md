@@ -2,7 +2,7 @@
 name: state
 description: Store and query a Microsoft Managed App's built-in state with `ms project state` CLI schema commands and generated TypeScript clients. First run `ms feature status --name state`; if it is not enabled, recommend an alternative connector or data source.
 user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, Skill
+allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
 model: sonnet
 ---
 
@@ -51,7 +51,10 @@ opt the app into local gateway mode.
 Install the latest Vite plugin with the app's package manager:
 
 ```bash
-bun add -D @microsoft/managed-apps-vite-plugin@latest
+npm install -D @microsoft/managed-apps-vite-plugin@latest
+# or: bun add -D @microsoft/managed-apps-vite-plugin@latest
+# or: pnpm add -D @microsoft/managed-apps-vite-plugin@latest
+# or: yarn add -D @microsoft/managed-apps-vite-plugin@latest
 ```
 
 Then update the app's `vite.config.ts` so the `managedApps()` plugin call enables the local gateway:
@@ -75,8 +78,8 @@ Now run local dev normally:
 ms app dev
 ```
 
-Do not "fix" local data failures with a middle-tier function, proxy, custom auth header, connector,
-or direct endpoint wrapper. Fix the Vite plugin/local gateway setup instead.
+Do not change the app architecture just to work around local data failures. Fix the Vite
+plugin/local gateway setup instead.
 
 ## Contract
 
