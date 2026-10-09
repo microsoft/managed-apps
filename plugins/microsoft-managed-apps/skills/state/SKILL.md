@@ -54,7 +54,8 @@ feature.
 
 Generated state services require the Managed Apps local gateway path during local development.
 Before testing data behavior locally, install the latest `@microsoft/managed-apps-vite-plugin` and
-opt the app into local gateway mode.
+opt the app into local gateway mode. `devMode: 'localGateway'` was added in plugin 0.4.2, so older
+versions won't start the local gateway.
 
 Install the latest Vite plugin with the app's package manager:
 
@@ -363,7 +364,7 @@ ms project state generate-code --json
 Then:
 
 - confirm `ms.config.json` has `enabled: true` on its state (or `data`/`db`) section;
-- confirm the app uses the latest `@microsoft/managed-apps-vite-plugin`;
+- confirm the app uses the latest `@microsoft/managed-apps-vite-plugin` (0.4.2 or later);
 - confirm `vite.config.ts` calls `managedApps({ devMode: 'localGateway' })` or preserves existing
   options while adding `devMode: 'localGateway'`;
 - run the narrowest relevant build/typecheck/lint for the app or package;
