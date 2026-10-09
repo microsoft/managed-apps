@@ -179,8 +179,10 @@ ms project state alter --collection task --property name --max-length ""
 Only pass the flags you intend to change. Empty string clears a type-specific constraint where the
 CLI supports clearing.
 
-Be careful with indexes on deployed fields: changing or removing an existing index is rejected, and
-adding an index to an already-deployed property must be validated in Preview.
+Indexes are add-only. Removing an index or changing its options (including the platform index on
+`name`) is rejected even before the first deploy, so choose `--index-ignore-case` and
+`--index-ignore-accents` when you add the property. Adding an index to an already-deployed property
+is allowed, but validate it in Preview first.
 
 ### Remove a property
 
@@ -339,8 +341,9 @@ relaunching Preview or deploying.
 - **Unsupported schema shapes need a decision.** If the requested design needs nested objects,
   arrays, enums, `$ref`, composition keywords, `pattern`, or defaults and the CLI cannot represent
   it, stop and ask. Do not silently switch to manual schema editing.
-- **Indexes freeze after deployment for existing columns.** Preview schema/index changes before live
-  deploy.
+- **Indexes are add-only.** The CLI rejects removing an index or changing its options, deployed or
+  not. Decide index options when adding a property, and Preview any index added to a deployed
+  property before live deploy.
 - **Never drop a declared collection/item type** by hand. Collection removal is not a supported CLI
   write.
 - **Do not run `ms project state clear`** unless the user explicitly asks to discard all Preview
