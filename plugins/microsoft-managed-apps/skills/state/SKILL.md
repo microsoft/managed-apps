@@ -1,6 +1,6 @@
 ---
 name: state
-description: Store and query a Microsoft Managed App's built-in state with `ms project state` CLI schema commands and generated TypeScript clients. First run `ms feature status --name state`; if it is not enabled, recommend an alternative connector or data source.
+description: Store and query a Microsoft Managed App's built-in state with `ms project state` CLI schema commands and generated TypeScript clients. First, with the user signed in to the CLI, run `ms feature status --name state --json`; if `feature.enabled` is not `true`, recommend an alternative connector or data source.
 user-invocable: true
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
 model: sonnet
@@ -20,15 +20,22 @@ app code.
 
 ## Mandatory feature gate
 
-Before using any guidance in this skill, run:
+Before using any guidance in this skill, it is recommended that the user is signed in to the CLI. Run
+`ms auth status`, and if it reports no signed-in account, ask the user to run `ms auth login`.
+`ms feature status` never prompts for sign-in, and features that are on by default for the user's
+organization only apply once they are signed in, so a signed-out check can report `state` as
+disabled even when it is available to them.
+
+Then run:
 
 ```bash
-ms feature status --name state
+ms feature status --name state --json
 ```
 
-Continue only when the command reports that `state` is enabled. If the command fails, the feature is
-not found, or the output reports disabled/off/unavailable, stop and do **not** run any
-`ms project state ...` command.
+Continue only when the output has `"success": true` and `feature.enabled` is `true`. Read the JSON
+rather than the human-readable output, which lists several settings that can each say "enabled". If
+the command fails (non-zero exit or `"success": false`), the feature is not found, or
+`feature.enabled` is `false`, stop and do **not** run any `ms project state ...` command.
 
 When state is not enabled, recommend an alternative data-source path based on the user's need:
 
@@ -85,7 +92,7 @@ plugin/local gateway setup instead.
 
 | Surface | Use | Don't use |
 | --- | --- | --- |
-| Feature gate | `ms feature status --name state` before any state work | assuming the feature is available |
+| Feature gate | `ms feature status --name state --json` (`feature.enabled`), with the user signed in, before any state work | assuming the feature is available |
 | Schema edits | `ms project state add`, `alter`, `remove`, `set-setting` | manual edits to `state/schema.json`, `ms.schema.json`, or another configured schema file |
 | Code generation | `ms project state generate-code` | handwritten model/service/validator files in the generated output folder |
 | App data access | generated services, models, validators, and typed query helpers | treating direct state requests as the default when codegen covers the scenario |
@@ -97,8 +104,9 @@ logic instead of duplicating transport behavior.
 
 ## Workflow
 
-1. Run `ms feature status --name state`. Stop and recommend a connector alternative unless it is
-   enabled.
+1. Make sure the user is signed in (`ms auth status`; ask them to run `ms auth login` if not), then
+   run `ms feature status --name state --json`. Stop and recommend a connector alternative unless
+   `feature.enabled` is `true`.
 2. Find the app root (`ms.config.json`) and the configured schema path.
 3. Inspect existing state schema/settings with `ms project state list-schema` and
    `ms project state list-settings`.
@@ -278,8 +286,8 @@ await fetch('/.ms/state/task/items', {
 
 ## Rules / gotchas
 
-- **Feature gate first.** Never use this skill's state workflow before `ms feature status --name state`
-  reports enabled.
+- **Feature gate first.** Never use this skill's state workflow before
+  `ms feature status --name state --json` reports `feature.enabled: true`.
 - **Schema changes are CLI-only.** Never patch the schema JSON to add properties, constraints,
   indexes, locale, or validation settings.
 - **Unsupported schema shapes need a decision.** If the requested design needs nested objects,
@@ -297,7 +305,7 @@ await fetch('/.ms/state/task/items', {
 ## Verification
 
 ```bash
-ms feature status --name state
+ms feature status --name state --json
 ms project state list-schema
 ms project state list-settings
 ms project state generate-code --json
