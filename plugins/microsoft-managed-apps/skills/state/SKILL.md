@@ -175,7 +175,7 @@ ms project state add --collection task --property attachment --type binary --kin
 ### Alter a property
 
 ```bash
-ms project state alter --collection task --property name --max-length 300
+ms project state alter --collection task --property name --max-length 200
 ms project state alter --collection task --property done --required false
 ms project state alter --collection task --property name --max-length ""
 ```
