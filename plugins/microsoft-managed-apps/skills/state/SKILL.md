@@ -1,6 +1,6 @@
 ---
 name: state
-description: Store and query a Microsoft Managed App's built-in state with `ms project state` CLI schema commands and generated TypeScript clients. First, with the user signed in to the CLI, run `ms feature status --name state --json`; if `feature.enabled` is not `true`, recommend an alternative connector or data source.
+description: Store and query a Microsoft Managed App's built-in state and file attachments with `ms project state` CLI schema commands and generated TypeScript clients. First, with the user signed in to the CLI, run `ms feature status --name state --json`; if `feature.enabled` is not `true`, recommend an alternative connector or data source.
 user-invocable: true
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
 model: sonnet
@@ -11,8 +11,9 @@ model: sonnet
 # Managed Apps State with CLI schema + generated client
 
 Every Microsoft Managed App can use built-in app state when the `state` feature is enabled for the
-current CLI/environment. Records are grouped into collections by an item type name; the server
-assigns each record an `itemId`.
+current CLI/environment: a NoSQL store the app calls directly (no middle-tier function, connector,
+or SDK; the host attaches auth). Records are grouped into collections by an item type name; the
+server assigns each record an `itemId`.
 
 For schema-backed state, **do not edit schema JSON by hand.** Use `ms project state ...` to change
 the schema, run `ms project state generate-code`, then call the generated TypeScript services from
@@ -64,13 +65,8 @@ npm install -D @microsoft/managed-apps-vite-plugin@latest
 # or: yarn add -D @microsoft/managed-apps-vite-plugin@latest
 ```
 
-Then update the app's `vite.config.ts` so the `managedApps()` plugin call enables the local gateway:
-
-```ts
-managedApps({ devMode: 'localGateway' })
-```
-
-If the app already passes options, preserve them and add `devMode`:
+Then update the app's `vite.config.ts` so the `managedApps()` plugin call enables the local gateway,
+preserving any existing options:
 
 ```ts
 managedApps({
@@ -85,8 +81,8 @@ Now run local dev normally:
 ms app dev
 ```
 
-Do not change the app architecture just to work around local data failures. Fix the Vite
-plugin/local gateway setup instead.
+Do not change the app architecture just to work around local data failures (no middle-tier
+functions, proxies, or CORS/auth workarounds). Fix the Vite plugin/local gateway setup instead.
 
 ## Contract
 
@@ -96,6 +92,7 @@ plugin/local gateway setup instead.
 | Schema edits | `ms project state add`, `alter`, `remove`, `set-setting` | manual edits to `state/schema.json`, `ms.schema.json`, or another configured schema file |
 | Code generation | `ms project state generate-code` | handwritten model/service/validator files in the generated output folder |
 | App data access | generated services, models, validators, and typed query helpers | treating direct state requests as the default when codegen covers the scenario |
+| File attachments | direct upload to `/.ms/state/attachments`, then save the returned URL through a generated service | storing file bytes inside items |
 | Testing data behavior | latest Vite plugin + `managedApps({ devMode: 'localGateway' })` + `ms app dev`; Preview for pre-deploy validation | local dev without local gateway mode |
 
 The generated services own request shapes, ETags, typed filters, paging, validation hooks, per-user
@@ -110,11 +107,12 @@ logic instead of duplicating transport behavior.
 2. Find the app root (`ms.config.json`) and the configured schema path.
 3. Inspect existing state schema/settings with `ms project state list-schema` and
    `ms project state list-settings`.
-4. Make schema changes only with `ms project state ...` commands.
-5. Run `ms project state generate-code` after every successful schema change.
-6. Import and use the generated TypeScript services from app code.
-7. Configure local gateway mode before local data testing.
-8. Build/typecheck and verify that generated services are used for behavior covered by codegen.
+4. For each new collection, decide up front whether records are per-user (see below).
+5. Make schema changes only with `ms project state ...` commands.
+6. Run `ms project state generate-code` after every successful schema change.
+7. Import and use the generated TypeScript services from app code.
+8. Configure local gateway mode before local data testing.
+9. Build/typecheck and verify that generated services are used for behavior covered by codegen.
 
 ## Schema setup
 
@@ -124,14 +122,18 @@ apps may use `data.schemaPath` or legacy `db.schemaPath`.
 ```json
 {
   "state": {
-    "schemaPath": "state/schema.json"
+    "schemaPath": "state/schema.json",
+    "enabled": true
   }
 }
 ```
 
-If no schema path exists yet, start by adding the first collection with the CLI. The CLI initializes
-the local schema path/file as needed; don't ask the user to hand-configure schema wiring first.
-After that, schema content is managed with CLI commands only.
+If no schema path exists yet, start by adding the first collection with the CLI. It writes
+`state.schemaPath: "state/schema.json"`, creates the schema file, and sets `enabled: true` unless the
+config already sets `enabled`; don't ask the user to hand-configure schema wiring first. The app
+serves no state while `enabled` is `false`, so confirm with the user before changing an explicit
+`false`. New schemas take the machine's locale (or `en-US`); match the app's users with
+`ms project state set-setting --locale <tag>`.
 
 Inspect the current schema:
 
@@ -148,8 +150,6 @@ ms project state list-settings
 ms project state add --collection task
 ```
 
-The first collection add can initialize a missing schema file. Do not create the schema JSON by hand.
-
 ### Add properties
 
 ```bash
@@ -162,10 +162,11 @@ ms project state add --collection task --property attachment --type binary --kin
 - **Types:** `string`, `number`, `integer`, `boolean`, `datetime`, `guid`, `binary`.
 - **Boolean flags take values:** `--required true`, `--index false`, etc. They are not bare
   switches.
-- **Indexes:** at most four custom indexed properties per collection. Platform properties are
-  indexed separately.
-- **Name property:** prefer a human-readable `name` property for each item. It is writable, indexed,
-  sortable/filterable, and generated services treat it as the display/title field when present.
+- **Indexes:** at most four custom indexed properties per collection, top-level scalars only. Only
+  indexed properties (plus `itemId`, `name`, `createdTime`, `modifiedTime`) can be filtered or sorted.
+- **Name property:** prefer a human-readable `name` property for each item (put a single-string
+  item's text there). It is writable, indexed, sortable/filterable, and generated services treat it
+  as the display/title field.
 
 ### Alter a property
 
@@ -188,13 +189,8 @@ ms project state remove --collection task --property obsoleteField
 ```
 
 Use `--force` only when non-interactive automation is necessary and the user already approved the
-removal:
-
-```bash
-ms project state remove --collection task --property obsoleteField --force
-```
-
-Collection removal is intentionally rejected. Do not work around it by editing the schema file.
+removal. Stored values are not deleted. Collection removal is intentionally rejected; do not work
+around it by editing the schema file.
 
 ### Change schema settings
 
@@ -207,6 +203,20 @@ ms project state set-setting --validation false
 ```
 
 `--validation false` keeps declared indexes active but makes writes index-only/unvalidated.
+
+### Per-user collections
+
+Make a collection per-user when a record belongs to one person (drafts, preferences, personal
+notes); skip it for catalogs, reference data, and anything collaborative. **Decide before it holds
+records:** ownership is immutable and can't be added to a collection that has data. The CLI has no
+ownership flag, so this is the one schema edit allowed by hand, and only after the user agrees: add
+`"x-ms-ownership": "perUser"` to the collection's root object (not a property), change nothing
+else, and regenerate.
+
+Generated services then take a `scope` option: `private` writes/reads only the caller's records,
+`shared` writes/reads records visible to all users, and omitting it writes private and reads both.
+Pass it explicitly on writes. The owner always comes from the caller's token; reads include a
+platform-managed `@ms.scope` that you must not send back.
 
 ## Generate the typed client
 
@@ -253,43 +263,79 @@ export async function createTask(input: TaskCreate): Promise<TaskRead> {
     throw new Error('Task input is invalid.');
   }
 
-  return taskService.create(input);
+  const result = await taskService.create(input);
+  if (!result.success) {
+    throw new Error(`Could not create the task: ${result.error.message}`);
+  }
+  return result.data;
 }
 ```
 
-Direct state requests are acceptable when there is a deliberate reason to bypass generated helpers,
-but they should not be the default for schema-backed collections:
-
-```ts
-await fetch('/.ms/db/task/items', {
-  method: 'POST',
-  body: JSON.stringify(input),
-});
-
-await fetch('/.ms/state/task/items', {
-  method: 'POST',
-  body: JSON.stringify(input),
-});
-```
+Direct requests to `/.ms/state/{collection}/items[/{itemId}]` are acceptable only with a deliberate
+reason to bypass the generated services. They follow the same contract: send `@odata.etag`
+verbatim as `If-Match`, follow `@odata.nextLink` to page (`$skip` is rejected), and quote string
+and date literals in `$filter`.
 
 ## Generated-service behavior
 
+- **Results, not exceptions:** service calls return `{ success: true, data }` or
+  `{ success: false, error }` (`error.kind`, `message`, `status`, `validationErrors`). Check
+  `success` before using `data`.
 - **Create/update validation:** generated validators enforce the declared schema when validation is
   enabled. `update` is a full-document PUT/upsert, not a partial patch.
 - **Edit with concurrency:** generated edit helpers read the item, shallow-merge callback changes,
   validate, and send the exact quoted ETag in `If-Match`. Only `412` is retried.
+- **Delete is idempotent:** deleting a missing item succeeds, so retries are safe.
 - **Server-owned fields:** `itemId`, `createdTime`, `modifiedTime`, and `@odata.etag` are read-only.
   Do not send them in write models.
 - **Queries:** use generated typed filters for indexed fields. Paging follows `@odata.nextLink`.
 - **Per-user data:** for `x-ms-ownership: "perUser"`, generated services expose scope-aware reads
-  and writes. Do not send scope to non-per-user collections.
+  and writes. Do not send scope to non-per-user collections; the service rejects it with `400`.
+
+## File attachments
+
+Generated services don't upload files. Declare a reference property
+(`ms project state add --collection note --property photo --type binary --kind image`), regenerate,
+then upload the bytes and save the returned URL through the generated service:
+
+```ts
+const uploaded = await fetch('/.ms/state/attachments', {
+  method: 'POST',
+  headers: { 'Content-Type': file.type || 'application/octet-stream' }, // required
+  body: file,
+}).then((response) => response.json()); // { id, url, contentType, size }
+
+const saved = await noteService.update(note.itemId, { ...noteFields, photo: uploaded.url });
+```
+
+Display it with `<img src={note.photo} />`.
+
+- Save within **15 minutes**, or the unreferenced upload is garbage-collected. Store `url` verbatim.
+- Attachments have no DELETE or PUT: save the property as `null` (or delete the item) to remove one,
+  and upload a new file to replace it. A file belongs to one item (`409` otherwise).
+- No filename is stored; add a separate property if needed. Limits: 10 MiB per file, 10,000 files
+  and 1 GiB per app. Use a real image `Content-Type` for `<img>`; SVG is always downloaded.
+
+## Preview has its own state
+
+`ms app play --mode preview --commit <sha>` (full SHA, after `ms app build --commit <sha>`) runs the
+app against a **separate Preview store**: same collections, different records. Test writes,
+validation, and schema/index changes there before `ms app deploy`. Preview only engages when the
+previewed commit differs from the deployed one. After deploying, click **Refresh** on the app's
+*New version available* banner before testing schema changes; a plain reload keeps the old schema.
+
+To purge Preview records (with the user's explicit approval, see rules), run
+`ms project state clear --force --json --non-interactive` in the app folder. `isComplete: false` is
+normal because deletion finishes in the background; don't retry, and wait a minute or two before
+relaunching Preview or deploying.
 
 ## Rules / gotchas
 
 - **Feature gate first.** Never use this skill's state workflow before
   `ms feature status --name state --json` reports `feature.enabled: true`.
 - **Schema changes are CLI-only.** Never patch the schema JSON to add properties, constraints,
-  indexes, locale, or validation settings.
+  indexes, locale, or validation settings. The only exception is per-user ownership, as described
+  above.
 - **Unsupported schema shapes need a decision.** If the requested design needs nested objects,
   arrays, enums, `$ref`, composition keywords, `pattern`, or defaults and the CLI cannot represent
   it, stop and ask. Do not silently switch to manual schema editing.
@@ -313,11 +359,11 @@ ms project state generate-code --json
 
 Then:
 
+- confirm `ms.config.json` has `enabled: true` on its state (or `data`/`db`) section;
 - confirm the app uses the latest `@microsoft/managed-apps-vite-plugin`;
 - confirm `vite.config.ts` calls `managedApps({ devMode: 'localGateway' })` or preserves existing
   options while adding `devMode: 'localGateway'`;
 - run the narrowest relevant build/typecheck/lint for the app or package;
 - prefer generated services for schema-backed state behavior covered by codegen;
 - run local gateway dev with `ms app dev` and verify generated-service behavior locally;
-- optionally preview the committed build with `ms app play --mode preview --commit <sha>` before
-  deploying.
+- preview the committed build with `ms app play --mode preview --commit <sha>` before deploying.
