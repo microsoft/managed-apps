@@ -250,28 +250,31 @@ Treat that folder as generator-owned:
 
 ## App code
 
-Import from the generated barrel and use generated types/services/validators.
+Import from the generated barrel. Each collection gets a service class with static methods,
+read/write types, and a validator: `task` gives `TaskService`, `TaskRead`, `TaskWrite`, and
+`validateTask(item)`, which returns `ValidationError[]` for form errors (services validate on write).
 
 ```ts
-import {
-  createTaskService,
-  type TaskCreate,
-  type TaskRead,
-  validateTaskCreate,
-} from '../state/generated-typescript';
+import { TaskService, type TaskRead, type TaskWrite } from '../state/generated-typescript';
 
-const taskService = createTaskService();
-
-export async function createTask(input: TaskCreate): Promise<TaskRead> {
-  const validation = validateTaskCreate(input);
-
-  if (!validation.success) {
-    throw new Error('Task input is invalid.');
-  }
-
-  const result = await taskService.create(input);
+export async function createTask(input: TaskWrite): Promise<TaskRead> {
+  // With validation on, invalid input fails with error.kind === 'validation'.
+  const result = await TaskService.create(input);
   if (!result.success) {
     throw new Error(`Could not create the task: ${result.error.message}`);
+  }
+  return result.data;
+}
+
+export async function listUpcomingTasks(): Promise<TaskRead[]> {
+  const q = TaskService.query;
+  const result = await TaskService.getAll({
+    filter: q.ge('dueDate', new Date().toISOString()),
+    orderBy: q.orderBy('dueDate', 'asc'),
+    maxItems: 50,
+  });
+  if (!result.success) {
+    throw new Error(`Could not load tasks: ${result.error.message}`);
   }
   return result.data;
 }
@@ -279,8 +282,8 @@ export async function createTask(input: TaskCreate): Promise<TaskRead> {
 
 Direct requests to `/.ms/state/{collection}/items[/{itemId}]` are acceptable only with a deliberate
 reason to bypass the generated services. They follow the same contract: send `@odata.etag`
-verbatim as `If-Match`, follow `@odata.nextLink` to page (`$skip` is rejected), and quote string
-and date literals in `$filter`.
+verbatim as `If-Match`, follow `@odata.nextLink` to page (`$skip` is rejected), sort with
+`$orderby=<field> asc|desc`, and quote string and date literals in `$filter` (URL-encode both).
 
 ## Generated-service behavior
 
@@ -294,7 +297,10 @@ and date literals in `$filter`.
 - **Delete is idempotent:** deleting a missing item succeeds, so retries are safe.
 - **Server-owned fields:** `itemId`, `createdTime`, `modifiedTime`, and `@odata.etag` are read-only.
   Do not send them in write models.
-- **Queries:** use generated typed filters for indexed fields. Paging follows `@odata.nextLink`.
+- **Queries:** `getAll` follows every page (cap it with `maxItems`); `getPage` returns one page and
+  a `nextLink` (`top` sets the page size). Build `filter` and `orderBy` with the typed `query`
+  builder (`eq`, `ne`, `gt`, `lt`, `le`, `ge`, `and`, `or`, `orderBy(field, 'asc' | 'desc')`); both
+  accept only indexed fields. `rawFilter(expr)` is the explicit escape hatch for raw OData filters.
 - **Per-user data:** for `x-ms-ownership: "perUser"`, generated services expose scope-aware reads
   and writes. Do not send scope to non-per-user collections; the service rejects it with `400`.
 
@@ -311,7 +317,7 @@ const uploaded = await fetch('/.ms/state/attachments', {
   body: file,
 }).then((response) => response.json()); // { id, url, contentType, size }
 
-const saved = await noteService.update(note.itemId, { ...noteFields, photo: uploaded.url });
+const saved = await NoteService.update(note.itemId, { ...noteFields, photo: uploaded.url });
 ```
 
 Display it with `<img src={note.photo} />`.
