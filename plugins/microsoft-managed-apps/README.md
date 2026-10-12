@@ -85,7 +85,8 @@ node scripts/validate-plugin-compatibility.mjs
 node --test scripts/validate-plugin-compatibility.test.mjs
 ```
 
-The PR workflow runs these checks on Windows and Linux.
+The generic `PR pipeline` workflow in `.github/workflows/pr.yml` runs plugin compatibility as its first and only job.
+This job runs these checks on Windows and Linux. Add future PR checks as separate jobs in the same workflow.
 To block merges on failures, configure both `Plugin compatibility` matrix checks as required in the repository ruleset.
 Validation checks JSON objects, regular files, the Agent Plugins 1.0.0 manifest shape, metadata equivalence, and marketplace consistency.
 Only the canonical `$schema` field is excluded from the manifest comparison.

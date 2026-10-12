@@ -128,5 +128,7 @@ After modifying this plugin:
 
 The canonical manifest follows [Agent Plugins 1.0.0](https://agent-plugins.org/specification).
 That version requires root `plugin.json`, not the older `.plugin/plugin.json` layout.
-The PR workflow checks both manifests and marketplace entries on Windows and Linux without installing dependencies.
+The generic `PR pipeline` workflow in `.github/workflows/pr.yml` contains one job: plugin compatibility.
+This job checks both manifests and marketplace entries on Windows and Linux without installing dependencies.
+Add future PR checks as separate jobs in this workflow.
 Client installation, updates, shared-resource resolution, and hook behavior still need host-level checks before claiming support for a new client.
