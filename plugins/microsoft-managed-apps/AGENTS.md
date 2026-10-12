@@ -117,6 +117,16 @@ model: sonnet  # or opus for design-heavy work
 
 After modifying this plugin:
 
-1. Bump the `version` field in `.claude-plugin/plugin.json` and the matching plugin entry in the repo-root `.claude-plugin/marketplace.json`.
-2. Test in a fresh project: `/create-app` end-to-end, then a representative `/add-*`.
-3. Verify any new `allowed-tools` entries are minimal — request only what the skill needs.
+1. Update the canonical `plugin.json` at this plugin's root, including its version.
+2. Copy its metadata to `.claude-plugin/plugin.json`, excluding only `$schema`. Keep both files as regular JSON files, never symlinks.
+3. Update the matching version and description in the repo-root `.claude-plugin/marketplace.json`. Preserve its marketplace name, plugin name, and source path.
+4. Keep the repo-root `.agents/plugins/marketplace.json` entry pointed at this same plugin directory.
+5. Run `node scripts/validate-plugin-compatibility.mjs` from the repository root.
+6. Run `node --test scripts/validate-plugin-compatibility.test.mjs` from the repository root.
+7. Test in a fresh project: `/create-app` end-to-end, then a representative `/add-*`.
+8. Verify any new `allowed-tools` entries are minimal — request only what the skill needs.
+
+The canonical manifest follows [Agent Plugins 1.0.0](https://agent-plugins.org/specification).
+That version requires root `plugin.json`, not the older `.plugin/plugin.json` layout.
+The PR workflow checks both manifests and marketplace entries on Windows and Linux without installing dependencies.
+Client installation, updates, shared-resource resolution, and hook behavior still need host-level checks before claiming support for a new client.

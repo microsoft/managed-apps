@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "microsoft-managed-apps",
+  "version": "2.1.5",
+  "description": "[Preview] Create and manage Microsoft Managed Apps using the @microsoft/managed-apps-cli (ms) toolchain.",
+  "author": {
+    "name": "Microsoft",
+    "url": "https://github.com/microsoft/Managed-Apps"
+  },
+  "homepage": "https://www.npmjs.com/package/@microsoft/managed-apps-cli",
+  "repository": "https://github.com/microsoft/Managed-Apps",
+  "license": "MIT",
+  "keywords": [
+    "microsoft-managed-apps",
+    "managed-apps-cli",
+    "dataverse",
+    "react",
+    "vite"
+  ]
+}
