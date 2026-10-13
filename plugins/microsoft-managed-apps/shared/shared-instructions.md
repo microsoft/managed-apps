@@ -308,59 +308,60 @@ Apply these rules whenever an `ms` or `npm` command exits non-zero. Do NOT retry
 
 ---
 
-## Ready-to-Ship Gate (preview before deploy)
+## Ready-to-Ship Gate
 
-When the user signals they're done iterating in local dev and ready to ship via an **ad-hoc readiness phrase** — "looks good", "ship it", "I'm done", "let's deploy", "ready to deploy" — **do not** jump straight into `/deploy`. Instead, run a preview gate so the user can validate the cloud build in their environment before any deploy is triggered.
+When the user signals they're done iterating in local dev via an **ad-hoc readiness phrase** — "looks good", "ship it", "I'm done", "let's deploy", "ready to deploy" — ask what they want to do **before** staging, committing, or pushing:
 
-**Scope of this gate:** it fires only on conversational readiness phrases. If the user explicitly invokes the `/deploy` slash command, run `/deploy` directly; the slash command is the explicit opt-in and bypasses this gate.
+> "Choose one:
+> 1) Keep iterating in local dev (changes load live in the browser).
+> 2) Preview (commit + push, then run a cloud preview build in your Microsoft-hosted environment).
+> 3) Deploy (commit + push, then explicitly publish the successful build live).
+> 4) Other (stop here with no preview or deploy yet)."
 
-**Branch precondition:** `ms app play --mode preview` only builds from `main` today; feature branches are not yet supported by the preview pipeline. Verify the user is on `main` before doing anything else:
+Wait for an explicit choice:
 
-```bash
-git rev-parse --abbrev-ref HEAD          # must print "main"
-```
+- **Keep iterating**: return to local-dev edits without changing Git state.
+- **Other**: stop without changing Git state.
+- **Preview or deploy**: continue with the Git sync below.
 
-If the current branch is anything other than `main`, **stop**. Tell the user:
-> "The preview pipeline only builds from `main` right now. You're on `{branch}`. To preview, the changes need to land on `main` first (merge / rebase / fast-forward, depending on how you prefer to integrate). Want me to walk through that, or skip the preview and go straight to `/deploy` from this branch?"
+**Scope of this gate:** it fires only on conversational readiness phrases. If the user explicitly invokes `/play` or `/deploy`, run that skill directly; the slash command is the explicit choice and bypasses this prompt.
 
-Wait for their decision — do not silently switch branches or merge on their behalf.
-
-1. **Stage and review pending changes** (on `main`). Use a tracked-only add to avoid sweeping in scratch files, logs, or unrelated untracked content:
+1. **Stage and review pending changes.** Use a tracked-only add to avoid sweeping in scratch files, logs, or unrelated untracked content:
    ```bash
    git add -u                              # tracked changes only — no untracked sweeps
    git status --short                      # show the user exactly what will be committed
    ```
    If there are new project files the user wants included, add them by explicit path (`git add path/to/new-file.ts`), never with `git add -A` or `git add .`.
 
-   If `git status --short` reports nothing to commit, skip to Step 3.
-
-2. **Propose a commit message and wait for explicit approval before committing.** Draft a concise message describing this iteration's changes, then show it to the user in this exact form:
+2. **Commit only when needed.** If there are staged changes, propose a concise commit message and wait for explicit approval:
    > "I'd like to commit the staged changes above with this message:
    > > `{proposed message}`
    >
    > Reply 'yes' to commit, or give me a different message."
 
-   Do not run `git commit` until the user explicitly approves (or supplies their own message). Once approved:
+   Do not run `git commit` until the user explicitly approves or supplies a message. If there is nothing to commit, continue with the current `HEAD`.
+
+3. **Push the selected commit.**
    ```bash
-   git commit -m "<approved message>"
-   git push origin main
+   git push -u origin HEAD
+   READY_SHA="$(git rev-parse HEAD)"
+   READY_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
    ```
-   If push fails (e.g., needs upstream), retry with the upstream set explicitly: `git push -u origin main`. Surface auth errors verbatim and stop on failure.
+   Surface authentication or push errors verbatim and stop on failure.
 
-3. **Run the cloud preview.**
-   ```bash
-   $BIN app play --mode preview
-   ```
-   This builds the app from `main` on demand and returns a preview URL hosted in the user's environment — no deploy required.
+4. **Complete the selected action.**
 
-   **If the command fails** (cloud build error, expired auth, region issue, missing env), surface the error verbatim, stop, and **do not proceed to Step 4**. A failed preview means we don't yet have proof the cloud build is healthy, so asking about `/deploy` would be premature. Propose the targeted fix (re-auth, retry) and wait for the user's next signal.
+   - **Preview:** preview `main` normally; for any other branch, pin the preview to the pushed commit:
+     ```bash
+     if [ "$READY_BRANCH" = "main" ]; then
+       $BIN app play --mode preview
+     else
+       $BIN app play --mode preview --commit "$READY_SHA"
+     fi
+     ```
+     If preview fails, surface the error verbatim, propose the targeted fix, and stop. On success, hand the URL to the user **as a markdown link**, then stop. Do not ask whether to deploy; deployment requires a separate user request.
 
-   On success, hand the URL to the user **as a markdown link**.
-
-4. **Ask whether to deploy** (only after a successful preview URL is in their hands):
-   > "Preview is live at the URL above — open it and confirm it looks right in the cloud. When you're ready, I can run `/deploy` to publish this to the live URL. Want me to deploy now?"
-
-   Wait for explicit confirmation. If the user wants more changes first, go back to local-dev iteration; the preview gate will fire again the next time they signal readiness. If they confirm, hand off to `/deploy`.
+   - **Deploy:** hand off to `/deploy`. Its confirmation remains mandatory before `ms app deploy` updates the live app.
 
 This gate lives between local-dev iteration and `/deploy`. Skills that hand off a local URL (`/create-app`, `/dev`) reference this section so users follow the same iterate → preview → deploy loop everywhere.
 
