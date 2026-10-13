@@ -1,0 +1,26 @@
+name: PR pipeline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-compatibility:
+    name: Plugin compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Validate manifests and marketplace entries
+        run: node scripts/validate-plugin-compatibility.mjs
+      - name: Test compatibility validation
+        run: node --test scripts/validate-plugin-compatibility.test.mjs
