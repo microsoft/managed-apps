@@ -7,8 +7,7 @@ be verified, stop without enabling it.
 
 ## Read the docs first
 
-Rayfin's data rules belong to the installed packages; this reference covers
-managed app file and client wiring. Read decorators, permissions, query APIs and
+Rayfin's data rules belong to the installed packages. Read decorators, permissions, query APIs and
 platform constraints from disk. Paths are relative to the app root.
 Complete the entry skill's `npm install` step first.
 

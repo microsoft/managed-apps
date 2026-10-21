@@ -8,7 +8,6 @@ be verified, stop without enabling it.
 ## Read the docs first
 
 Use the entities and client from [data modeling](./rayfin-data-modeling.md).
-Keep the app's existing sign-in flow and authentication boundary intact.
 The client API belongs to the installed packages; this reference covers the UI.
 Paths are relative to the app root; complete the entry skill's `npm install` step
 if dependencies are not installed.

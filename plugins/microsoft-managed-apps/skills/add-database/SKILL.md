@@ -1,9 +1,7 @@
 ---
 name: add-database
-description: Add an app backend database with `ms app add rayfin`. Use only when the user explicitly requests a database, /add-database, or Rayfin, and the rayfin feature (MS_CLI_FEATURE_RAYFIN) is enabled.
+description: Add an app backend database with `ms app add backend --provider rayfin`. Use only when the user explicitly requests a database, /add-database, or Rayfin, and the rayfin feature (MS_CLI_FEATURE_RAYFIN) is enabled.
 user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
 ---
 
 **Shared instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)**
@@ -16,11 +14,10 @@ enabling it automatically.
 
 ## 1. Set up the database
 
-From the app root, check for `ms.config.json` and `package.json`.
 If `rayfin/rayfin.yml` exists, use the existing configuration. Otherwise, run:
 
 ```bash
-ms app add rayfin --json
+ms app add backend --provider rayfin --json
 ```
 
 This creates the backend configuration, TypeScript configuration and `rayfin/data/`,
@@ -48,12 +45,3 @@ in order:
 
 - [Data modeling](./references/rayfin-data-modeling.md): entities, permissions and runtime client.
 - [CRUD UI](./references/rayfin-crud-ui.md): lists, forms, mutations and persistence checks.
-
-When called from `/create-app`, complete setup and modeling, then return the
-entity/client paths and any blocked prerequisites. The caller follows the CRUD
-UI reference during implementation.
-
-After implementation, run the app's build command (`npm run build` for npm apps).
-When called from `/create-app`, leave that build to its post-implementation step.
-Use the shared [app build and deploy workflow](../../shared/development-standards.md#build--deploy)
-and its approval gates; do not add a separate database lifecycle.
