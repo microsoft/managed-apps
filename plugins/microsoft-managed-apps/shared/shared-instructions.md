@@ -160,9 +160,12 @@ Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail 
 
 ## App backend database
 
+Select `/add-database` only for an explicit app backend database request
+(including `/add-database` or Rayfin).
+
 ### Rayfin feature gate
 
-All Rayfin guidance requires the experimental `rayfin` feature
+All Rayfin guidance requires the `rayfin` feature
 (`MS_CLI_FEATURE_RAYFIN=true` enables it in the CLI process environment).
 Before recommending or using `/add-database` or its references, editing
 database code, installing dependencies, or checking database behavior, read the
@@ -175,7 +178,7 @@ ms feature status --name rayfin --json
 Proceed only when the command exits successfully, `"success": true` and
 `feature.enabled` is `true`. A disabled, missing or unknown feature, failed
 command or malformed response blocks Rayfin work. Report the result; do not
-silently substitute another database for an explicit Rayfin request.
+silently substitute another database for an explicit app backend database request.
 
 Do not set the environment variable or enable the feature automatically. An
 explicit user opt-in must precede enablement, followed by another status check.

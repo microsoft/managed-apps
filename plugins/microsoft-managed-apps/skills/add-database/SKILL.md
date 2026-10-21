@@ -1,6 +1,6 @@
 ---
 name: add-database
-description: Add an app backend database with `ms app add rayfin`. Use when the user requests Rayfin and the rayfin feature (MS_CLI_FEATURE_RAYFIN) is enabled.
+description: Add an app backend database with `ms app add rayfin`. Use only when the user explicitly requests a database, /add-database, or Rayfin, and the rayfin feature (MS_CLI_FEATURE_RAYFIN) is enabled.
 user-invocable: true
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
 model: sonnet

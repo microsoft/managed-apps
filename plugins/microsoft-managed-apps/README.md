@@ -12,12 +12,12 @@ Managed apps run locally against the App Player with hot reload (`ms app dev`) a
 | ---------------- | -------- |
 | Scaffold         | `/create-app` |
 | Lifecycle        | `/dev`, `/deploy`, `/play`, `/share`, `/share-link`, `/delete-app`, `/list-apps` |
-| App backend database | `/add-database` (experimental; requires the Rayfin feature gate) |
+| App backend database | `/add-database` (requires the Rayfin feature gate) |
 | Data sources     | `/add-data-source`, `/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`, `/list-connectors` |
 
 ### App backend database
 
-Use `/add-database` to set up an app backend database with Rayfin.
+Use `/add-database` only for an explicitly requested app backend database with Rayfin.
 Its two reference documents point to the installed SDK docs for API guidance:
 
 | Reference | Code and checks |

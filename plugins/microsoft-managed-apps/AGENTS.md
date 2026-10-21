@@ -77,7 +77,10 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 
 ### App backend database
 
-**Setup:** `/add-database` scaffolds the app backend database with `ms app add rayfin` (experimental). Its local references use the installed SDK docs for API guidance.
+**Setup:** `/add-database` scaffolds the app backend database with `ms app add rayfin`. Its local references use the installed SDK docs for API guidance.
+
+Select it only for an explicit app backend database request (including
+`/add-database` or Rayfin).
 
 All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate)
 for `MS_CLI_FEATURE_RAYFIN`. Apply it to setup, coding, checks and architecture
