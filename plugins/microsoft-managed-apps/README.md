@@ -12,7 +12,25 @@ Managed apps run locally against the App Player with hot reload (`ms app dev`) a
 | ---------------- | -------- |
 | Scaffold         | `/create-app` |
 | Lifecycle        | `/dev`, `/deploy`, `/play`, `/share`, `/share-link`, `/delete-app`, `/list-apps` |
+| App backend database | `/add-database` (experimental; requires the Rayfin feature gate) |
 | Data sources     | `/add-data-source`, `/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`, `/list-connectors` |
+
+### App backend database
+
+Use `/add-database` to set up an app backend database with Rayfin.
+Its two reference documents point to the installed SDK docs for API guidance:
+
+| Reference | Code and checks |
+| --- | --- |
+| [Data modeling](skills/add-database/references/rayfin-data-modeling.md) | Entity/client integration, permissions and authentication checks. |
+| [CRUD UI](skills/add-database/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
+
+The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate):
+the status command must exit successfully, return `"success": true`, and report
+`feature.enabled` as `true`. Enablement through `MS_CLI_FEATURE_RAYFIN=true`
+requires explicit user opt-in; never enable it automatically.
+The database follows the same [build and deployment workflow](shared/development-standards.md#build--deploy)
+as the rest of the app, not a separate Rayfin workflow.
 
 ## Prerequisites
 

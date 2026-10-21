@@ -9,6 +9,7 @@ The managed apps plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to sca
 - Creating a new app (`/create-app`) — global install of the CLI, scaffold, local dev loop.
 - Iterating locally (`/dev`) — `ms app dev`, hot reload against the App Player.
 - Lifecycle ops (`/deploy`, `/share`, `/delete-app`, `/list-apps`).
+- Defining an app backend database (`/add-database`) — entities and a typed runtime client.
 - Binding data sources (`/add-dataverse`, `/add-sharepoint`, etc.) — generates typed TypeScript services under `src/`.
 
 ## Memory Bank System
@@ -74,12 +75,26 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 | `/add-data-source` | Generic fallback for any other connector.                                 |
 | `/list-connectors` | Enumerate connectors / bound data sources for discovery.                  |
 
+### App backend database
+
+**Setup:** `/add-database` scaffolds the app backend database with `ms app add rayfin` (experimental). Its local references use the installed SDK docs for API guidance.
+
+All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate)
+for `MS_CLI_FEATURE_RAYFIN`. Apply it to setup, coding, checks and architecture
+recommendations; never enable the feature automatically.
+
+| Reference | Purpose |
+| --- | --- |
+| [Data modeling](skills/add-database/references/rayfin-data-modeling.md) | Write entities and the typed runtime client; check authentication and permissions. |
+| [CRUD UI](skills/add-database/references/rayfin-crud-ui.md) | Write database-backed lists, forms and CRUD operations; check UI behavior and persistence. |
+
 ### Workflow
 
 ```
 /create-app
    └── /dev (default loop)
-   └── /add-data-source (or specific /add-*)
+   └── /add-database (when explicitly requested and the Rayfin feature is enabled)
+   └── /add-data-source (or a specific connector skill)
    └── /deploy (explicit, requires confirmation)
    └── /share, /delete-app (explicit, require confirmation)
 ```

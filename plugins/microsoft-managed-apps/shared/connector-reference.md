@@ -1,11 +1,11 @@
 # Connector Reference
 
-Applies to all `/add-*` skills.
+Applies to connector-binding skills.
 
 ## Connections — created inline by the CLI
 
 There is **no separate "create connection" command**. Connections are created and resolved
-inline by `ms app add data-source` (the single add command — there is no `ms app add action` /
+inline by `ms app add data-source` (the connector-binding command — there is no `ms app add action` /
 `ms app add table` / `ms app add procedure`):
 
 ```bash
@@ -107,8 +107,8 @@ When a connector skill is invoked from another skill (e.g., `/create-app` plans 
 
 ## Build After, Don't Deploy
 
-Every `/add-*` skill runs `npm run build` after the `ms app add ...` call to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
+Every connector-binding skill runs `npm run build` after `ms app add data-source` to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
 
-The one thing every `/add-*` skill must do *before* that build is the shared-connection check
+The one thing every connector-binding skill must do *before* that build is the shared-connection check
 above — a missing `allowedActions` doesn't surface as a build error, it surfaces much later as
 a deploy failure.

@@ -1,6 +1,7 @@
 # Allowed Actions (shared connection runtime policies)
 
-Applies to every `/add-*` skill and to `/deploy`.
+Applies when adding connectors and before packing or deploying an app with shared
+connection references, including apps that also use Rayfin.
 
 When a connection reference in `ms.config.json` is **shared**, the app must declare which
 connector actions it is allowed to invoke. This is not optional: `ms app pack` and

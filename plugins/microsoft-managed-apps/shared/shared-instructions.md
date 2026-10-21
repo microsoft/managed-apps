@@ -17,6 +17,7 @@ All skills reference this single file. When new shared instructions are added, u
 - **Confirm before ACL changes**: Before running `ms app share` or `ms app unshare`, ask the user to confirm the email list. These mutate permissions on the cloud app.
 - **Confirm before `ms app delete`**: Always confirm. Never auto-`--force`, even when reading the slug from `ms.config.json`.
 - **Declare `allowedActions` for shared connections**: Before `ms app pack` or `ms app deploy`, every **shared** connection reference in `ms.config.json` (one with a non-empty `sharedConnectionId`) must declare `allowedActions`. The CLI validates this and fails the deploy otherwise. Infer the least-privilege set from what the app actually calls, propose it, and confirm with the user — see [allowed-actions.md](./allowed-actions.md).
+- **Honor the Rayfin feature gate**: Before Rayfin-specific work or packing/deploying an app with `rayfin/rayfin.yml`, pass the [Rayfin feature gate](#rayfin-feature-gate). Do not silently omit the database when the feature is disabled.
 
 ### MUST NOT
 
@@ -81,7 +82,7 @@ Standards for theme, build workflow, and TypeScript strict mode.
 
 **📋 [connector-reference.md](./connector-reference.md)**
 
-Applies to every `/add-*` skill. Covers how the CLI creates/picks connections inline, the Grep-first pattern for inspecting large generated service files, and sub-skill invocation conventions.
+Applies to connector-binding skills, not app backend database setup. Covers how the CLI creates/picks connections inline, the Grep-first pattern for inspecting large generated service files, and sub-skill invocation conventions.
 
 ---
 
@@ -96,7 +97,7 @@ Use this guide to intelligently select the right connector(s) for any app scenar
 - **Common App Patterns** — pre-built recommendations for typical use cases
 - **Examples** — step-by-step decision process for real scenarios
 
-**All `/add-*` skills and the Architect agent must reference this guide before recommending connectors.**
+**Connector skills and the Architect agent must reference this guide before recommending connectors.**
 
 ---
 
@@ -104,7 +105,8 @@ Use this guide to intelligently select the right connector(s) for any app scenar
 
 **📋 [allowed-actions.md](./allowed-actions.md)**
 
-Applies to every `/add-*` skill and to `/deploy`. A shared connection can back several apps and
+Applies when adding connectors and before packing or deploying an app with shared
+connection references, including apps that also use Rayfin. A shared connection can back several apps and
 carries its creator's permissions, so each app declares the connector operations it may invoke
 and the Connectors infrastructure enforces that limit **per app**. When a connection reference
 in `ms.config.json`
@@ -137,7 +139,7 @@ By default, `ms app create` resolves and uses an environment automatically — p
 
 ## Connector-First Rule
 
-**Always use Power Platform connectors. Never make direct API calls (fetch, axios, Graph API, Azure REST, etc.).**
+**For external integrations, use Power Platform connectors. Never make direct API calls (fetch, axios, Graph API, Azure REST, etc.).**
 
 Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail at runtime because the sandbox does not allow arbitrary outbound network requests — only connector-proxied calls work.
 
@@ -153,6 +155,43 @@ Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail 
 - Tell the user clearly: _"This functionality is not supported by any available Power Platform connector."_
 - Do NOT implement a direct API call as a workaround — it will not work in production.
 - Suggest alternatives (a different connector, Dataverse, or a custom connector).
+
+---
+
+## App backend database
+
+### Rayfin feature gate
+
+All Rayfin guidance requires the experimental `rayfin` feature
+(`MS_CLI_FEATURE_RAYFIN=true` enables it in the CLI process environment).
+Before recommending or using `/add-database` or its references, editing
+database code, installing dependencies, or checking database behavior, read the
+CLI's effective feature status:
+
+```bash
+ms feature status --name rayfin --json
+```
+
+Proceed only when the command exits successfully, `"success": true` and
+`feature.enabled` is `true`. A disabled, missing or unknown feature, failed
+command or malformed response blocks Rayfin work. Report the result; do not
+silently substitute another database for an explicit Rayfin request.
+
+Do not set the environment variable or enable the feature automatically. An
+explicit user opt-in must precede enablement, followed by another status check.
+An existing `rayfin/` folder, installed SDK or request to use Rayfin does not
+bypass this gate. Leave unrelated state/connector workflows unchanged.
+
+Reuse a successful check only within the same workflow and unchanged CLI
+execution environment. Recheck after environment/CLI changes and before app
+packaging or deployment when the app uses Rayfin;
+local enablement does not enable a hosted build.
+This is a CLI feature gate, not a browser variable or runtime authorization check.
+
+With the gate passed, Rayfin provides the app backend database, not an external
+integration. Follow `/add-database` and its local modeling/CRUD references,
+then use the existing managed apps build and deploy workflow. Verify host support
+and runtime configuration; SDK code alone does not establish App Player connectivity.
 
 ---
 

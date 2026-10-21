@@ -19,7 +19,7 @@ This skill scaffolds a new Microsoft App end-to-end using `@microsoft/managed-ap
 
 ## Workflow
 
-1. Memory Bank → 2. Prerequisites → 3. Infer App Spec → 4. Plan → 5. Auth → 6. Environment → 7. Scaffold → 8. Add Data Sources → 9. Implement App → 10. Local Dev → 11. Summary → 12. Memory Bank Update
+1. Memory Bank → 2. Prerequisites → 3. Infer App Spec → 4. Plan → 5. Auth → 6. Environment → 7. Scaffold → 8. Set Up App Backend Database and Data Sources → 9. Implement App → 10. Local Dev → 11. Summary → 12. Memory Bank Update
 
 **Critical principle:** when this skill ends and the user opens the local URL, they must see a **functional app** — connectors wired when required, screens implemented from the approved plan — not a bare template. Adding required data sources and implementing the UI happen **inside this skill**, before `ms app dev` is started. Do not defer them to "next steps."
 
@@ -80,7 +80,7 @@ Wait for their answer. Do NOT present a multiple-choice list of app types. Once 
 
 1. **Generate the display name.** If the user already gave a name, use it verbatim. Otherwise derive a short title from the user's prompt (usually 2-5 title-cased words) and use it with `--display-name`. Either way, do not ask the user to name or confirm it. Derive the folder slug from this title.
 2. **Plan the complete requested experience.** Include every capability the user clearly describes. Infer the screens, navigation, interactions, and visual styling needed to make those capabilities usable; use a single responsive screen only when it can support the full request cleanly. Do not ask separate questions about layout, theme, or architecture. Present these decisions in the plan for approval.
-3. **Infer data needs from user intent.** Add built-in app state or the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a data source. Use `/state` for the app's own typed persisted records when `ms feature status --name state` reports enabled. Use connectors for external systems, tenant data, shared business data, or when the state feature is disabled. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
+3. **Infer data needs from user intent.** Add built-in app state or the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a data source. Use `/state` for the app's own typed persisted records when `ms feature status --name state` reports enabled. Use connectors for external systems, tenant data, shared business data, or when the state feature is disabled. If the user explicitly requests Rayfin, first pass the [Rayfin feature gate](../../shared/shared-instructions.md#rayfin-feature-gate) for `MS_CLI_FEATURE_RAYFIN`; only then plan `/add-database`. If disabled or unverified, report the blocked request without auto-enabling it or silently substituting state or a connector. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
 4. **Discover before asking.** When a connector is needed, infer its api-id and mode from the connector decision guide, and let the CLI discover or create connections where supported. When built-in app state is appropriate, invoke `/state` for the detailed schema/codegen workflow rather than duplicating it here. Ask one focused question only if a required tenant-specific identifier cannot be discovered (for example, which of several matching SharePoint lists to use) or if the state-vs-connector choice materially changes the app.
 5. **Consolidate assumptions into the plan.** Include the generated name, requested capabilities, inferred UI, and any state schema or connector choice in one complete plan. Do not ask separate questions to confirm each assumption.
 
@@ -89,7 +89,7 @@ Wait for their answer. Do NOT present a multiple-choice list of app types. Once 
 1. Enter plan mode with `EnterPlanMode`.
 2. Design the **complete** implementation approach the user will approve in one shot:
    - Display name (let the CLI resolve the environment automatically; only pass `--environment-id` if the user explicitly provided one).
-   - **Each state collection or data source to be added** (which `/state` or `/add-*` skill, schema collections/properties, api-id, table/list/connection identifiers). These are invoked by Step 8 of this skill — list them as concrete steps, not as "next steps."
+   - **App backend database and data sources** (the `/state` or `/add-*` skill, entities or state collections, and connector identifiers where applicable). These are set up in Step 8 — list them as concrete steps, not as "next steps."
    - **App architecture**: components, pages, routing, state management — enough detail that Step 9 can generate the code without re-asking.
    - Build/verify steps and the final `ms app dev` hand-off.
 3. Present the complete inferred plan. Include `allowedPrompts` from [prerequisites-reference.md](./references/prerequisites-reference.md) when the host requires them.
@@ -168,9 +168,18 @@ git fetch origin # browser opens; approve.
 
 Detect this by matching `Could not commit and push the initial scaffold` together with `Authentication failed for 'https://...d.environment.api...'`, or `push.success: false` in `--json` output. Surface `git fetch origin` and continue with the existing app after it succeeds.
 
-### Step 8: Add State and Data Sources
+### Step 8: Set Up App Backend Database and Data Sources
 
-For every built-in state collection or connector identified in Step 3 / Step 4, invoke the matching skill **now**, in this session, before any UI code is generated:
+Set up the approved app backend database and data sources **now**, before generating UI code.
+
+**App backend database:** only after the Rayfin feature gate passes and Rayfin is
+explicitly requested, invoke `/add-database` for scaffolding, dependencies
+and its [data modeling reference](../add-database/references/rayfin-data-modeling.md).
+Pass the gate result and CLI execution context; capture the returned entity/client
+paths and any missing runtime settings. Defer UI work to Step 9 and checks to
+Step 10; do not deploy during setup.
+
+**State and external data sources:** invoke the matching skills from the plan:
 
 - `/state` when the app needs its own typed persisted records and `ms feature status --name state` reports enabled. If `/state` reports that the feature is disabled, update the plan to use an appropriate connector alternative instead.
 - A specific `/add-*` skill when one exists (`/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`).
@@ -180,21 +189,21 @@ For Work IQ knowledge/search scenarios, prefer `/add-workiq` (maps to `shared_a3
 
 Run them sequentially. After each one:
 
-- Confirm the typed services were generated: `/state` writes `generated-typescript/` beside the configured state schema; add-* skills generate under `generated/` at the project root.
+- Confirm the code paths: `/state` writes `generated-typescript/` beside the state schema; connectors generate under `generated/`. Rayfin uses the authored entities and client from its modeling step.
 - **For implementation guidance**, refer to the specialized skill's documentation:
   - `/state` → Prefer generated state services, validators, and query helpers when codegen covers the scenario
   - `/add-office365` → See "Office 365 Connector: Method Selection Guide" for correct import paths, calendar discovery, and API patterns
   - `/add-office365-users` → See "Office 365 Users: Method Selection Guide" for profile, reporting relationship, and CSP-safe profile photo patterns
   - `/add-workiq` → See "Work IQ Integration: MCP Session Pattern" for session management and response parsing
-  - Other `/add-*` skills have similar guidance
-- Capture the generated service path, and the connection ID when applicable, so Step 9 can import them.
-- **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+  - Other connector skills have similar guidance
+- Capture the service/client path and connection ID where applicable so Step 9 can import them.
+- **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending*. After implementation, resolve it before any pack or deploy. This does not block `ms app dev`; carry any pending policy into Step 11's summary. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
 
 **Forward all captured context to each sub-skill so its own prompts are suppressed.** The `/state` skill needs the approved collections/properties and the CLI freshness gate outcome. The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, CLI freshness, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: state collections/properties, api-id, connection ID or name, table/list/site identifiers, environment URL, project root, and the CLI freshness gate outcome plus known versions. A sub-skill receiving the CLI freshness outcome must not check or prompt again. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
 
 The intent of this step is no per-connector approval prompts: the approved plan from Step 4 covers them. If a sub-skill fails (auth, missing connection, wrong api-id), surface the error verbatim and stop; do not silently proceed with a half-wired app.
 
-If Step 3 / Step 4 identified zero state collections or data sources, skip this step. Otherwise, this step must complete before Step 9 starts.
+Skip this step only if the approved plan has no app backend database, state collections or external data sources. Otherwise, this step must complete before Step 9 starts.
 
 ### Step 9: Implement the App
 
@@ -202,6 +211,7 @@ Generate the code that delivers the experience described in the approved plan:
 
 - Components, pages, routing, state management.
 - Wire each component to the typed services produced in Step 8. For connectors, avoid raw `fetch` / `axios` / Graph calls and use generated connector services. For `/state`, prefer generated state services when codegen covers the scenario while allowing deliberate direct state requests when they are the better fit.
+- For Rayfin, only with the feature gate still satisfied, follow the database skill's [CRUD UI reference](../add-database/references/rayfin-crud-ui.md) using the client from Step 8. Keep configuration, sign-in and data errors distinct; do not replace an unavailable backend with mock rows.
 - Apply the inferred theme and UI decisions documented in the approved plan.
 - Replace template placeholder content; the user must see *their* app at the local URL, not "Hello World."
 
@@ -217,6 +227,13 @@ $BIN app dev           # starts the dev server (default port 8080) + config serv
 
 If `npm run build` fails, fix the errors before running `ms app dev`. Don't hand the user a URL that points at a broken build.
 
+For Rayfin, keep its feature gate satisfied during runtime checks. In the App
+Player, follow the database skill's
+[authentication/permission checks](../add-database/references/rayfin-data-modeling.md#check-authentication-and-permissions)
+and [UI/persistence checks](../add-database/references/rayfin-crud-ui.md#checklist).
+`ms app dev` does not start the database; report runtime checks as blocked if no
+approved, configured backend is available.
+
 `ms app dev` runs two servers and prints an App Player URL like:
 
 ```
@@ -225,7 +242,7 @@ Ready. You can play your app locally at: https://play.<cloud-domain>/apps/dev?ms
 
 The domain varies by cloud/region (e.g. `play.preview.managedapps.cloud.microsoft.com`, `play.managedapps.cloud.microsoft.com`, or a sovereign-cloud equivalent). **Always use the exact URL the CLI prints** — do not hardcode or rewrite the host.
 
-Hand that URL to the user **as a markdown link** (`[Open app in browser](<url>)`) **and also print the raw URL on its own line** — markdown links can render as plain label text in some environments (e.g. tables), hiding the actual URL. **Then open the browser automatically** using `Start-Process` (Windows) or `open` (macOS) / `xdg-open` (Linux). **Nothing has been deployed to the cloud at this point** — the app exists in the service catalog but its runtime is local, with the connectors and UI you just built wired up.
+Hand that URL to the user **as a markdown link** (`[Open app in browser](<url>)`) **and also print the raw URL on its own line** — markdown links can render as plain label text in some environments (e.g. tables), hiding the actual URL. **Then open the browser automatically** using `Start-Process` (Windows) or `open` (macOS) / `xdg-open` (Linux). **The app has not been published at this point** — the frontend runs locally; connectors and any existing app backend database remain remote services.
 
 The dev server runs in the foreground. Either:
 - Keep it running and tell the user how to stop it (Ctrl+C) and restart (`ms app dev`).
@@ -245,7 +262,7 @@ Provide:
 - **Next steps** (in this exact framing):
   1. Tell me what to change — I'll edit the code and you'll see it update live in the browser.
   2. When you're happy with how it looks and behaves, say so. I'll commit + push your changes, run `ms app play --mode preview` to give you a cloud preview URL hosted in your environment, and *then* ask if you want me to `/deploy` to the live URL.
-- **Important**: explicitly note that **nothing has been deployed to the cloud yet** — current state is local dev only.
+- **Important**: the app has not been published; the frontend is running locally. If using an existing app backend database, identify it and report any blocked runtime checks.
 
 When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, `ms app play --mode preview`, hand off the preview URL, then ask about `/deploy`. Do not skip the preview gate.
 
