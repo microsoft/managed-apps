@@ -1,12 +1,10 @@
 ---
 name: add-dataverse
 description: Adds Dataverse by delegating to `/add-data-source` with `api-id=dataverse` and table mode. Use when binding Dataverse tables.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: opus
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Dataverse (Wrapper)
 

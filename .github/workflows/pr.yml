@@ -1,0 +1,41 @@
+name: PR pipeline
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-compatibility:
+    name: Plugin compatibility (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install the pinned Agent Skills reference validator
+        run: python -m pip install -r scripts/requirements-plugin-validation.txt
+      - name: Validate manifests and marketplace entries
+        run: node scripts/validate-plugin-compatibility.mjs
+      - name: Test compatibility validation
+        run: node --test scripts/validate-plugin-compatibility.test.mjs
+      - name: Validate every packaged skill
+        run: python scripts/validate_plugin_skills.py
+      - name: Test skill validation
+        run: python -m unittest discover -s scripts -p "*_test.py"
+      - name: Test attribution hooks
+        run: node --test scripts/plugin-hooks.test.mjs

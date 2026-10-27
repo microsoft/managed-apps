@@ -1,16 +1,14 @@
 ---
 name: add-data-source
 description: Canonical add flow for Microsoft Managed Apps. Use when adding any data source through `ms app add data-source` (with `--as table` or `--as action`), or when the user wants help discovering which connector / api-id to use.
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
-**Reference:** [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
+**Reference:** [connector-reference.md](../../shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
 
-**Reference:** [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
+**Reference:** [allowed-actions.md](../../shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
 
 # Add Data Source (Canonical)
 
@@ -145,7 +143,7 @@ $BIN app add data-source --connector <api-id> --as table --dataset "<dataset>" -
 The CLI resolves a connection inline (interactive picker, or `--connection-id <id>` / `-c <id>`
 for a specific one). In non-interactive mode, if `--connection-id` is omitted the CLI prints the
 available connections and then errors. Dataverse (`--connector dataverse --as table`) needs no
-`--connection-id`. See [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md).
+`--connection-id`. See [connector-reference.md](../../shared/connector-reference.md).
 
 > **SQL stored procedures** have no `ms app add procedure` command and `--sql-stored-procedure` is not
 > accepted by `ms app add data-source`; binding a specific stored procedure is not currently supported.
@@ -214,7 +212,7 @@ can reach a failing deploy — not silently forgotten.
 
 **4d. Write the confirmed values into `ms.config.json`** (skip when deferring).
 
-Full rules, worked examples, and failure recovery: [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+Full rules, worked examples, and failure recovery: [allowed-actions.md](../../shared/allowed-actions.md).
 
 ### Step 5: Build
 
