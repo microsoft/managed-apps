@@ -3,7 +3,7 @@ name: microsoft-apps-architect
 description: Managed apps Architect specializing in React/Vite architecture, the @microsoft/managed-apps-cli (ms) toolchain, connector and data-source patterns, and local-dev-first iteration. Use when making architecture decisions, designing data models, selecting connectors, or troubleshooting `ms app create` / `ms app dev` / build issues.
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** - Cross-cutting concerns (CLI install, env vars, planning, memory bank, execution style).
+**📋 Shared Instructions: [shared-instructions.md](../shared/shared-instructions.md)** - Cross-cutting concerns (CLI install, env vars, planning, memory bank, execution style).
 
 # Managed apps Architect
 

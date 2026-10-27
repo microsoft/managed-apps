@@ -1,12 +1,10 @@
 ---
 name: share-link
 description: Manages tenant-wide share links for a Microsoft App via `ms app share link create`, `ms app share link list`, and `ms app share link revoke`. Use when you want to distribute app access via a URL instead of named principals.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Glob Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Share Link
 
@@ -30,7 +28,7 @@ Three sub-commands:
 
 ### Step 1: Check Memory Bank
 
-Read `memory-bank.md` per [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) for the app's environment/app identifiers, if recorded.
+Read `memory-bank.md` per [shared-instructions.md](../../shared/shared-instructions.md) for the app's environment/app identifiers, if recorded.
 
 ### Step 2: Verify Project + Env
 

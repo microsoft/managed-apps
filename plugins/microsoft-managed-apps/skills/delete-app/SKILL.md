@@ -1,12 +1,10 @@
 ---
 name: delete-app
 description: Deletes a Microsoft App via `ms app delete`. Use when the user asks to delete an app; always require explicit confirmation.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Glob Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns. **Two confirmations required; never auto-`--force`.**
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns. **Two confirmations required; never auto-`--force`.**
 
 # Delete App
 

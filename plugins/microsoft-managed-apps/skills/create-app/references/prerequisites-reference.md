@@ -18,7 +18,7 @@
 
 The CLI is published on the public npm registry: [`@microsoft/managed-apps-cli`](https://www.npmjs.com/package/@microsoft/managed-apps-cli).
 
-**Shell note:** the snippets below are shown in bash. If you're on PowerShell, use the equivalents called out in [shared-instructions.md](../../shared/shared-instructions.md#shell-compatibility) instead of copying the bash syntax literally.
+**Shell note:** the snippets below are shown in bash. If you're on PowerShell, use the equivalents called out in [shared-instructions.md](../../../shared/shared-instructions.md#shell-compatibility) instead of copying the bash syntax literally.
 
 ### Global install (pinned to `@latest`)
 

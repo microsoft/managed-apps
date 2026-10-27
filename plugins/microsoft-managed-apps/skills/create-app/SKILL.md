@@ -1,12 +1,10 @@
 ---
 name: create-app
 description: Creates managed apps using React and Vite. Use when scaffolding a new app with `ms app create` and ending on local dev with `ms app dev`.
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, EnterPlanMode, ExitPlanMode, Skill
-model: opus
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion EnterPlanMode ExitPlanMode Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 **References:**
 
@@ -27,13 +25,13 @@ This skill scaffolds a new Microsoft App end-to-end using `@microsoft/managed-ap
 
 ### Step 1: Check Memory Bank
 
-Check for `memory-bank.md` per [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md). If found, infer whether to resume or create a new app from the request: resume when it refers to the existing app or incomplete work; create a new sibling project when it clearly describes a different app. State the choice and continue. Ask only when the request genuinely fits both paths and choosing incorrectly could overwrite or modify existing work.
+Check for `memory-bank.md` per [shared-instructions.md](../../shared/shared-instructions.md). If found, infer whether to resume or create a new app from the request: resume when it refers to the existing app or incomplete work; create a new sibling project when it clearly describes a different app. State the choice and continue. Ask only when the request genuinely fits both paths and choosing incorrectly could overwrite or modify existing work.
 
 ### Step 2: Validate Prerequisites
 
 Run prerequisite checks **first** — no point gathering requirements if the environment isn't ready. Full details in [prerequisites-reference.md](./references/prerequisites-reference.md).
 
-The commands below are shown in bash syntax. If you are running PowerShell on Windows, use the equivalents described in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md#shell-compatibility) and the PowerShell example in [prerequisites-reference.md](./references/prerequisites-reference.md) instead of copying the bash snippets literally.
+The commands below are shown in bash syntax. If you are running PowerShell on Windows, use the equivalents described in [shared-instructions.md](../../shared/shared-instructions.md#shell-compatibility) and the PowerShell example in [prerequisites-reference.md](./references/prerequisites-reference.md) instead of copying the bash snippets literally.
 
 ```bash
 node --version                                                    # Must be v22+
@@ -66,7 +64,7 @@ Record the resolved bin name as `$BIN`.
 
 #### `@latest` refresh check
 
-If `ms` was already installed, run the CLI freshness gate in [development-standards.md](${CLAUDE_PLUGIN_ROOT}/shared/development-standards.md#cli-freshness-gate) now. When npm `@latest` is newer, pause app creation and ask whether to update before proceeding. Never auto-update.
+If `ms` was already installed, run the CLI freshness gate in [development-standards.md](../../shared/development-standards.md#cli-freshness-gate) now. When npm `@latest` is newer, pause app creation and ask whether to update before proceeding. Never auto-update.
 
 ### Step 3: Infer App Spec
 
@@ -144,7 +142,7 @@ After the command succeeds, enter the target directory unless it is `.`, then se
 PROJECT_ROOT="$(pwd)"
 ```
 
-Now that `PROJECT_ROOT` exists, write the approved plan to `$PROJECT_ROOT/app_generated_plan.md` per [planning-policy.md](${CLAUDE_PLUGIN_ROOT}/shared/planning-policy.md) — before any implementation, so it is committed with the rest of the generated app.
+Now that `PROJECT_ROOT` exists, write the approved plan to `$PROJECT_ROOT/app_generated_plan.md` per [planning-policy.md](../../shared/planning-policy.md) — before any implementation, so it is committed with the rest of the generated app.
 
 Capture from the output: the app GUID, the environment ID/name resolved by the CLI, and the remote git URL. (The environment ID appears in the App Player URL and is needed for that link — it's an internal detail, not something to surface to the user.)
 
@@ -188,7 +186,7 @@ Run them sequentially. After each one:
   - `/add-workiq` → See "Work IQ Integration: MCP Session Pattern" for session management and response parsing
   - Other `/add-*` skills have similar guidance
 - Capture the generated service path, and the connection ID when applicable, so Step 9 can import them.
-- **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+- **If the sub-skill reports a shared connection** (`sharedConnectionId` in `ms.config.json`), it will defer the `allowedActions` policy rather than prompting — there's no app code to infer from yet. Record it as *shared, policy pending* and carry it into Step 11's summary. This does not block `ms app dev`; `/deploy` gates on it later. See [allowed-actions.md](../../shared/allowed-actions.md).
 
 **Forward all captured context to each sub-skill so its own prompts are suppressed.** The `/state` skill needs the approved collections/properties and the CLI freshness gate outcome. The per-service skills (`/add-dataverse`, `/add-sharepoint`, etc.) and `/add-connector` each have their own prompt sequences (pick connection, pick table/list/site, choose api-id, CLI freshness, etc.). The approved plan and discovery results should contain those answers, so pass them through as `$ARGUMENTS` (or whatever invocation surface is available) when dispatching: state collections/properties, api-id, connection ID or name, table/list/site identifiers, environment URL, project root, and the CLI freshness gate outcome plus known versions. A sub-skill receiving the CLI freshness outcome must not check or prompt again. If a sub-skill still needs a required input that cannot be discovered or safely inferred, ask the user one focused question and record the answer as an amendment to the approved plan rather than letting multiple sub-skills ask interactively.
 
@@ -247,13 +245,13 @@ Provide:
   2. When you're happy with how it looks and behaves, say so. I'll commit + push your changes, run `ms app play --mode preview` to give you a cloud preview URL hosted in your environment, and *then* ask if you want me to `/deploy` to the live URL.
 - **Important**: explicitly note that **nothing has been deployed to the cloud yet** — current state is local dev only.
 
-When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, `ms app play --mode preview`, hand off the preview URL, then ask about `/deploy`. Do not skip the preview gate.
+When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](../../shared/shared-instructions.md) — commit, push, `ms app play --mode preview`, hand off the preview URL, then ask about `/deploy`. Do not skip the preview gate.
 
 Do **not** list `/add-*` skills as next steps here; data sources were already wired in Step 8. (If the user later wants an additional connector, they can ask and you'll invoke the right `/add-*` mid-iteration.)
 
 ### Step 12: Update Memory Bank
 
-Write `memory-bank.md` at `$PROJECT_ROOT/memory-bank.md` per [memory-bank.md](${CLAUDE_PLUGIN_ROOT}/shared/memory-bank.md) template. Record the environment ID the CLI resolved for reference (e.g. to reconstruct the App Player URL) — do not use it to re-target a future `ms app create`, and do not surface it to the user.
+Write `memory-bank.md` at `$PROJECT_ROOT/memory-bank.md` per [memory-bank.md](../../shared/memory-bank.md) template. Record the environment ID the CLI resolved for reference (e.g. to reconstruct the App Player URL) — do not use it to re-target a future `ms app create`, and do not surface it to the user.
 
 ---
 

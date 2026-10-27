@@ -7,7 +7,8 @@
 # Behavior:
 #   - If the command does not invoke `ms`, allow unchanged.
 #   - If the command already sets MS_CLI_ORIGIN inline, allow unchanged.
-#   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput. The
+#   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput
+#     (Claude) and modifiedArgs (Copilot). The
 #     rewrite defaults MS_CLI_ORIGIN only when it is truly unset
 #     (`${MS_CLI_ORIGIN-...}` for bash tools, `Test-Path Env:MS_CLI_ORIGIN`
 #     for PowerShell tools), so ANY pre-existing value in the parent
@@ -53,6 +54,7 @@ function Write-AllowWithRewrite {
         permissionDecision       = 'allow'
         permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution'
         updatedInput             = $updated
+        modifiedArgs             = $updated
         hookSpecificOutput = @{
             hookEventName            = 'PreToolUse'
             permissionDecision       = 'allow'
@@ -82,7 +84,7 @@ try {
 
     # Locate tool input
     $toolInput = $null
-    foreach ($prop in @('tool_input', 'input', 'toolInput')) {
+    foreach ($prop in @('tool_input', 'input', 'toolInput', 'toolArgs')) {
         if ($data.PSObject.Properties[$prop]) { $toolInput = $data.$prop; break }
     }
     if (-not $toolInput) { Write-AllowUnchanged }
@@ -118,16 +120,11 @@ try {
     $inlinePattern = '(^|[;&|()\n\r])\s*([A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(export\s+MS_CLI_ORIGIN=|set\s+MS_CLI_ORIGIN=|MS_CLI_ORIGIN=|\$env:MS_CLI_ORIGIN\s*=)'
     if ($command -match $inlinePattern) { Write-AllowUnchanged }
 
-    # Detect if the command will run in PowerShell context.
-    # Primary: check if this hook script itself is running in PowerShell (most reliable).
-    # Fallback: check explicit tool_name field.
-    $isPowerShellTool = $false
-    if ($PSVersionTable) {
-        # Hook script is running in PowerShell; assume PowerShell commands
-        $isPowerShellTool = $true
-    } elseif ($toolName) {
-        $tn = $toolName.ToLowerInvariant()
-        if ($tn -eq 'powershell' -or $tn -eq 'pwsh') { $isPowerShellTool = $true }
+    # Native Copilot payloads identify the actual shell. Legacy payloads
+    # retain the existing platform-based fallback.
+    $isPowerShellTool = $true
+    if ($data.PSObject.Properties['toolName']) {
+        $isPowerShellTool = $toolName.ToLowerInvariant() -in @('powershell', 'pwsh')
     }
 
     if ($isPowerShellTool) {

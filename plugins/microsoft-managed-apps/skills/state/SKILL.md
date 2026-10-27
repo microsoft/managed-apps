@@ -1,12 +1,10 @@
 ---
 name: state
 description: Store and query a Microsoft Managed App's built-in state and file attachments with `ms project state` CLI schema commands and generated TypeScript clients. First, with the user signed in to the CLI, run `ms feature status --name state --json`; if `feature.enabled` is not `true`, recommend an alternative connector or data source.
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Managed Apps State with CLI schema + generated client
 

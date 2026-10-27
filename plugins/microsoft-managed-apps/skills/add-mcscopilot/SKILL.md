@@ -1,12 +1,10 @@
 ---
 name: add-mcscopilot
 description: Adds Microsoft Copilot Studio by delegating to `/add-data-source` with `api-id=microsoftcopilotstudio` and action mode. Use when integrating Copilot Studio agents.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Microsoft Copilot Studio (Wrapper)
 

@@ -1,12 +1,10 @@
 ---
 name: play
 description: Opens a Microsoft App in the browser via `ms app play`. Use when opening the live deployed version or a cloud-hosted preview (main branch or specific commit SHA) without starting a local dev server.
-user-invocable: true
-allowed-tools: Read, Grep, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Play
 
@@ -28,7 +26,7 @@ Opens a Microsoft App in the browser by fetching its cloud play URL and launchin
 
 ### Step 1: Check Memory Bank
 
-Read `memory-bank.md` per [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) for the app's environment/app identifiers, if recorded.
+Read `memory-bank.md` per [shared-instructions.md](../../shared/shared-instructions.md) for the app's environment/app identifiers, if recorded.
 
 ### Step 2: Verify Project + Env
 

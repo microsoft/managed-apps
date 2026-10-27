@@ -9,7 +9,8 @@
 #   - If the command does not invoke `ms`, allow unchanged.
 #   - If the command already sets MS_CLI_ORIGIN= inline (env-prefix, `set`,
 #     or `$env:`), allow unchanged.
-#   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput. The
+#   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput
+#     (Claude) and modifiedArgs (Copilot). The
 #     rewrite defaults MS_CLI_ORIGIN only when it is truly unset
 #     (`${MS_CLI_ORIGIN-...}` for bash, `Test-Path Env:MS_CLI_ORIGIN` for
 #     PowerShell), so ANY pre-existing value in the parent environment wins at
@@ -84,7 +85,7 @@ tool_name = data.get("tool_name") or data.get("toolName") or ""
 if not isinstance(tool_name, str):
     tool_name = ""
 
-tool_input = data.get("tool_input") or data.get("input") or data.get("toolInput") or {}
+tool_input = data.get("tool_input") or data.get("input") or data.get("toolInput") or data.get("toolArgs") or {}
 if not isinstance(tool_input, dict):
     emit_allow()
 
@@ -148,12 +149,12 @@ else:
 updated = dict(tool_input)
 updated["command"] = new_command
 reason = "Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution"
-# Emit both the flat fields (Copilot CLI) and the hookSpecificOutput wrapper
-# (Claude Code) so the rewrite applies regardless of host engine.
+# Keep legacy fields, native Copilot modifiedArgs, and the Claude wrapper.
 print(json.dumps({
     "permissionDecision": "allow",
     "permissionDecisionReason": reason,
     "updatedInput": updated,
+    "modifiedArgs": updated,
     "hookSpecificOutput": {
         "hookEventName": "PreToolUse",
         "permissionDecision": "allow",

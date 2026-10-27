@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,10 @@ function fixture(t) {
   for (const path of [canonical, legacy, marketplace, codex]) {
     mkdirSync(dirname(join(directory, path)), { recursive: true });
     copyFileSync(join(root, path), join(directory, path));
+  }
+  for (const path of ['agents', 'hooks', 'com.github.copilot', 'skills', 'shared']) {
+    cpSync(join(root, 'plugins/microsoft-managed-apps', path),
+      join(directory, 'plugins/microsoft-managed-apps', path), { recursive: true });
   }
   return directory;
 }
@@ -57,6 +61,8 @@ for (const [name, path, change, message] of [
   ['missing marketplace entry', marketplace, value => { value.plugins = []; }, /exactly one matching plugin/],
   ['duplicate marketplace entry', marketplace, value => { value.plugins.push(value.plugins[0]); }, /exactly one matching plugin/],
   ['Codex source drift', codex, value => { value.plugins[0].source.path = './wrong'; }, /same plugin directory/],
+  ['Codex marketplace identity drift', codex, value => { value.name = 'different'; }, /marketplace identities must match/],
+  ['duplicate Codex marketplace entry', codex, value => { value.plugins.push(value.plugins[0]); }, /exactly one matching plugin/],
 ]) {
   test(`rejects ${name}`, t => {
     const directory = fixture(t);
@@ -97,6 +103,44 @@ for (const path of [canonical, legacy, marketplace, codex]) {
       t.skip('Windows requires permission to create file symlinks. Linux CI covers this case.');
       return;
     }
+
     assert.throws(() => validate(directory), /must be a regular file/);
+  });
+}
+
+test('rejects a missing Copilot agent', t => {
+  const directory = fixture(t);
+  rmSync(join(directory, 'plugins/microsoft-managed-apps/com.github.copilot/agents/microsoft-apps-architect.agent.md'));
+  assert.throws(() => validate(directory), /Copilot architect agent/);
+});
+
+test('rejects Copilot agent drift', t => {
+  const directory = fixture(t);
+  writeFileSync(join(directory, 'plugins/microsoft-managed-apps/com.github.copilot/agents/microsoft-apps-architect.agent.md'), 'changed');
+  assert.throws(() => validate(directory), /Copilot agent must match/);
+});
+
+test('rejects Copilot hook drift', t => {
+  const directory = fixture(t);
+  edit(directory, 'plugins/microsoft-managed-apps/com.github.copilot/hooks/hooks.json',
+    value => { value.hooks.preToolUse[0].bash = 'wrong'; });
+  assert.throws(() => validate(directory), /Copilot hooks must match/);
+});
+
+test('rejects missing hook scripts', t => {
+  const directory = fixture(t);
+  rmSync(join(directory, 'plugins/microsoft-managed-apps/hooks/pre-tool-use.ps1'));
+  assert.throws(() => validate(directory), /ENOENT/);
+});
+
+for (const [name, content, message] of [
+  ['host-specific root', '[shared](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)', /document-relative/],
+  ['missing resource', '[shared](../../shared/missing.md)', /ENOENT/],
+  ['escaping resource', '[outside](../../../../.claude-plugin/marketplace.json)', /inside the plugin/],
+]) {
+  test(`rejects ${name} in a skill`, t => {
+    const directory = fixture(t);
+    writeFileSync(join(directory, 'plugins/microsoft-managed-apps/skills/create-app/SKILL.md'), content);
+    assert.throws(() => validate(directory), message);
   });
 }
