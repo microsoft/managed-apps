@@ -82,9 +82,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 Select it only for an explicit app backend database request (including
 `/add-database` or Rayfin).
 
-All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate)
-for `MS_CLI_FEATURE_RAYFIN`. Apply it to setup, coding, checks and architecture
-recommendations; never enable the feature automatically.
+All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
 
 | Reference | Purpose |
 | --- | --- |

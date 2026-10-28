@@ -2,8 +2,7 @@
 
 Reference for [/add-database](../SKILL.md). Pass the
 [Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
-for `MS_CLI_FEATURE_RAYFIN` before using this guidance. If it is disabled or cannot
-be verified, stop without enabling it.
+before using this guidance.
 
 ## Read the docs first
 

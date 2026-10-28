@@ -53,9 +53,7 @@ ms --version           # Bin name has flipped between dev builds
 Rayfin provides the app backend database; it is not a connector.
 
 Before recommending or using Rayfin, pass the
-[Rayfin feature gate](../shared/shared-instructions.md#rayfin-feature-gate) for
-`MS_CLI_FEATURE_RAYFIN`. If disabled or unverified, report it as unavailable;
-do not enable it automatically or use its coding guidance.
+[Rayfin feature gate](../shared/shared-instructions.md#rayfin-feature-gate).
 
 When the gate passes and the user explicitly requests an app backend database
 (including `/add-database` or Rayfin), use

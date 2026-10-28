@@ -1,6 +1,6 @@
 ---
 name: add-database
-description: Add an app backend database with `ms app add backend --provider rayfin`. Use only when the user explicitly requests a database, /add-database, or Rayfin, and the rayfin feature (MS_CLI_FEATURE_RAYFIN) is enabled.
+description: Add an app backend database with `ms app add backend --provider rayfin`. Use only when the user explicitly requests a database, /add-database, or Rayfin, and the CLI reports the rayfin feature as enabled.
 user-invocable: true
 ---
 
@@ -8,9 +8,7 @@ user-invocable: true
 
 # Add an app backend database
 
-**Required first:** pass the [Rayfin feature gate](../../shared/shared-instructions.md#rayfin-feature-gate)
-for `MS_CLI_FEATURE_RAYFIN`. If it is disabled or cannot be verified, stop without
-enabling it automatically.
+**Required first:** pass the [Rayfin feature gate](../../shared/shared-instructions.md#rayfin-feature-gate).
 
 ## 1. Set up the database
 

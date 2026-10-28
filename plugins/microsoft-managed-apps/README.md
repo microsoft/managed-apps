@@ -25,10 +25,7 @@ Its two reference documents point to the installed SDK docs for API guidance:
 | [Data modeling](skills/add-database/references/rayfin-data-modeling.md) | Entity/client integration, permissions and authentication checks. |
 | [CRUD UI](skills/add-database/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
 
-The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate):
-the status command must exit successfully, return `"success": true`, and report
-`feature.enabled` as `true`. Enablement through `MS_CLI_FEATURE_RAYFIN=true`
-requires explicit user opt-in; never enable it automatically.
+The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
 The database follows the same [build and deployment workflow](shared/development-standards.md#build--deploy)
 as the rest of the app, not a separate Rayfin workflow.
 

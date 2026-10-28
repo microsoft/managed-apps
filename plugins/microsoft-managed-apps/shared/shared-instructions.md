@@ -165,8 +165,6 @@ Select `/add-database` only for an explicit app backend database request
 
 ### Rayfin feature gate
 
-All Rayfin guidance requires the `rayfin` feature
-(`MS_CLI_FEATURE_RAYFIN=true` enables it in the CLI process environment).
 Before recommending or using `/add-database` or its references, editing
 database code, installing dependencies, or checking database behavior, read the
 CLI's effective feature status:
@@ -180,16 +178,14 @@ Proceed only when the command exits successfully, `"success": true` and
 command or malformed response blocks Rayfin work. Report the result; do not
 silently substitute another database for an explicit app backend database request.
 
-Do not set the environment variable or enable the feature automatically. An
-explicit user opt-in must precede enablement, followed by another status check.
+Do not change feature settings or offer to enable the feature.
 An existing `rayfin/` folder, installed SDK or request to use Rayfin does not
 bypass this gate. Leave unrelated state/connector workflows unchanged.
 
 Reuse a successful check only within the same workflow and unchanged CLI
 execution environment. Recheck after environment/CLI changes and before app
-packaging or deployment when the app uses Rayfin;
-local enablement does not enable a hosted build.
-This is a CLI feature gate, not a browser variable or runtime authorization check.
+packaging or deployment when the app uses Rayfin.
+This availability check does not establish runtime authorization.
 
 With the gate passed, Rayfin provides the app backend database, not an external
 integration. Follow `/add-database` and its local modeling/CRUD references,
