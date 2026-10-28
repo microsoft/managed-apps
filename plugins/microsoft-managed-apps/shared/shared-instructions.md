@@ -189,8 +189,7 @@ This availability check does not establish runtime authorization.
 
 With the gate passed, Rayfin provides the app backend database, not an external
 integration. Follow `/add-backend` and its local modeling/CRUD references,
-then use the existing managed apps build and deploy workflow. Verify host support
-and runtime configuration; SDK code alone does not establish App Player connectivity.
+then use the existing managed apps build and deploy workflow.
 
 ---
 
