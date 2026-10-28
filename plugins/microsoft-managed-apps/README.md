@@ -12,18 +12,18 @@ Managed apps run locally against the App Player with hot reload (`ms app dev`) a
 | ---------------- | -------- |
 | Scaffold         | `/create-app` |
 | Lifecycle        | `/dev`, `/deploy`, `/play`, `/share`, `/share-link`, `/delete-app`, `/list-apps` |
-| App backend database | `/add-database` (requires the Rayfin feature gate) |
+| App backend database | `/add-backend` (requires the Rayfin feature gate) |
 | Data sources     | `/add-data-source`, `/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`, `/list-connectors` |
 
 ### App backend database
 
-Use `/add-database` only for an explicitly requested app backend database with Rayfin.
+Use `/add-backend` only for an explicitly requested app backend database with Rayfin.
 Its two reference documents point to the installed SDK docs for API guidance:
 
 | Reference | Code and checks |
 | --- | --- |
-| [Data modeling](skills/add-database/references/rayfin-data-modeling.md) | Entity/client integration, permissions and authentication checks. |
-| [CRUD UI](skills/add-database/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
+| [Data modeling](skills/add-backend/references/rayfin-data-modeling.md) | Entity/client integration using installed SDK docs. |
+| [CRUD UI](skills/add-backend/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
 
 The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
 The database follows the same [build and deployment workflow](shared/development-standards.md#build--deploy)

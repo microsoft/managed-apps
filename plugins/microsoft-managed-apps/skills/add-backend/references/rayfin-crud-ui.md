@@ -1,6 +1,6 @@
 # CRUD UI
 
-Reference for [/add-database](../SKILL.md). Pass the
+Reference for [/add-backend](../SKILL.md). Pass the
 [Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
 before using this guidance.
 
@@ -69,7 +69,8 @@ until success, or restore it in its original position if an optimistic delete fa
 
 ## Per-user data
 
-Follow [server-side ownership](./rayfin-data-modeling.md#step-5-per-user-data).
+Follow the installed permissions docs listed in [data modeling](./rayfin-data-modeling.md#read-the-docs-first)
+for server-side ownership.
 Never use UI filtering as authorization. Clear private rows and pending results
 when the session changes.
 
@@ -106,7 +107,6 @@ source is unavailable.
   and pagination across multiple pages, including empty pages and later-page retry.
 - [ ] On an approved backend, with approval for test writes: create a row and reload,
   update it and reload, then delete it and reload. Verify each saved result.
-- [ ] Include the [authentication and permission checks](./rayfin-data-modeling.md#check-authentication-and-permissions).
 
 Follow the normal app build/deploy workflow and repeat runtime checks after app
 deployment. Report unavailable checks as blocked; build/pack success or mocks do

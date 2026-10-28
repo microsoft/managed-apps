@@ -80,7 +80,7 @@ Wait for their answer. Do NOT present a multiple-choice list of app types. Once 
 
 1. **Generate the display name.** If the user already gave a name, use it verbatim. Otherwise derive a short title from the user's prompt (usually 2-5 title-cased words) and use it with `--display-name`. Either way, do not ask the user to name or confirm it. Derive the folder slug from this title.
 2. **Plan the complete requested experience.** Include every capability the user clearly describes. Infer the screens, navigation, interactions, and visual styling needed to make those capabilities usable; use a single responsive screen only when it can support the full request cleanly. Do not ask separate questions about layout, theme, or architecture. Present these decisions in the plan for approval.
-3. **Infer data needs from user intent.** Add built-in app state or the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a data source. Use `/state` for the app's own typed persisted records when `ms feature status --name state` reports enabled. Use connectors for external systems, tenant data, shared business data, or when the state feature is disabled. If the user explicitly requests an app backend database (including `/add-database` or Rayfin), first pass the [Rayfin feature gate](../../shared/shared-instructions.md#rayfin-feature-gate); only then plan `/add-database`. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
+3. **Infer data needs from user intent.** Add built-in app state or the appropriate connector whenever the requested experience clearly depends on user, organizational, shared, persistent, or external data, even if the user does not mention a data source. Use `/state` for the app's own typed persisted records when `ms feature status --name state` reports enabled. Use connectors for external systems, tenant data, shared business data, or when the state feature is disabled. If the user explicitly requests an app backend database (including `/add-backend` or Rayfin), first pass the [Rayfin feature gate](../../shared/shared-instructions.md#rayfin-feature-gate); only then plan `/add-backend`. Use local sample data only when the experience is genuinely self-contained or the data intent is unclear. Ask one focused question only when choosing incorrectly would materially change the app.
 4. **Discover before asking.** When a connector is needed, infer its api-id and mode from the connector decision guide, and let the CLI discover or create connections where supported. When built-in app state is appropriate, invoke `/state` for the detailed schema/codegen workflow rather than duplicating it here. Ask one focused question only if a required tenant-specific identifier cannot be discovered (for example, which of several matching SharePoint lists to use) or if the state-vs-connector choice materially changes the app.
 5. **Consolidate assumptions into the plan.** Include the generated name, requested capabilities, inferred UI, and any state schema or connector choice in one complete plan. Do not ask separate questions to confirm each assumption.
 
@@ -173,8 +173,8 @@ Detect this by matching `Could not commit and push the initial scaffold` togethe
 Set up the approved app backend database and data sources **now**, before generating UI code.
 
 **App backend database:** only after the Rayfin feature gate passes and the app
-backend database capability is explicitly requested, invoke `/add-database` for scaffolding, dependencies
-and its [data modeling reference](../add-database/references/rayfin-data-modeling.md).
+backend database capability is explicitly requested, invoke `/add-backend` for scaffolding, dependencies
+and its [data modeling reference](../add-backend/references/rayfin-data-modeling.md).
 Pass the gate result and CLI execution context; capture the returned entity/client
 paths and any missing runtime settings. Defer UI work to Step 9 and checks to
 Step 10; do not deploy during setup.
@@ -211,7 +211,7 @@ Generate the code that delivers the experience described in the approved plan:
 
 - Components, pages, routing, state management.
 - Wire each component to the typed services produced in Step 8. For connectors, avoid raw `fetch` / `axios` / Graph calls and use generated connector services. For `/state`, prefer generated state services when codegen covers the scenario while allowing deliberate direct state requests when they are the better fit.
-- For Rayfin, only with the feature gate still satisfied, follow the database skill's [CRUD UI reference](../add-database/references/rayfin-crud-ui.md) using the client from Step 8. Keep configuration, sign-in and data errors distinct; do not replace an unavailable backend with mock rows.
+- For Rayfin, only with the feature gate still satisfied, follow the backend skill's [CRUD UI reference](../add-backend/references/rayfin-crud-ui.md) using the client from Step 8. Keep configuration, sign-in and data errors distinct; do not replace an unavailable backend with mock rows.
 - Apply the inferred theme and UI decisions documented in the approved plan.
 - Replace template placeholder content; the user must see *their* app at the local URL, not "Hello World."
 
@@ -228,9 +228,8 @@ $BIN app dev           # starts the dev server (default port 8080) + config serv
 If `npm run build` fails, fix the errors before running `ms app dev`. Don't hand the user a URL that points at a broken build.
 
 For Rayfin, keep its feature gate satisfied during runtime checks. In the App
-Player, follow the database skill's
-[authentication/permission checks](../add-database/references/rayfin-data-modeling.md#check-authentication-and-permissions)
-and [UI/persistence checks](../add-database/references/rayfin-crud-ui.md#checklist).
+Player, follow the backend skill's
+[UI/persistence checks](../add-backend/references/rayfin-crud-ui.md#checklist).
 `ms app dev` does not start the database; report runtime checks as blocked if no
 approved, configured backend is available.
 

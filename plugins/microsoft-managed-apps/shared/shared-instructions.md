@@ -160,12 +160,12 @@ Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail 
 
 ## App backend database
 
-Select `/add-database` only for an explicit app backend database request
-(including `/add-database` or Rayfin).
+Select `/add-backend` only for an explicit app backend database request
+(including `/add-backend` or Rayfin).
 
 ### Rayfin feature gate
 
-Before recommending or using `/add-database` or its references, editing
+Before recommending or using `/add-backend` or its references, editing
 database code, installing dependencies, or checking database behavior, read the
 CLI's effective feature status:
 
@@ -188,7 +188,7 @@ packaging or deployment when the app uses Rayfin.
 This availability check does not establish runtime authorization.
 
 With the gate passed, Rayfin provides the app backend database, not an external
-integration. Follow `/add-database` and its local modeling/CRUD references,
+integration. Follow `/add-backend` and its local modeling/CRUD references,
 then use the existing managed apps build and deploy workflow. Verify host support
 and runtime configuration; SDK code alone does not establish App Player connectivity.
 

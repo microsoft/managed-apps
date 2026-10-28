@@ -9,7 +9,7 @@ The managed apps plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to sca
 - Creating a new app (`/create-app`) — global install of the CLI, scaffold, local dev loop.
 - Iterating locally (`/dev`) — `ms app dev`, hot reload against the App Player.
 - Lifecycle ops (`/deploy`, `/share`, `/delete-app`, `/list-apps`).
-- Defining an app backend database (`/add-database`) — entities and a typed runtime client.
+- Defining an app backend database (`/add-backend`) — entities and a typed runtime client.
 - Binding data sources (`/add-dataverse`, `/add-sharepoint`, etc.) — generates typed TypeScript services under `src/`.
 
 ## Memory Bank System
@@ -77,24 +77,24 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 
 ### App backend database
 
-**Setup:** `/add-database` scaffolds the app backend database with `ms app add backend --provider rayfin`. Its local references use the installed SDK docs for API guidance.
+**Setup:** `/add-backend` scaffolds the app backend database with `ms app add backend --provider rayfin`. Its local references use the installed SDK docs for API guidance.
 
 Select it only for an explicit app backend database request (including
-`/add-database` or Rayfin).
+`/add-backend` or Rayfin).
 
 All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
 
 | Reference | Purpose |
 | --- | --- |
-| [Data modeling](skills/add-database/references/rayfin-data-modeling.md) | Write entities and the typed runtime client; check authentication and permissions. |
-| [CRUD UI](skills/add-database/references/rayfin-crud-ui.md) | Write database-backed lists, forms and CRUD operations; check UI behavior and persistence. |
+| [Data modeling](skills/add-backend/references/rayfin-data-modeling.md) | Write entities and the typed runtime client using installed SDK docs. |
+| [CRUD UI](skills/add-backend/references/rayfin-crud-ui.md) | Write database-backed lists, forms and CRUD operations; check UI behavior and persistence. |
 
 ### Workflow
 
 ```
 /create-app
    └── /dev (default loop)
-   └── /add-database (when explicitly requested and the Rayfin feature is enabled)
+   └── /add-backend (when explicitly requested and the Rayfin feature is enabled)
    └── /add-data-source (or a specific connector skill)
    └── /deploy (explicit, requires confirmation)
    └── /share, /delete-app (explicit, require confirmation)

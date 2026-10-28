@@ -1,6 +1,6 @@
 # Data modeling
 
-Reference for [/add-database](../SKILL.md). Pass the
+Reference for [/add-backend](../SKILL.md). Pass the
 [Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
 before using this guidance.
 
@@ -44,7 +44,7 @@ rather than guessing. Do not install the Rayfin CLI or guide just to read docs.
 ## Step 1: Turn the data service on
 
 Reuse `rayfin/rayfin.yml` and the installed dependencies from Steps 1-2 of
-[/add-database](../SKILL.md). If setup is missing, complete only those steps.
+[/add-backend](../SKILL.md). If setup is missing, complete only those steps.
 Keep the existing managed app layout, authentication and transport boundary.
 
 Declare `@microsoft/rayfin-core` directly when entity code imports it. The client
@@ -87,40 +87,8 @@ Reuse the app's client. If missing, implement a shared, typed
 `RayfinClient<AppSchema>` helper in `src/rayfin/client.ts` using the installed
 client declarations. Use `client.data` and `client.auth`.
 
-- Resolve configuration from the verified host source. Scaffold and pack do not
-  supply runtime client configuration; do not invent endpoints or copy Universal's
-  environment-file setup.
-- Preserve end-user sign-in. If Fabric sign-in is needed, follow the provider's
-  browser documentation using `client.auth` and verified backend settings.
-  Load configuration before enabling click-triggered sign-in.
-- Keep initialization failures retryable and gate database operations until
-  configuration and authentication are ready. Never fall back to anonymous access.
-- Scope persisted sessions to the backend. Clear private rows and invalidate
-  pending requests on sign-out, expiry or identity changes; unsubscribe listeners
-  when their consumers unmount.
-
 Continue with [CRUD UI](./rayfin-crud-ui.md) for lists, forms and UI state.
-
-## Step 5: Per-user data
-
-Use the installed permissions docs to enforce ownership on the server, not just
-with UI filters. Stamp owner fields from the authenticated session and prevent
-owner reassignment. Do not layer restrictive grants over unrestricted access.
 
 ## Notes
 
 Use the shared [app build and deploy workflow](../../../shared/development-standards.md#build--deploy).
-Local frontend dev does not create or migrate the database.
-
-## Check authentication and permissions
-
-Use an approved backend in the App Player and obtain approval for test writes.
-
-- Missing configuration and failed/cancelled sign-in show actionable errors.
-- Reload restores the correct session; switching backends does not reuse another
-  backend's session. Sign-out and identity changes clear private data.
-- For private records, verify signed-out denial and that another user cannot read
-  or mutate the owner's test row.
-
-Repeat runtime checks after app deployment; report unavailable checks as blocked,
-not passed.

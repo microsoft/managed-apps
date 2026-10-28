@@ -56,8 +56,8 @@ Before recommending or using Rayfin, pass the
 [Rayfin feature gate](../shared/shared-instructions.md#rayfin-feature-gate).
 
 When the gate passes and the user explicitly requests an app backend database
-(including `/add-database` or Rayfin), use
-[/add-database](../skills/add-database/SKILL.md).
+(including `/add-backend` or Rayfin), use
+[/add-backend](../skills/add-backend/SKILL.md).
 
 ### Connector-First Principle
 
