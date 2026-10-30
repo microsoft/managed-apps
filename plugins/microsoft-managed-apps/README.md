@@ -12,7 +12,7 @@ Managed apps run locally against the App Player with hot reload (`ms app dev`) a
 | ---------------- | -------- |
 | Scaffold         | `/create-app` |
 | Lifecycle        | `/dev`, `/deploy`, `/play`, `/share`, `/share-link`, `/delete-app`, `/list-apps` |
-| App backend database | `/add-backend` (requires the Rayfin feature gate) |
+| App backend database | `/add-backend` |
 | Data sources     | `/add-data-source`, `/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`, `/list-connectors` |
 
 ### App backend database
@@ -25,9 +25,10 @@ Its two reference documents point to the installed SDK docs for API guidance:
 | [Data modeling](skills/add-backend/references/rayfin-data-modeling.md) | Entity/client integration using installed SDK docs. |
 | [CRUD UI](skills/add-backend/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
 
-The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
+The entry skill applies the [shared feature policy](shared/shared-instructions.md#rayfin-feature-gate).
 The database follows the same [build and deployment workflow](shared/development-standards.md#build--deploy)
-as the rest of the app, not a separate Rayfin workflow.
+as the rest of the app, not a separate Rayfin workflow. Scaffolding prepares backend
+definitions.
 
 ## Prerequisites
 

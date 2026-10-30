@@ -1,8 +1,6 @@
 # Data modeling
 
-Reference for [/add-backend](../SKILL.md). Pass the
-[Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
-before using this guidance.
+Reference for [/add-backend](../SKILL.md).
 
 ## Read the docs first
 
@@ -41,7 +39,7 @@ Some client/auth indexes are stubs. Follow the installed package's `types` or
 docs and declarations do not establish the required behavior, report the gap
 rather than guessing. Do not install the Rayfin CLI or guide just to read docs.
 
-## Step 1: Turn the data service on
+## Step 1: Reuse the backend scaffold
 
 Reuse `rayfin/rayfin.yml` and the installed dependencies from Steps 1-2 of
 [/add-backend](../SKILL.md). If setup is missing, complete only those steps.

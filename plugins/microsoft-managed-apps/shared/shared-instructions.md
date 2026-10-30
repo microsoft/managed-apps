@@ -17,7 +17,7 @@ All skills reference this single file. When new shared instructions are added, u
 - **Confirm before ACL changes**: Before running `ms app share` or `ms app unshare`, ask the user to confirm the email list. These mutate permissions on the cloud app.
 - **Confirm before `ms app delete`**: Always confirm. Never auto-`--force`, even when reading the slug from `ms.config.json`.
 - **Declare `allowedActions` for shared connections**: Before `ms app pack` or `ms app deploy`, every **shared** connection reference in `ms.config.json` (one with a non-empty `sharedConnectionId`) must declare `allowedActions`. The CLI validates this and fails the deploy otherwise. Infer the least-privilege set from what the app actually calls, propose it, and confirm with the user — see [allowed-actions.md](./allowed-actions.md).
-- **Honor the Rayfin feature gate**: Before Rayfin-specific work or packing/deploying an app with `rayfin/rayfin.yml`, pass the [Rayfin feature gate](#rayfin-feature-gate). Do not silently omit the database when the feature is disabled.
+- **App backend work**: Follow the [Rayfin feature gate](#rayfin-feature-gate).
 
 ### MUST NOT
 
@@ -106,7 +106,7 @@ Use this guide to intelligently select the right connector(s) for any app scenar
 **📋 [allowed-actions.md](./allowed-actions.md)**
 
 Applies when adding connectors and before packing or deploying an app with shared
-connection references, including apps that also use Rayfin. A shared connection can back several apps and
+connection references. A shared connection can back several apps and
 carries its creator's permissions, so each app declares the connector operations it may invoke
 and the Connectors infrastructure enforces that limit **per app**. When a connection reference
 in `ms.config.json`
