@@ -1,8 +1,6 @@
 # CRUD UI
 
-Reference for [/add-backend](../SKILL.md). Pass the
-[Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
-before using this guidance.
+Reference for [/add-backend](../SKILL.md).
 
 ## Read the docs first
 
@@ -105,9 +103,3 @@ source is unavailable.
   saved rows independently of unrelated live data.
 - [ ] Local fixtures cover partial results, write/readback failures, stale requests,
   and pagination across multiple pages, including empty pages and later-page retry.
-- [ ] On an approved backend, with approval for test writes: create a row and reload,
-  update it and reload, then delete it and reload. Verify each saved result.
-
-Follow the normal app build/deploy workflow and repeat runtime checks after app
-deployment. Report unavailable checks as blocked; build/pack success or mocks do
-not prove persistence.

@@ -1,6 +1,6 @@
 ---
 name: add-backend
-description: Add an app backend with `ms app add backend --provider rayfin`. Currently covers database entities and client integration. Use only when the user explicitly requests a database, /add-backend, or Rayfin, and the CLI reports the rayfin feature as enabled.
+description: Add an app backend with `ms app add backend --provider rayfin`. Currently covers database entities and client integration. Use only when the user explicitly requests a database, /add-backend, or Rayfin.
 user-invocable: true
 ---
 
@@ -21,6 +21,9 @@ ms app add backend --provider rayfin --json
 This creates the backend configuration, TypeScript configuration and `rayfin/data/`,
 and declares the runtime client dependency. Keep the existing app layout and
 exclude `rayfin/.temp/` from version control.
+
+This prepares the app's backend definitions; it does not provision a database.
+Rayfin is the app backend, not an existing database to select or connect to.
 
 ## 2. Install dependencies
 
@@ -43,3 +46,12 @@ in order:
 
 - [Data modeling](./references/rayfin-data-modeling.md): entities, permissions and runtime client.
 - [CRUD UI](./references/rayfin-crud-ui.md): lists, forms, mutations and persistence checks.
+
+When invoked from `/create-app`, complete data modeling in Step 9 and return the
+entity/client paths; that workflow handles UI implementation and checks in
+Steps 10-11. Standalone use continues through both references.
+
+## 4. Follow the app lifecycle
+
+Use the normal [app build and deploy workflow](../../shared/development-standards.md#build--deploy),
+not a separate Rayfin provisioning workflow.
