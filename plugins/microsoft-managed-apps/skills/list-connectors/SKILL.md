@@ -64,7 +64,7 @@ Parse the response for the data-source list and print a summary:
 
 | Connector       | api-id                            | Type     | Name                  |
 | --------------- | --------------------------------- | -------- | --------------------- |
-| Dataverse       | `dataverse`                       | table    | `contact`             |
+| Dataverse       | `shared_commondataserviceforapps`  | action   | (entire connector)    |
 | SharePoint Online | `shared_sharepointonline`        | table    | `Project Milestones`  |
 | Teams           | `shared_teams`                    | action   | (entire connector)    |
 
