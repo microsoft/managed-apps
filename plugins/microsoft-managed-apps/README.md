@@ -12,7 +12,22 @@ Managed apps run locally against the App Player with hot reload (`ms app dev`) a
 | ---------------- | -------- |
 | Scaffold         | `/create-app` |
 | Lifecycle        | `/dev`, `/deploy`, `/play`, `/share`, `/share-link`, `/delete-app`, `/list-apps` |
+| App backend database | `/add-backend` (requires the Rayfin feature gate) |
 | Data sources     | `/add-data-source`, `/add-dataverse`, `/add-sharepoint`, `/add-excel`, `/add-office365`, `/add-office365-users`, `/add-teams`, `/add-onedrive`, `/add-azuredevops`, `/add-mcscopilot`, `/add-workiq`, `/list-connectors` |
+
+### App backend database
+
+Use `/add-backend` only for an explicitly requested app backend database with Rayfin.
+Its two reference documents point to the installed SDK docs for API guidance:
+
+| Reference | Code and checks |
+| --- | --- |
+| [Data modeling](skills/add-backend/references/rayfin-data-modeling.md) | Entity/client integration using installed SDK docs. |
+| [CRUD UI](skills/add-backend/references/rayfin-crud-ui.md) | Lists, forms, mutation handling and persistence checks. |
+
+The skill and its references require the [Rayfin feature gate](shared/shared-instructions.md#rayfin-feature-gate).
+The database follows the same [build and deployment workflow](shared/development-standards.md#build--deploy)
+as the rest of the app, not a separate Rayfin workflow.
 
 ## Prerequisites
 
@@ -96,6 +111,9 @@ The team must review this exception to issue #34's unchanged-behavior requiremen
 The removed `user-invocable: true` field matches Claude's default, so skills remain user-invocable.
 The workflow instructions and tool permissions remain, with portable resource links.
 
+Version 2.1.6 includes `/add-backend`, bringing the current package to 22 skills.
+The recorded 2.1.4-to-2.1.5 results below cover the earlier 21-skill package.
+
 ### Package maintenance and validation
 
 The legacy `.claude-plugin/plugin.json` is a regular JSON mirror of the canonical manifest, excluding only `$schema`.
@@ -139,11 +157,11 @@ Do not mark an unexecuted check as passed.
 
 | Client and scenario | Required result | Current evidence |
 | --- | --- | --- |
-| Claude Code, fresh install | 21 skills, architect, both hooks, resource links, daily version check, selected model, `/create-app`, and one `/add-*`. | Pending. Claude is not installed on the implementation machine. |
+| Claude Code, fresh install | 22 skills, architect, both hooks, resource links, daily version check, selected model, `/create-app`, and one `/add-*`. | Pending. Claude is not installed on the implementation machine. |
 | Claude Code, upgrade from 2.1.4 | Same components after update, without reinstalling. Existing marketplace and plugin identities remain. | Pending. |
-| Copilot CLI, fresh install on Windows | 21 skills, architect from `com.github.copilot`, both hooks, resource links, daily version check, and user attribution overrides. | Local marketplace installation and discovery passed for all 21 skills. Runtime agent and hook loading remain pending. |
+| Copilot CLI, fresh install on Windows | 22 skills, architect from `com.github.copilot`, both hooks, resource links, daily version check, and user attribution overrides. | Earlier local marketplace installation and discovery passed for 21 skills. Runtime agent and hook loading remain pending. |
 | Copilot CLI, upgrade from 2.1.4 on Windows | Same components and identity after update, without reinstalling. | Local marketplace changed from 2.1.4 to 2.1.5 with the same 21 skill names and one `Managed-Apps` registration. Git-backed update and runtime checks remain pending. |
-| Codex, fresh install | 21 skills, resolved shared resources, representative CLI attribution, and documented absence of bundled agents/hooks. | Pending. Codex is not installed on the implementation machine. |
+| Codex, fresh install | 22 skills, resolved shared resources, representative CLI attribution, and documented absence of bundled agents/hooks. | Pending. Codex is not installed on the implementation machine. |
 | Windows and Linux client flows | Fresh and upgrade results agree across platforms. | Windows local discovery evidence only. Both CI platforms are configured. Linux client flows remain pending. |
 | Activation and updates | Disable and enable without reinstalling. No duplicate identity. Malformed or drifted compatibility files fail CI. | Negative package checks pass locally. Activation remains pending because the installed CLI rejects the documented enable/disable subcommands. |
 

@@ -1,6 +1,6 @@
 # Connector Decision Guide
 
-**Use this guide to select the right connector(s) for user scenarios.** This ensures consistent, intelligent connector recommendations across all `/add-*` skills.
+**Use this guide to select the right connector(s) for external integrations.** It applies to connector skills, not app backend database setup.
 
 > **Note:** This guide covers the most common connectors. There are **1400+ connectors** available across the Microsoft ecosystem (Power Platform, Copilot Studio, Power Automate, Power Apps, Azure Logic Apps). See [Discovering All Available Connectors](#discovering-all-available-connectors) below.
 

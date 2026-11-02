@@ -1,11 +1,11 @@
 # Connector Reference
 
-Applies to all `/add-*` skills.
+Applies to connector-binding skills.
 
 ## Connections — created inline by the CLI
 
 There is **no separate "create connection" command**. Connections are created and resolved
-inline by `ms app add data-source` (the single add command — there is no `ms app add action` /
+inline by `ms app add data-source` (the connector-binding command — there is no `ms app add action` /
 `ms app add table` / `ms app add procedure`):
 
 ```bash
@@ -28,16 +28,16 @@ When you run it, the CLI resolves a connection for `<api-id>` as follows:
    - **All other connectors** open a **browser** OAuth/consent dialog (served by a local
      callback). On success the new connection's ID is printed and used.
 
-**Non-interactive (`--non-interactive`):** the CLI does **not** open a browser and does **not**
-create a connection. If `--connection-id` / `-c` is omitted, it **first prints a table of the
-available connections** for that connector (Display Name + Connection ID, or
-"No connections found in this environment.") and **then** errors, instructing you to re-run
-with `--connection-id <id>`. Copy a Connection ID from that printed table and pass it
-explicitly. If no connection exists yet, **run the command once interactively** (omit
-`--non-interactive`) so the CLI creates it, then reuse the printed Connection ID.
+**Non-interactive (`--non-interactive`):** the CLI does not open a browser.
+Without `--connection-id`, the current CLI can reuse a single connection or silently create an SSO-only connection.
+SSO means single sign-on through Microsoft Entra ID.
+Use `--use-sso` to select SSO for connectors that also offer other authentication types.
+If the connection choice is ambiguous, the CLI reports available connections and errors.
+Pass `--connection-id <id>` to select a specific connection.
+If authentication requires browser consent, create the connection interactively first.
 
 So interactively you do NOT need to pre-create connections or pass `--connection-id`; you only
-need it to bypass the picker or to script a non-interactive run.
+need it to select a specific connection or resolve an ambiguous non-interactive choice.
 
 ### Shared connections require an action policy
 
@@ -57,13 +57,40 @@ references, connector-level Action IDs for action connectors. Full rules, the le
 inference procedure, and failure recovery live in
 [allowed-actions.md](./allowed-actions.md).
 
-### Dataverse is different
+### Dataverse connector selection
 
-The tabular Dataverse connector (`--connector dataverse`) doesn't use the connection-id model —
-`ms app add data-source --connector dataverse --as table --table <name>` resolves the active
-environment's Dataverse automatically. No `--connection-id` is required (or accepted). (The
-separate `shared_commondataserviceforapps` connector instead pairs `--table` with
-`--dataverse-environment-id`.)
+Use `--connector shared_commondataserviceforapps` for Dataverse.
+Do not use `dataverse` or "Microsoft Dataverse" as the connector ID.
+Both the current connector and the older `shared_commondataservice` connector have that display name.
+Use the older connector only when the user explicitly requests it.
+
+For a fixed, existing table:
+
+```bash
+ms app add data-source --connector shared_commondataserviceforapps --as table --table <logical-name>
+```
+
+The logical name identifies the table, such as `account`.
+Do not pass `--dataset`. Run once per table.
+The optional `--dataverse-environment-id <environment-guid>` selects a specific environment.
+Without it, the CLI uses the app environment.
+Connection selection still applies. Pass `--connection-id <id>` when needed.
+
+For an app that accepts organization URLs or entity-set names at runtime:
+
+```bash
+ms app add data-source --connector shared_commondataserviceforapps --as action
+```
+
+Do not request a fixed table for this flow.
+An entity-set name identifies the API collection, such as `accounts`.
+Inspect generated `*WithOrganization` methods before implementing cross-environment operations.
+Check their policy status with `ms connector list-actions --connector shared_commondataserviceforapps --json`.
+Report blocked operations instead of substituting the older connector.
+
+After binding, check the connector ID in `ms.config.json` and the generated service reference.
+Replacing an older binding requires regenerated services, updated app calls, and updated shared `allowedActions`.
+Changing only the config ID is not sufficient.
 
 ## Inspecting Large Generated Files
 
@@ -107,8 +134,8 @@ When a connector skill is invoked from another skill (e.g., `/create-app` plans 
 
 ## Build After, Don't Deploy
 
-Every `/add-*` skill runs `npm run build` after the `ms app add ...` call to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
+Every connector-binding skill runs `npm run build` after `ms app add data-source` to catch type errors in the generated services. **None of them push or deploy.** Deployment happens only via `/deploy`, which always requires explicit user confirmation.
 
-The one thing every `/add-*` skill must do *before* that build is the shared-connection check
+The one thing every connector-binding skill must do *before* that build is the shared-connection check
 above — a missing `allowedActions` doesn't surface as a build error, it surfaces much later as
 a deploy failure.
