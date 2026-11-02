@@ -18,9 +18,8 @@ If `rayfin/rayfin.yml` exists, use the existing configuration. Otherwise, run:
 ms app add backend --provider rayfin --json
 ```
 
-This creates the backend configuration, TypeScript configuration and `rayfin/data/`,
-and declares the runtime client dependency. Keep the existing app layout and
-exclude `rayfin/.temp/` from version control.
+This creates the backend configuration, TypeScript configuration and `rayfin/data/`.
+Keep the existing app layout and exclude `rayfin/.temp/` from version control.
 
 This prepares the app's backend definitions; it does not provision a database.
 Rayfin is the app backend, not an existing database to select or connect to.
@@ -44,7 +43,7 @@ implementation described in the references.
 Read the installed package docs identified in these references, then follow them
 in order:
 
-- [Data modeling](./references/rayfin-data-modeling.md): entities, permissions and runtime client.
+- [Data modeling](./references/rayfin-data-modeling.md): entities, permissions and required [Managed Apps host initialization](./references/rayfin-data-modeling.md#step-4-initialize-through-managed-apps).
 - [CRUD UI](./references/rayfin-crud-ui.md): lists, forms, mutations and persistence checks.
 
 When invoked from `/create-app`, complete data modeling in Step 9 and return the

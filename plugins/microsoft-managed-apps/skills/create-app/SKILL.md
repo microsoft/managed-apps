@@ -211,8 +211,9 @@ dependencies and its [data modeling reference](../add-backend/references/rayfin-
 Forward the approved entities and the feature-check result with its CLI execution
 context so the shared reuse policy applies.
 
-Verify the authored entities and typed client exist, and capture their paths for
-Step 10. Defer UI work to Step 10 and checks to Step 11; do not deploy during setup.
+Verify the authored entities and the [host-backed client helper](../add-backend/references/rayfin-data-modeling.md#step-4-initialize-through-managed-apps)
+exist, and capture their paths for Step 10. Defer UI work to Step 10 and checks to
+Step 11; do not deploy during setup.
 
 For Rayfin, completion here means scaffolding, dependency installation and
 entity/client implementation, not provisioning. An unprovisioned backend does
@@ -243,10 +244,10 @@ If `npm run build` fails, fix the errors before running `ms app dev`. Don't hand
 
 For Rayfin, follow the backend skill's
 [UI/persistence checks](../add-backend/references/rayfin-crud-ui.md#checklist).
-Complete the build and local UI checks without treating an unprovisioned backend
-as missing user configuration. Defer live persistence checks until the managed
-app lifecycle has provisioned the backend; local compilation alone does not
-establish that. Do not deploy just to complete these checks.
+Attempt host-backed initialization in the App Player before reporting backend
+availability, following the backend skill's guidance. Report actual errors rather
+than inferring backend absence from missing local configuration.
+Do not deploy just to complete these checks.
 
 `ms app dev` runs two servers and prints an App Player URL like:
 
@@ -277,7 +278,7 @@ Provide:
   1. Tell me what to change — I'll edit the code and you'll see it update live in the browser.
   2. When you're happy with how it looks and behaves, say so. I'll commit + push your changes, run `ms app play --mode preview` to give you a cloud preview URL hosted in your environment, and *then* ask if you want me to `/deploy` to the live URL.
 - **Important**: explicitly note that **nothing has been deployed to the cloud yet** — current state is local dev only.
-- **App backend, if requested**: report the lifecycle stage actually reached. Before provisioning, say "Backend definitions and client code prepared; app backend not yet provisioned. Live persistence checks deferred." A local UI preview does not verify database persistence.
+- **App backend, if requested**: report what was implemented and verified, with actual errors or unrun checks. Do not infer provisioning state from missing local configuration. A local UI preview does not verify database persistence.
 
 When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, `ms app play --mode preview`, hand off the preview URL, then ask about `/deploy`. Do not skip the preview gate.
 

@@ -4,7 +4,8 @@ Reference for [/add-backend](../SKILL.md).
 
 ## Read the docs first
 
-Use the entities and client from [data modeling](./rayfin-data-modeling.md).
+Use the entities and [host-initialized client](./rayfin-data-modeling.md#step-4-initialize-through-managed-apps)
+from data modeling.
 The client API belongs to the installed packages; this reference covers the UI.
 Paths are relative to the app root; complete the entry skill's `npm install` step
 if dependencies are not installed.
@@ -15,7 +16,7 @@ and open `index.md` before the relevant pages:
 | Topic | Installed documentation |
 | --- | --- |
 | Paging, cursors and field nullability | `node_modules/@microsoft/rayfin-data/assets/docs/index.md` |
-| Client entry point | `node_modules/@microsoft/rayfin-client/assets/docs/index.md` |
+| Client data operations | `node_modules/@microsoft/rayfin-client/assets/docs/index.md` |
 
 If `@microsoft/rayfin-guide` is already installed, read
 `node_modules/@microsoft/rayfin-guide/assets/docs/data/graphql.md` for the query
@@ -67,8 +68,7 @@ until success, or restore it in its original position if an optimistic delete fa
 
 ## Per-user data
 
-Follow the installed permissions docs listed in [data modeling](./rayfin-data-modeling.md#read-the-docs-first)
-for server-side ownership.
+Follow the installed permissions docs listed in [data modeling](./rayfin-data-modeling.md#read-the-docs-first) for server-side ownership.
 Never use UI filtering as authorization. Clear private rows and pending results
 when the session changes.
 
