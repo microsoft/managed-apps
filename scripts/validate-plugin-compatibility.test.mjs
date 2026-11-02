@@ -121,10 +121,16 @@ test('rejects Copilot agent drift', t => {
 });
 
 test('rejects Copilot hook drift', t => {
-  const directory = fixture(t);
-  edit(directory, 'plugins/microsoft-managed-apps/com.github.copilot/hooks/hooks.json',
-    value => { value.hooks.preToolUse[0].bash = 'wrong'; });
-  assert.throws(() => validate(directory), /Copilot hooks must match/);
+  for (const change of [
+    value => { value.hooks.preToolUse[0].bash = 'wrong'; },
+    value => { value.hooks.preToolUse[0].bash = value.hooks.preToolUse[0].bash.replace(' --github-copilot', ''); },
+    value => { value.hooks.preToolUse[0].powershell = value.hooks.preToolUse[0].powershell.replace(' -GitHubCopilot', ''); },
+    value => { value.hooks.preToolUse[0].env = { COPILOT_CLI: '1' }; },
+  ]) {
+    const directory = fixture(t);
+    edit(directory, 'plugins/microsoft-managed-apps/com.github.copilot/hooks/hooks.json', change);
+    assert.throws(() => validate(directory), /Copilot hooks must match/);
+  }
 });
 
 test('rejects missing hook scripts', t => {
