@@ -1,16 +1,14 @@
 ---
 name: add-data-source
 description: Canonical add flow for Microsoft Managed Apps. Use when adding any data source through `ms app add data-source` (with `--as table` or `--as action`), or when the user wants help discovering which connector / api-id to use.
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
-**Reference:** [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
+**Reference:** [connector-reference.md](../../shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
 
-**Reference:** [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
+**Reference:** [allowed-actions.md](../../shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
 
 # Add Data Source (Canonical)
 
@@ -166,7 +164,7 @@ For runtime-selected organizations and tables, use the action command without `-
 In interactive action mode, decline the optional prompt to bind a specific Dataverse table.
 
 The CLI resolves connections inline. Pass `--connection-id <id>` or `-c <id>` when a specific connection is required.
-See [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md) for connection selection.
+See [connector-reference.md](../../shared/connector-reference.md) for connection selection.
 
 After a Dataverse add, check the new reference in `ms.config.json`.
 Its `id` must be `/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps`, unless the user explicitly requested the older connector.
@@ -246,7 +244,7 @@ can reach a failing deploy — not silently forgotten.
 
 **4d. Write the confirmed values into `ms.config.json`** (skip when deferring).
 
-Full rules, worked examples, and failure recovery: [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+Full rules, worked examples, and failure recovery: [allowed-actions.md](../../shared/allowed-actions.md).
 
 ### Step 5: Build
 

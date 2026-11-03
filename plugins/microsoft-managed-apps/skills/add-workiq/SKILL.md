@@ -1,12 +1,10 @@
 ---
 name: add-workiq
 description: Adds Work IQ Copilot MCP by delegating to /add-data-source with api-id=shared_a365copilotchatmcp and action mode. Use when users need Microsoft 365 knowledge-grounded Work IQ search/chat.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Work IQ Copilot MCP (Wrapper)
 

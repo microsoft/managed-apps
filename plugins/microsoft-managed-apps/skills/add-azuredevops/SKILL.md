@@ -1,12 +1,10 @@
 ---
 name: add-azuredevops
 description: Adds Azure DevOps by delegating to `/add-data-source` with `api-id=shared_visualstudioteamservices` and action mode. Use when adding Azure DevOps integration.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Azure DevOps (Wrapper)
 

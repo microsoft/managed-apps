@@ -1,12 +1,10 @@
 ---
 name: add-office365-users
 description: Adds Office 365 Users by delegating to `/add-data-source` with `api-id=shared_office365users` and action mode. Use for user profiles, managers, direct reports, people search, and profile photos.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Office 365 Users (Wrapper)
 

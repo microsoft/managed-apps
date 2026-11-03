@@ -1,12 +1,10 @@
 ---
 name: share
 description: Shares (or unshares) a Microsoft App with users via `ms app share` / `ms app unshare`. Use when updating app access control.
-user-invocable: true
-allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Glob Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns. **Always confirm before share/unshare.**
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns. **Always confirm before share/unshare.**
 
 # Share / Unshare
 

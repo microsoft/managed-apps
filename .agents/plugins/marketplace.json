@@ -1,0 +1,17 @@
+{
+  "name": "Managed-Apps",
+  "plugins": [
+    {
+      "name": "microsoft-managed-apps",
+      "source": {
+        "source": "local",
+        "path": "./plugins/microsoft-managed-apps"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

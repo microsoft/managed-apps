@@ -1,12 +1,10 @@
 ---
 name: add-dataverse
 description: Adds Microsoft Dataverse through `/add-data-source` with `api-id=shared_commondataserviceforapps`. Use for existing table bindings or Dataverse actions.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: opus
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Dataverse (Wrapper)
 
