@@ -41,7 +41,7 @@ function validateComponents(directory) {
   assert.deepEqual(readdirSync(resolve(plugin, 'com.github.copilot/agents')).sort(), [`${agent}.agent.md`],
     'Copilot architect agent must remain discoverable without duplicates');
   assert.equal(regularFile(plugin, `com.github.copilot/agents/${agent}.agent.md`),
-    regularFile(plugin, `agents/${agent}.md`).replaceAll('../shared/', '../../shared/'),
+    regularFile(plugin, `agents/${agent}.md`).replaceAll('../shared/', '../../shared/').replaceAll('../skills/', '../../skills/'),
     'Copilot agent must match the legacy agent except for relative resource paths');
 
   const legacy = readJson(directory, `${pluginPath}/hooks/hooks.json`);
