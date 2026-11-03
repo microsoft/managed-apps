@@ -1,12 +1,10 @@
 ---
 name: list-connectors
 description: Lists connectors available in the active environment — including whether each is allowed or blocked by your organization's policy — plus the connection-bound data sources already wired into a Microsoft App. Use when discovering connectors and their operations before adding data sources.
-user-invocable: true
-allowed-tools: Read, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # List Connectors
 
@@ -64,7 +62,7 @@ Parse the response for the data-source list and print a summary:
 
 | Connector       | api-id                            | Type     | Name                  |
 | --------------- | --------------------------------- | -------- | --------------------- |
-| Dataverse       | `dataverse`                       | table    | `contact`             |
+| Dataverse       | `shared_commondataserviceforapps`  | action   | (entire connector)    |
 | SharePoint Online | `shared_sharepointonline`        | table    | `Project Milestones`  |
 | Teams           | `shared_teams`                    | action   | (entire connector)    |
 
@@ -115,7 +113,7 @@ $BIN connector list-actions --connector <api-id> --json | jq -r '.[] | select(.b
 
 > This applies to **action** connectors only. Tabular data sources take a fixed vocabulary of
 > `"get"` / `"post"` / `"patch"` / `"delete"` per table — never operation IDs from this
-> command. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+> command. See [allowed-actions.md](../../shared/allowed-actions.md).
 
 ---
 

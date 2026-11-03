@@ -1,12 +1,10 @@
 ---
 name: add-office365
 description: Adds Office 365 Outlook by delegating to `/add-data-source` with `api-id=shared_office365` and action mode. Use when integrating Outlook mail/calendar.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Office 365 Outlook (Wrapper)
 
@@ -160,7 +158,7 @@ const result = await Office365OutlookService.SendEmailV2({
 
 ## Key Patterns
 
-**📋 Generic connector response handling:** [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md#connector-response-handling) — Error handling, array access (`.data.value`), empty results, and response structure patterns apply to all connectors, including Office 365.
+**📋 Generic connector response handling:** [shared-instructions.md](../../shared/shared-instructions.md#connector-response-handling) — Error handling, array access (`.data.value`), empty results, and response structure patterns apply to all connectors, including Office 365.
 
 **1. Always discover calendar ID first using `CalendarGetTables()`**
 

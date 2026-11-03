@@ -1,12 +1,10 @@
 ---
 name: dev
 description: Runs a Microsoft App locally with hot reload via `ms app dev`. Use when starting or restarting local development and surfacing the App Player URL.
-user-invocable: true
-allowed-tools: Read, Grep, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Local Dev
 
@@ -82,7 +80,7 @@ Then add a one-liner reminder of the iterate → preview → deploy loop:
 
 > "The browser tab hot-reloads as I edit code — tell me what to change. When you're happy with it, I'll commit + push your changes, run `ms app play --mode preview` for a cloud preview URL in your environment, and then ask if you want me to `/deploy`."
 
-When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md) — commit, push, preview, then ask about `/deploy`.
+When the user signals readiness, follow the **Ready-to-Ship Gate** in [shared-instructions.md](../../shared/shared-instructions.md) — commit, push, preview, then ask about `/deploy`.
 
 If the dev server prints an error during startup (port conflict, missing `ms.config.json`, expired auth), stop the background task, surface the error verbatim, and propose the targeted fix:
 

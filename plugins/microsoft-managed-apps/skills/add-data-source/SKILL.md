@@ -1,16 +1,14 @@
 ---
 name: add-data-source
 description: Canonical add flow for Microsoft Managed Apps. Use when adding any data source through `ms app add data-source` (with `--as table` or `--as action`), or when the user wants help discovering which connector / api-id to use.
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
-**Reference:** [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
+**Reference:** [connector-reference.md](../../shared/connector-reference.md) — Inline connection creation, Grep-first for large generated files.
 
-**Reference:** [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
+**Reference:** [allowed-actions.md](../../shared/allowed-actions.md) — Shared connections must declare `allowedActions` before deploy (Step 4).
 
 # Add Data Source (Canonical)
 
@@ -61,7 +59,7 @@ Collect:
 
 Additional by mode:
 
-- `table`: `dataset`, `table`
+- `table`: `dataset`, `table`. Dataverse uses a table logical name without `dataset`, plus an optional `dataverse-environment-id`.
 
 > **SQL stored procedures:** the CLI has no `ms app add procedure` command and `ms app add data-source`
 > does not accept `--sql-stored-procedure`. You can still add the SQL data source as a table
@@ -74,7 +72,7 @@ Try sources in this order; stop at the first one that yields a value:
 
 1. **Wrapper preset.** If invoked by a specialized `/add-*` skill (see "Common Presets" below), use the preset api-id and skip discovery.
 2. **Caller-supplied.** If `$ARGUMENTS` includes an `api-id` (e.g., `api-id=shared_office365`), use it verbatim.
-3. **User-supplied verbatim string.** If the user already typed an api-id (anything matching the `shared_*` / `dataverse` / `microsoftcopilotstudio` shape, or a string they explicitly call an api-id), use it.
+3. **User-supplied verbatim string.** If the user already typed an api-id (anything matching the `shared_*` / `microsoftcopilotstudio` shape, or a string they explicitly call an api-id), use it. Apply the Dataverse rule below to ambiguous service names.
 4. **Discovery via `ms connector list`.** **Do not ask the user to type an api-id from memory.** Instead:
 
    a. Ask one question: "Which connector do you need? (a short keyword like 'teams', 'sql', 'sharepoint', 'salesforce' is fine — I'll search the catalog.)" Capture the keyword as `{term}`.
@@ -90,6 +88,17 @@ Try sources in this order; stop at the first one that yields a value:
    d. If `ms connector list --search "<term>"` returns no results, fall back to `ms connector list` with no filter, surface a representative slice, and ask the user to refine the term. Do not proceed with a guessed api-id.
 
 5. **Validation.** Once an api-id is chosen, confirm it's real before spending a build cycle on it: `$BIN connector list-actions --connector <api-id> --search ""` should succeed. If the CLI replies that the api-id is unknown, drop back to step 4 — don't keep retrying with the same value.
+
+#### Dataverse intent hint
+
+For Dataverse requests, use `shared_commondataserviceforapps`.
+Treat `dataverse` and "Microsoft Dataverse" as ambiguous service names, not exact connector IDs.
+Both the current connector and the older `shared_commondataservice` connector use that display name.
+Use the older connector only when the user explicitly requests it.
+
+Use `table` mode for a fixed, existing table.
+Use `action` mode when users choose the organization URL or entity-set name inside the app.
+Preserve the caller's selected mode. Do not ask for a fixed table in action mode.
 
 #### Work IQ intent hint
 
@@ -112,7 +121,7 @@ If they insist on `/add-data-source`, proceed but **after adding the connector, 
 
 #### 2b. Resolve `mode`
 
-For api-ids in the "Common Presets" table, use that table's mode. Otherwise ask the user one question, framed by what they want to do:
+For Dataverse, use the intent rule above. For other api-ids in the "Common Presets" table, use that table's mode. Otherwise ask the user one question, framed by what they want to do:
 
 - "Read or write rows in a tabular store?" → `table`
 - "Trigger an operation (send a message, post a file, list events)?" → `action`
@@ -136,16 +145,36 @@ connector is passed via `--connector` (there is **no** `--api-id` flag).
 $BIN app add data-source --connector <api-id> --as action
 ```
 
-**Table mode**
+**Table mode (other connectors)**
 
 ```bash
 $BIN app add data-source --connector <api-id> --as table --dataset "<dataset>" --table "<table>"
 ```
 
-The CLI resolves a connection inline (interactive picker, or `--connection-id <id>` / `-c <id>`
-for a specific one). In non-interactive mode, if `--connection-id` is omitted the CLI prints the
-available connections and then errors. Dataverse (`--connector dataverse --as table`) needs no
-`--connection-id`. See [connector-reference.md](${CLAUDE_PLUGIN_ROOT}/shared/connector-reference.md).
+**Dataverse table mode**
+
+```bash
+$BIN app add data-source --connector shared_commondataserviceforapps --as table --table "<logical-name>"
+```
+
+Do not pass `--dataset`. Run once per table.
+Add `--dataverse-environment-id <environment-guid>` only when targeting a specific environment.
+If omitted, the CLI uses the app environment.
+For runtime-selected organizations and tables, use the action command without `--table` or `--dataverse-environment-id`.
+In interactive action mode, decline the optional prompt to bind a specific Dataverse table.
+
+The CLI resolves connections inline. Pass `--connection-id <id>` or `-c <id>` when a specific connection is required.
+See [connector-reference.md](../../shared/connector-reference.md) for connection selection.
+
+After a Dataverse add, check the new reference in `ms.config.json`.
+Its `id` must be `/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps`, unless the user explicitly requested the older connector.
+Check that the generated service uses that reference.
+If the binding is wrong, stop and report the mismatch. Do not change only the ID in the config.
+Regenerate services and update app calls and shared `allowedActions` when replacing an older binding.
+
+Check required operations with `ms connector list-actions --connector shared_commondataserviceforapps --json`.
+For a runtime-selected organization, inspect the `*WithOrganization` operations and their generated signatures.
+If policy blocks a required operation, report the restriction. Do not substitute the older connector or bypass policy.
 
 > **SQL stored procedures** have no `ms app add procedure` command and `--sql-stored-procedure` is not
 > accepted by `ms app add data-source`; binding a specific stored procedure is not currently supported.
@@ -191,9 +220,10 @@ If it prints `OK`, **skip to Step 5** — the connection isn't shared, or is alr
 | dataset tables (`dataSets`)         | per-table `allowedActions` — every table, from `"get"` / `"post"` / `"patch"` / `"delete"` |
 | no dataset tables                   | connector-level `allowedActions` — Action IDs from `ms connector list-actions --connector <api-id> --json` (`id`, `behavior: Allow` only) |
 
-**4c. Infer least privilege, then confirm.** Grep `src/` for calls into the generated service
-and map them to values (read/list → `get`, create → `post`, update → `patch`, delete →
-`delete`). Present the inferred list and ask the user to confirm or adjust:
+**4c. Infer least privilege, then confirm.** Grep `src/` for calls into the generated service.
+For dataset tables, map read/list to `get`, create to `post`, update to `patch`, and delete to `delete`.
+For action references, use the exact invoked operation IDs from `ms connector list-actions`.
+Present the inferred list and ask the user to confirm or adjust:
 
 > "`<reference>` is a shared connection, so it needs an action policy before deploy. From the
 > code, I'd declare `<inferred>`. Anything else it should be allowed to do?"
@@ -214,7 +244,7 @@ can reach a failing deploy — not silently forgotten.
 
 **4d. Write the confirmed values into `ms.config.json`** (skip when deferring).
 
-Full rules, worked examples, and failure recovery: [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+Full rules, worked examples, and failure recovery: [allowed-actions.md](../../shared/allowed-actions.md).
 
 ### Step 5: Build
 
@@ -233,7 +263,7 @@ shared — the `allowedActions` that were agreed, so the next session doesn't re
 
 | Wrapper skill        | api-id                          | mode       |
 | -------------------- | ------------------------------- | ---------- |
-| `/add-dataverse`     | `dataverse`                     | `table`    |
+| `/add-dataverse`     | `shared_commondataserviceforapps` | `table` or `action` by intent |
 | `/add-sharepoint`    | `shared_sharepointonline`       | `table`    |
 | `/add-excel`         | `shared_excelonlinebusiness`    | `table`    |
 | `/add-office365`     | `shared_office365`              | `action`   |

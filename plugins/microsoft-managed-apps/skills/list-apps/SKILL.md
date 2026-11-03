@@ -1,12 +1,10 @@
 ---
 name: list-apps
 description: Discovers managed apps in the active environment via `ms app list --json` and optional `ms app show --json`. Use when listing or locating apps.
-user-invocable: true
-allowed-tools: Read, Grep, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Grep Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # List Apps
 

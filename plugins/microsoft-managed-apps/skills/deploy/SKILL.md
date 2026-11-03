@@ -1,12 +1,10 @@
 ---
 name: deploy
 description: Ships a Microsoft App to the cloud. Use when the user asks to deploy via `ms app deploy` (with optional build-status traceability flow).
-user-invocable: true
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash, AskUserQuestion
-model: sonnet
+allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns. **Always confirm before deploy.**
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns. **Always confirm before deploy.**
 
 # Deploy
 
@@ -87,7 +85,7 @@ Any `MISSING` or `INVALID` line means the deploy will fail. **Stop and fix it** 
 
 Infer the least-privilege set from what `src/` actually calls, propose it, and confirm with the
 user before writing. Do **not** grant everything to get past the gate, and do **not** delete
-`sharedConnectionId`. See [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md).
+`sharedConnectionId`. See [allowed-actions.md](../../shared/allowed-actions.md).
 
 `OK` means every shared reference is covered — continue.
 
@@ -97,7 +95,7 @@ user before writing. Do **not** grant everything to get past the gate, and do **
 npm run build
 ```
 
-Failure handling per [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md):
+Failure handling per [shared-instructions.md](../../shared/shared-instructions.md):
 
 - TS6133 (unused import): remove and retry once.
 - Other TS errors: report file:line, STOP.
@@ -174,7 +172,7 @@ If `memory-bank.md` exists:
 - Record the deploy path used (standard / traced).
 - Capture the commit SHA at deploy time.
 
-If no memory bank exists, create one per [memory-bank.md](${CLAUDE_PLUGIN_ROOT}/shared/memory-bank.md) so subsequent skills have context.
+If no memory bank exists, create one per [memory-bank.md](../../shared/memory-bank.md) so subsequent skills have context.
 
 ---
 
@@ -183,7 +181,7 @@ If no memory bank exists, create one per [memory-bank.md](${CLAUDE_PLUGIN_ROOT}/
 | Error                                                  | Fix                                                                                                                                       |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `ms app deploy`: 401 / token expired                     | `$BIN auth login` and retry.                                                                                                              |
-| `ms app deploy`: `Invalid ms.config.json for shared connection policy enforcement` | A shared connection reference is missing `allowedActions`. The listed issues name the reference (and dataset/table) at fault. Declare them per [allowed-actions.md](${CLAUDE_PLUGIN_ROOT}/shared/allowed-actions.md) and retry. Never remove `sharedConnectionId` to bypass this. |
+| `ms app deploy`: `Invalid ms.config.json for shared connection policy enforcement` | A shared connection reference is missing `allowedActions`. The listed issues name the reference (and dataset/table) at fault. Declare them per [allowed-actions.md](../../shared/allowed-actions.md) and retry. Never remove `sharedConnectionId` to bypass this. |
 | `ms app deploy`: env mismatch                            | Active CLI env doesn't match `ms.config.json`. Either re-create/redeploy against the matching environment, or update `ms.config.json`. |
 | `git push`: no upstream configured                      | Run `git push -u origin HEAD`, then retry deploy.                                                                                         |
 | `git commit`: author identity unknown                   | Configure Git identity (`git config --global user.name` / `git config --global user.email`) and retry commit.                            |

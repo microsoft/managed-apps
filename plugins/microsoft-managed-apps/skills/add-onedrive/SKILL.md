@@ -1,12 +1,10 @@
 ---
 name: add-onedrive
 description: Adds OneDrive for Business by delegating to `/add-data-source` with `api-id=shared_onedriveforbusiness` and action mode. Use when integrating OneDrive files.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add OneDrive for Business (Wrapper)
 

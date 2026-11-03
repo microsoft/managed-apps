@@ -13,7 +13,8 @@ Look for the file `~/.microsoft-managed-apps-last-version-check`. Read it if it 
 
 ### Step 2: Read the local version
 
-Read `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json` and extract the `version` field.
+Read [the canonical plugin manifest](../plugin.json) and extract the `version` field.
+Resolve this path relative to this instruction file, not the user's project.
 
 ### Step 3: Fetch the latest version from the marketplace
 

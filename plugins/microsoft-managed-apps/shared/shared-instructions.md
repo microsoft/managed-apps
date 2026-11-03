@@ -4,6 +4,27 @@
 
 All skills reference this single file. When new shared instructions are added, update this file only — no changes needed to individual skills.
 
+Resolve packaged resource links relative to the file that contains the link, not the user's project directory.
+The plugin does not select an AI model. Use the model selected in the client.
+
+## CLI attribution without hooks
+
+Claude Code and Copilot use the packaged hooks to set CLI attribution.
+Do not add another attribution prefix when those hooks are active.
+
+The package does not provide Codex hooks. In Codex, default `MS_CLI_ORIGIN` to `plugin/codex` before an `ms` command.
+Preserve any existing value, including an empty value. Use the syntax for the active shell:
+
+```bash
+export MS_CLI_ORIGIN="${MS_CLI_ORIGIN-plugin/codex}"
+```
+
+```powershell
+if (-not (Test-Path Env:MS_CLI_ORIGIN)) { $env:MS_CLI_ORIGIN = 'plugin/codex' }
+```
+
+This Codex behavior depends on the agent following these instructions. No hook enforces it.
+
 ---
 
 ## Safety Guardrails

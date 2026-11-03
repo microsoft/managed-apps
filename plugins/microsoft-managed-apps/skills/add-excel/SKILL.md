@@ -1,12 +1,10 @@
 ---
 name: add-excel
 description: Adds Excel Online (Business) by delegating to `/add-data-source` with `api-id=shared_excelonlinebusiness` and table mode. Use when binding Excel tables.
-user-invocable: true
-allowed-tools: Read, AskUserQuestion, Skill
-model: sonnet
+allowed-tools: Read AskUserQuestion Skill
 ---
 
-**📋 Shared Instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)** — Cross-cutting concerns.
+**📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
 # Add Excel Online (Business) (Wrapper)
 

@@ -1,10 +1,9 @@
 ---
 name: add-backend
 description: Add an app backend with `ms app add backend --provider rayfin`. Currently covers database entities and client integration. Use only when the user explicitly requests a database, /add-backend, or Rayfin.
-user-invocable: true
 ---
 
-**Shared instructions: [shared-instructions.md](${CLAUDE_PLUGIN_ROOT}/shared/shared-instructions.md)**
+**Shared instructions: [shared-instructions.md](../../shared/shared-instructions.md)**
 
 # Add an app backend
 
