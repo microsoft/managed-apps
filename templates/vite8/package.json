@@ -10,13 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@microsoft/managed-apps": "^0.6.3",
+    "@microsoft/cmr-apps": "^0.6.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@microsoft/managed-apps-vite-plugin": "^0.4.8",
+    "@microsoft/cmr-apps-vite-plugin": "^0.4.8",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

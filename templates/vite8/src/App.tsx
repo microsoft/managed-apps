@@ -93,7 +93,7 @@ function App() {
             </li>
             <li>
               <a
-                href="https://www.npmjs.com/package/@microsoft/managed-apps-cli"
+                href="https://www.npmjs.com/package/@microsoft/cmr-cli"
                 target="_blank"
               >
                 <svg

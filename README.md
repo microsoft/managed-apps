@@ -5,13 +5,13 @@
 
 Copilot Managed Runtime hosts Microsoft 365 line-of-business applications that automatically inherit organizational governance, security, and compliance controls from the moment they're created.
 
-This repository hosts the official first-party project **templates** and is the home for **public issues**. The tooling itself ships as npm packages under the `@microsoft/managed-apps` scope:
+This repository hosts the official first-party project **templates** and is the home for **public issues**. The tooling itself ships as npm packages under the `@microsoft` scope:
 
 | Package | Description |
 | --- | --- |
-| [`@microsoft/managed-apps`](https://www.npmjs.com/package/@microsoft/managed-apps) | SDK for building apps hosted on Copilot Managed Runtime |
-| [`@microsoft/managed-apps-cli`](https://www.npmjs.com/package/@microsoft/managed-apps-cli) | Command-line interface for building and managing apps hosted on Copilot Managed Runtime |
-| [`@microsoft/managed-apps-vite-plugin`](https://www.npmjs.com/package/@microsoft/managed-apps-vite-plugin) | Vite plugin for apps hosted on Copilot Managed Runtime |
+| [`@microsoft/cmr-apps`](https://www.npmjs.com/package/@microsoft/cmr-apps) | SDK for building apps hosted on Copilot Managed Runtime |
+| [`@microsoft/cmr-cli`](https://www.npmjs.com/package/@microsoft/cmr-cli) | Command-line interface for building and managing apps hosted on Copilot Managed Runtime |
+| [`@microsoft/cmr-apps-vite-plugin`](https://www.npmjs.com/package/@microsoft/cmr-apps-vite-plugin) | Vite plugin for apps hosted on Copilot Managed Runtime |
 
 ## Getting started
 
