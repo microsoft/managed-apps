@@ -1,6 +1,6 @@
 ---
 name: "🐞 Bug Report"
-about: "Report a bug with Microsoft Managed Apps"
+about: "Report a bug with Copilot Managed Runtime"
 title: "[Bug] <short description>"
 labels: bug
 ---

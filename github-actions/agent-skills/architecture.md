@@ -1,6 +1,6 @@
-# Managed Apps GitHub Actions — Architecture & Flow
+# Copilot Managed Runtime GitHub Actions — Architecture & Flow
 
-How the actions under `github-actions/` fit into the end-to-end managed apps lifecycle:
+How the actions under `github-actions/` fit into the end-to-end Copilot Managed Runtime lifecycle:
 one-time app setup, the local dev loop, the CI/CD deploy loop, and how this repo
 releases the actions themselves. Diagrams are Mermaid (render on GitHub).
 
@@ -63,7 +63,7 @@ sequenceDiagram
     participant WF as Workflow
     participant ACT as ms-app-deploy
     participant CLI as ms CLI
-    participant RP as Managed Apps service
+    participant RP as Copilot Managed Runtime service
 
     WF->>ACT: with working-directory, app-id, client-secret, tenant-id
     ACT->>ACT: require MS_MANAGED_APPS_INSTALLED == true
@@ -127,7 +127,7 @@ flowchart LR
 - **Auth:** interactive sign-in (`ms auth login`) works for local dev. For CI,
   supply all three Service Principal inputs (`app-id`, `client-secret`,
   `tenant-id`) — the actions set `MS_CLI_USE_SP_AUTH` + `MS_CLI_SP_*`, and the service
-  accepts the SPN for managed apps operations, so the deploy runs with no developer in
+  accepts the SPN for Copilot Managed Runtime operations, so the deploy runs with no developer in
   the loop.
 - **Sharing:** for `repoType: none` apps (no platform-managed repo),
   `ms app share <id> --access edit` grants contributor access at the **app scope**

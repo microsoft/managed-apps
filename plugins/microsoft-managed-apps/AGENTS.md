@@ -1,10 +1,10 @@
-# Microsoft Managed Apps Plugin — Development Guidelines
+# Copilot Managed Runtime Plugin — Development Guidelines
 
-This file provides instructions for assistants working on the managed apps plugin itself (not for end-users of the plugin).
+This file provides instructions for assistants working on the Copilot Managed Runtime plugin itself (not for end-users of the plugin).
 
 ## Overview
 
-The managed apps plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to scaffold, develop, and ship managed apps end-to-end. It provides skills for:
+The Copilot Managed Runtime plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to scaffold, develop, and ship apps on Copilot Managed Runtime end-to-end. It provides skills for:
 
 - Creating a new app (`/create-app`) — global install of the CLI, scaffold, local dev loop.
 - Iterating locally (`/dev`) — `ms app dev`, hot reload against the App Player.

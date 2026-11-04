@@ -36,8 +36,8 @@ ms.config.json  ──►  RP at deploy time  ──►  executionRestrictions p
                                        policy and allows or refuses it
 ```
 
-Enforcement lives in the **Connectors infrastructure**, not in the app and not in the managed
-apps host. APIHub runs every connector request through the runtime policy and refuses anything
+Enforcement lives in the **Connectors infrastructure**, not in the app and not in the Copilot
+Managed Runtime host. APIHub runs every connector request through the runtime policy and refuses anything
 the policy doesn't permit. The host's part is only addressing: it rewrites the outgoing
 connector URL to point at the policy rather than the connection, and stamps an
 `x-ms-shared-connection-id` header.

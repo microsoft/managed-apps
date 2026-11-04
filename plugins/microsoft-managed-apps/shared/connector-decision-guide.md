@@ -293,7 +293,7 @@ This skill handles ANY connector, including those not listed in this guide. When
 
 **This guide covers the most common cases, but `/add-data-source` works with any Microsoft connector — not just the commonly listed connectors above.**
 
-### **For managed apps Architect Agent**
+### **For Copilot Managed Runtime Architect Agent**
 
 When recommending connectors for an app design:
 1. Always start with the user's end goal (not available connectors)

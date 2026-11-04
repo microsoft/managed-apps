@@ -1,6 +1,6 @@
 ---
 name: create-app
-description: Creates managed apps using React and Vite. Use when scaffolding a new app with `ms app create` and ending on local dev with `ms app dev`.
+description: Creates apps on Copilot Managed Runtime using React and Vite. Use when scaffolding a new app with `ms app create` and ending on local dev with `ms app dev`.
 allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion EnterPlanMode ExitPlanMode Skill
 ---
 

@@ -3,7 +3,7 @@
 
 // src/actions/ms-app-pack/index.ts
 //
-// Packs a Microsoft managed apps code app via `ms app pack`. Pack runs the `buildCommand` from
+// Packs a Copilot Managed Runtime code app via `ms app pack`. Pack runs the `buildCommand` from
 // ms.config.json (default: `npm run build`) and copies the result into the
 // canonical packed layout `<projectRoot>/.ms/packed/apps/<appId>/client/`.
 //

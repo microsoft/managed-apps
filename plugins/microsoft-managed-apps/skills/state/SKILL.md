@@ -6,7 +6,7 @@ allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion
 
 **📋 Shared Instructions: [shared-instructions.md](../../shared/shared-instructions.md)** — Cross-cutting concerns.
 
-# Managed Apps State with CLI schema + generated client
+# Copilot Managed Runtime State with CLI schema + generated client
 
 Every Microsoft Managed App can use built-in app state when the `state` feature is enabled for the
 current CLI/environment: a NoSQL store the app calls directly (no middle-tier function, connector,
@@ -50,7 +50,7 @@ feature.
 
 ## ⚠️ Local testing requires local gateway mode
 
-Generated state services require the Managed Apps local gateway path during local development.
+Generated state services require the Copilot Managed Runtime local gateway path during local development.
 Before testing data behavior locally, make sure the app has `@microsoft/managed-apps-vite-plugin`
 0.4.2 or later (the version that added `devMode: 'localGateway'`; older versions won't start the
 local gateway), then opt the app into local gateway mode.

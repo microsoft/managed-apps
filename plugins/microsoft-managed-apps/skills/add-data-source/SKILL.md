@@ -1,6 +1,6 @@
 ---
 name: add-data-source
-description: Canonical add flow for Microsoft Managed Apps. Use when adding any data source through `ms app add data-source` (with `--as table` or `--as action`), or when the user wants help discovering which connector / api-id to use.
+description: Canonical add flow for Copilot Managed Runtime. Use when adding any data source through `ms app add data-source` (with `--as table` or `--as action`), or when the user wants help discovering which connector / api-id to use.
 allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion Skill
 ---
 

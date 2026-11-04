@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook: inform the agent that the Microsoft Managed Apps plugin
+# SessionStart hook: inform the agent that the Copilot Managed Runtime plugin
 # automatically attributes every `ms` CLI invocation via MS_CLI_ORIGIN.
 # The PreToolUse hook (pre-tool-use.sh) enforces this transparently — this
 # message just makes the behavior visible to the agent so it isn't surprised

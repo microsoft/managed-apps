@@ -1,6 +1,6 @@
 ---
 name: list-apps
-description: Discovers managed apps in the active environment via `ms app list --json` and optional `ms app show --json`. Use when listing or locating apps.
+description: Discovers apps on Copilot Managed Runtime in the active environment via `ms app list --json` and optional `ms app show --json`. Use when listing or locating apps.
 allowed-tools: Read Grep Bash AskUserQuestion
 ---
 

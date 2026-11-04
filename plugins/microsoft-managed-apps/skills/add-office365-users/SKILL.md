@@ -92,7 +92,7 @@ Call `UserPhotoMetadata` before downloading the photo. `HasPhoto: false` is a va
 no-photo state; render initials or another accessible fallback.
 
 Image responses are a special runtime contract: the generated `UserPhoto_V2` signature may
-declare `IOperationResult<string>`, but the Managed Apps SDK decodes an `image/*` response into
+declare `IOperationResult<string>`, but the Copilot Managed Runtime SDK decodes an `image/*` response into
 a `Uint8Array`. Do not interpolate that byte array directly into a base64 URL, and do not use a
 `blob:` URL—the deployed App Player content security policy may block `blob:` under `img-src`.
 

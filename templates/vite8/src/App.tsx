@@ -37,8 +37,8 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#documentation-icon"></use>
           </svg>
-          <h2>Microsoft managed apps Documentation</h2>
-          <p>Build and ship managed apps</p>
+          <h2>Copilot Managed Runtime Documentation</h2>
+          <p>Build and ship apps on Copilot Managed Runtime</p>
           <ul>
             <li>
               <a
@@ -76,7 +76,7 @@ function App() {
           <svg className="icon" role="presentation" aria-hidden="true">
             <use href="/icons.svg#social-icon"></use>
           </svg>
-          <h2>Connect with Microsoft managed apps</h2>
+          <h2>Connect with Copilot Managed Runtime</h2>
           <p>The project and its packages</p>
           <ul>
             <li>

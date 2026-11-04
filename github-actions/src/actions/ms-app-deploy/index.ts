@@ -3,7 +3,7 @@
 
 // src/actions/ms-app-deploy/index.ts
 //
-// Deploys a Microsoft managed apps code app via `ms app deploy`. Three modes:
+// Deploys a Copilot Managed Runtime code app via `ms app deploy`. Three modes:
 //
 //   1. repoType:'none' + artifact-path supplied → --artifact <zip>
 //      Uploads a pre-built zip and deploys it.

@@ -1,6 +1,6 @@
-# Managed Apps GitHub Actions
+# Copilot Managed Runtime GitHub Actions
 
-GitHub Actions for building and deploying [Microsoft Managed Apps](https://www.npmjs.com/package/@microsoft/managed-apps-cli) from CI.
+GitHub Actions for building and deploying apps on [Copilot Managed Runtime](https://www.npmjs.com/package/@microsoft/managed-apps-cli) from CI.
 
 ## Actions
 
@@ -53,7 +53,7 @@ See each action's `action.yml` for the full input/output reference.
 
 Step-by-step guides any operator — or coding-agent CLI (GitHub Copilot CLI, Claude Code, etc.) — can follow. See [`AGENTS.md`](AGENTS.md) for the index.
 
-- [Architecture & Flow](agent-skills/architecture.md) — the end-to-end managed apps lifecycle (setup, local dev, CI loops), the `ms-app-deploy` sequence with service rejection points, and the release/versioning flow, with diagrams.
+- [Architecture & Flow](agent-skills/architecture.md) — the end-to-end Copilot Managed Runtime lifecycle (setup, local dev, CI loops), the `ms-app-deploy` sequence with service rejection points, and the release/versioning flow, with diagrams.
 - [Release guide](agent-skills/release-guide.md) — how to cut a release PR (version bump + changelog + dist rebuild).
 
 ## Prerequisites

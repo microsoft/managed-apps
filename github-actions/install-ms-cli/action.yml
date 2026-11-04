@@ -3,7 +3,7 @@
 #
 # install-ms-cli/action.yml
 #
-# Installs the managed apps `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner.
+# Installs the Copilot Managed Runtime `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner.
 #
 # Defaults to the public npm registry — @microsoft/managed-apps-cli is published there
 # (since 2026-05-14). No inputs are required for standard usage:
@@ -20,7 +20,7 @@
 #       registry-auth-token: ${{ secrets.AZURE_DEVOPS_PAT }}
 #
 name: 'install-ms-cli'
-description: 'Install the Microsoft managed apps CLI (@microsoft/managed-apps-cli, binary: ms)'
+description: 'Install the Copilot Managed Runtime CLI (@microsoft/managed-apps-cli, binary: ms)'
 
 inputs:
   version:

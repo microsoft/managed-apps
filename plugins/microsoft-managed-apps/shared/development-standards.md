@@ -1,6 +1,6 @@
 # Development Standards
 
-Standards that apply to all managed apps skills.
+Standards that apply to all Copilot Managed Runtime skills.
 
 ## Theme
 
@@ -42,7 +42,7 @@ The upgrade prompt satisfies the global-install confirmation requirement; do not
 
 ## Build & Deploy
 
-- **Default loop is `ms app dev`**, not deploy. Managed apps run locally against the App Player with hot reload; deploy only when the user asks.
+- **Default loop is `ms app dev`**, not deploy. Apps on Copilot Managed Runtime run locally against the App Player with hot reload; deploy only when the user asks.
 - When the user does want to ship:
   - Local-built (primary): `npm run build`, then `git add -A && git commit && git push`, then `ms app deploy`.
   - Cloud-built: `git add -A && git commit && git push`, then `ms app deploy [--commit <sha>]`.

@@ -9,7 +9,7 @@ import test from 'node:test';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const windows = process.platform === 'win32';
 const shell = windows ? 'powershell' : 'bash';
-const directory = mkdtempSync(join(tmpdir(), 'managed apps hooks '));
+const directory = mkdtempSync(join(tmpdir(), 'Copilot Managed Runtime hooks '));
 cpSync(join(root, 'plugins/microsoft-managed-apps/hooks'), join(directory, 'hooks'), { recursive: true });
 test.after(() => rmSync(directory, { recursive: true, force: true }));
 

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Managed Apps GitHub Actions (under `github-actions/`)
+All notable changes to the Copilot Managed Runtime GitHub Actions (under `github-actions/`)
 are documented here. This project follows [Semantic Versioning](https://semver.org)
 and the format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
@@ -12,7 +12,7 @@ the new version **in the same PR that bumps the version**, before it merges to
 
 ## [1.0.1] - 2026-06-22
 
-Initial release of the Managed Apps GitHub Actions.
+Initial release of the Copilot Managed Runtime GitHub Actions.
 
 ### Added
 - `install-ms-cli` — installs `@microsoft/managed-apps-cli` (binary: `ms`) on the

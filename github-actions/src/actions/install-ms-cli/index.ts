@@ -3,7 +3,7 @@
 
 // src/actions/install-ms-cli/index.ts
 //
-// Installs the managed apps `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner
+// Installs the Copilot Managed Runtime `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner
 // via npm. The package's `bin` field maps to the `ms` executable.
 
 import * as core from '@actions/core';

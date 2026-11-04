@@ -3,7 +3,7 @@
 #
 # ms-app-deploy/action.yml
 #
-# Deploys a Microsoft managed apps code app via `ms app deploy`. Three deploy modes are
+# Deploys a Copilot Managed Runtime code app via `ms app deploy`. Three deploy modes are
 # supported, selected based on inputs and the app's repoType from
 # ms.config.json:
 #
@@ -35,7 +35,7 @@
 # Service Principal auth:
 #   The auth inputs (`app-id`, `client-secret`, `tenant-id`) are wired to the
 #   CLI's SPN env vars (MS_CLI_SP_* + MS_CLI_USE_SP_AUTH). The service
-#   accepts Service Principal identities for managed apps operations. Provide all three
+#   accepts Service Principal identities for Copilot Managed Runtime operations. Provide all three
 #   inputs together to deploy as the SPN with no developer in the loop.
 # ---------------------------------------------------------------------------
 #
@@ -74,7 +74,7 @@
 #       tenant-id:     ${{ secrets.PP_SP_TENANT_ID }}
 #
 name: 'ms-app-deploy'
-description: 'Deploy a Microsoft managed apps code app for the given commit'
+description: 'Deploy a Copilot Managed Runtime code app for the given commit'
 
 inputs:
   # ── App context ───────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ inputs:
   cloud:
     description: >
       Cloud instance to target. One of: prod, test, preview,
-      gccmoderate, dev. The managed apps end-to-end flow is currently supported only
+      gccmoderate, dev. The Copilot Managed Runtime end-to-end flow is currently supported only
       in 'test'. Maps to MS_CLI_CLOUD_INSTANCE.
     required: false
     default: 'test'

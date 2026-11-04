@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Build and run a Microsoft App using just your coding copilot. No prior managed apps knowledge needed.
+Build and run a Microsoft App using just your coding copilot. No prior Copilot Managed Runtime knowledge needed.
 
 ---
 
@@ -15,7 +15,7 @@ node --version   # should print v22.x.x or higher
 ```
 
 **Git**
-Managed apps store app code in a remote git repository, and `ms app create` initializes the local repo. Install from [git-scm.com](https://git-scm.com). Git for Windows includes Git Credential Manager, which the first `ms app create` will exercise.
+Apps on Copilot Managed Runtime store app code in a remote git repository, and `ms app create` initializes the local repo. Install from [git-scm.com](https://git-scm.com). Git for Windows includes Git Credential Manager, which the first `ms app create` will exercise.
 
 That's it for now — `/create-app` installs the `ms` CLI itself globally on its first run.
 

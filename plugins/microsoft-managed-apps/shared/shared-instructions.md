@@ -1,6 +1,6 @@
 # Shared Instructions
 
-**This file aggregates all cross-cutting instructions that apply to every skill in the managed apps plugin.**
+**This file aggregates all cross-cutting instructions that apply to every skill in the Copilot Managed Runtime plugin.**
 
 All skills reference this single file. When new shared instructions are added, update this file only — no changes needed to individual skills.
 
@@ -162,7 +162,7 @@ By default, `ms app create` resolves and uses an environment automatically — p
 
 **For external integrations, use Power Platform connectors. Never make direct API calls (fetch, axios, Graph API, Azure REST, etc.).**
 
-Managed apps run inside a sandbox. Direct HTTP calls to external APIs will fail at runtime because the sandbox does not allow arbitrary outbound network requests — only connector-proxied calls work.
+Apps on Copilot Managed Runtime run inside a sandbox. Direct HTTP calls to external APIs will fail at runtime because the sandbox does not allow arbitrary outbound network requests — only connector-proxied calls work.
 
 **If a connector exists for the service, use it — no exceptions.**
 
@@ -210,7 +210,7 @@ This availability check does not establish runtime authorization.
 
 With the gate passed, Rayfin provides the app backend database, not an external
 integration. Follow `/add-backend` and its local modeling/CRUD references,
-then use the existing managed apps build and deploy workflow.
+then use the existing Copilot Managed Runtime build and deploy workflow.
 
 ---
 
