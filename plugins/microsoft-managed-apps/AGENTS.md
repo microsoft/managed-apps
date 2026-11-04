@@ -4,7 +4,7 @@ This file provides instructions for assistants working on the Copilot Managed Ru
 
 ## Overview
 
-The Copilot Managed Runtime plugin wraps `@microsoft/managed-apps-cli` (binary `ms`) to scaffold, develop, and ship apps on Copilot Managed Runtime end-to-end. It provides skills for:
+The Copilot Managed Runtime plugin wraps `@microsoft/cmr-cli` (binary `ms`) to scaffold, develop, and ship apps on Copilot Managed Runtime end-to-end. It provides skills for:
 
 - Creating a new app (`/create-app`) — global install of the CLI, scaffold, local dev loop.
 - Iterating locally (`/dev`) — `ms app dev`, hot reload against the App Player.

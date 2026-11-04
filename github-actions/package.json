@@ -1,5 +1,5 @@
 {
-  "name": "@microsoft/managed-apps-github-actions",
+  "name": "@microsoft/cmr-apps-github-actions",
   "version": "1.0.1",
   "private": true,
   "description": "GitHub Actions for building and deploying apps on Copilot Managed Runtime from CI",

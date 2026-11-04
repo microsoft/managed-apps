@@ -12,7 +12,7 @@
 //   3. repoType:'native'/'github' → --commit <sha>
 //      Server-side build for the commit, then deploy.
 //
-// Requires @microsoft/managed-apps-cli >= 0.7.0 for --artifact support.
+// Requires @microsoft/cmr-cli >= 0.7.0 for --artifact support.
 //
 // Reads `appId`, `environmentId`, `repoType` from ms.config.json (written
 // by `ms app create`).

@@ -44,7 +44,7 @@ Navigate to an **empty** folder where you want your project. `/create-app` treat
 
 Your copilot will:
 
-1. Install `@microsoft/managed-apps-cli@latest` globally (with your confirmation) from the public npm registry.
+1. Install `@microsoft/cmr-cli@latest` globally (with your confirmation) from the public npm registry.
 2. Ask you what you want to build, plain English.
 3. Run `ms app create` to scaffold the project.
 4. Start `ms app dev` so you can play the app locally in the App Player.

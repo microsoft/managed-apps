@@ -8,7 +8,7 @@ releases the actions themselves. Diagrams are Mermaid (render on GitHub).
 
 | Piece | Role |
 |---|---|
-| `ms` CLI (`@microsoft/managed-apps-cli`) | Does the real work: scaffolds, builds, packs, uploads, deploys, shares. |
+| `ms` CLI (`@microsoft/cmr-cli`) | Does the real work: scaffolds, builds, packs, uploads, deploys, shares. |
 | `install-ms-cli` action | Installs the `ms` CLI on the runner. |
 | `ms-app-pack` action | Wraps `ms app pack` (build + stage artifact). Optional — deploy can pack internally. |
 | `ms-app-deploy` action | Wraps `ms app deploy` (build + pack + upload + deploy). |

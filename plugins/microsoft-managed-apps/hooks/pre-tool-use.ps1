@@ -1,5 +1,5 @@
 # PreToolUse hook (PowerShell): for any shell command that invokes the `ms`
-# CLI (the @microsoft/managed-apps-cli binary), default MS_CLI_ORIGIN to
+# CLI (the @microsoft/cmr-cli binary), default MS_CLI_ORIGIN to
 # `plugin/<host-agent>` (e.g. plugin/claude-code, plugin/copilot-cli, or
 # plugin/unknown) for that invocation. Every CLI command run by this plugin
 # or any of its skills is thereby attributed for telemetry.
@@ -52,13 +52,13 @@ function Write-AllowWithRewrite {
     $updated['command'] = $NewCommand
     $payload = @{
         permissionDecision       = 'allow'
-        permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution'
+        permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/cmr-cli attribution'
         updatedInput             = $updated
         modifiedArgs             = $updated
         hookSpecificOutput = @{
             hookEventName            = 'PreToolUse'
             permissionDecision       = 'allow'
-            permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution'
+            permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/cmr-cli attribution'
             updatedInput             = $updated
         }
     }

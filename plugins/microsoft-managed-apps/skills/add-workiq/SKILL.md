@@ -30,7 +30,7 @@ After the connector is added, you'll have access to `WorkIQCopilotMCPService`. *
 Create `src/connectors/mcpClient.ts`:
 
 ```typescript
-import type { IOperationResult } from '@microsoft/managed-apps/data'
+import type { IOperationResult } from '@microsoft/cmr-apps/data'
 import { WorkIQCopilotMCPService } from '../../generated/services/WorkIQCopilotMCPService'
 import type { QueryRequest } from '../../generated/models/WorkIQCopilotMCPModel'
 

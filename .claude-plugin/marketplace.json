@@ -1,7 +1,7 @@
 {
   "name": "Managed-Apps",
   "metadata": {
-    "description": "Copilot Managed Runtime plugin marketplace — wraps the @microsoft/managed-apps-cli (ms) toolchain for coding agents (GitHub Copilot CLI, Claude Code).",
+    "description": "Copilot Managed Runtime plugin marketplace — wraps the @microsoft/cmr-cli (ms) toolchain for coding agents (GitHub Copilot CLI, Claude Code).",
     "version": "0.1.0"
   },
   "owner": {
@@ -12,8 +12,8 @@
     {
       "name": "microsoft-managed-apps",
       "source": "./plugins/microsoft-managed-apps",
-      "description": "[Preview] Create and manage apps on Copilot Managed Runtime using the @microsoft/managed-apps-cli (ms) toolchain.",
-      "version": "2.1.8"
+      "description": "[Preview] Create and manage apps on Copilot Managed Runtime using the @microsoft/cmr-cli (ms) toolchain.",
+      "version": "2.1.9"
     }
   ]
 }

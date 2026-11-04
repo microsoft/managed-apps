@@ -33,7 +33,7 @@ This Codex behavior depends on the agent following these instructions. No hook e
 
 - **Confirm before any deploy**: Before running `ms app deploy`, ask: _"Ready to deploy to [environment name]? This will update the live app."_ Wait for explicit user confirmation. There is no baseline-deploy exemption in this plugin — the default inner loop is `ms app dev`, not deploy.
 - **Sync git before deploy**: Before any `ms app deploy`, ensure current project changes are staged, committed, and pushed (`git add -A`, `git commit`, `git push`). Deploy only from a commit that exists on remote.
-- **Confirm before any global install**: Before running `npm install -g ...` or `winget install ...`, ask: _"This will install [tool] globally on your machine. OK to proceed?"_ Wait for explicit user confirmation. This applies even when the install is a documented prerequisite. Exception: the `/create-app` skill's global install of `@microsoft/managed-apps-cli@latest` is part of the documented setup flow, but still surface the install command before running it.
+- **Confirm before any global install**: Before running `npm install -g ...` or `winget install ...`, ask: _"This will install [tool] globally on your machine. OK to proceed?"_ Wait for explicit user confirmation. This applies even when the install is a documented prerequisite. Exception: the `/create-app` skill's global install of `@microsoft/cmr-cli@latest` is part of the documented setup flow, but still surface the install command before running it.
 - **Confirm before writing outside project root**: Before writing, editing, or deleting any file that is not inside the current project directory, ask the user for confirmation.
 - **Confirm before ACL changes**: Before running `ms app share` or `ms app unshare`, ask the user to confirm the email list. These mutate permissions on the cloud app.
 - **Confirm before `ms app delete`**: Always confirm. Never auto-`--force`, even when reading the slug from `ms.config.json`.
@@ -44,7 +44,7 @@ This Codex behavior depends on the agent following these instructions. No hook e
 
 - MUST NOT run `ms app deploy` if `npm run build` has not succeeded in the current session.
 - MUST NOT run `ms app deploy` from uncommitted or unpushed local changes.
-- MUST NOT install `@microsoft/managed-apps-cli` per-workspace. The `@microsoft/managed-apps-cli` is installed globally so the `ms` binary is on PATH; the workspace stays clean.
+- MUST NOT install `@microsoft/cmr-cli` per-workspace. The `@microsoft/cmr-cli` is installed globally so the `ms` binary is on PATH; the workspace stays clean.
 - MUST NOT edit generated codegen output in `generated/` unless the step explicitly calls for it.
 - MUST NOT install packages globally without user confirmation (see exception above for the documented setup flow).
 - MUST NOT remove `sharedConnectionId` from `ms.config.json` to get past an `allowedActions` validation failure. That field records how the connection was actually created; deleting it misrepresents the binding. Declare the actions instead.
@@ -289,7 +289,7 @@ may block `blob:` URLs. See `/add-office365-users` for a complete chunk-safe con
 
 ## CLI Toolchain
 
-The CLI is `@microsoft/managed-apps-cli` (binary `ms`), installed globally from the public npm registry. The `/create-app` skill handles install + binary-name probing.
+The CLI is `@microsoft/cmr-cli` (binary `ms`), installed globally from the public npm registry. The `/create-app` skill handles install + binary-name probing.
 
 **Binary name:** use `ms`:
 

@@ -15,7 +15,7 @@ the new version **in the same PR that bumps the version**, before it merges to
 Initial release of the Copilot Managed Runtime GitHub Actions.
 
 ### Added
-- `install-ms-cli` — installs `@microsoft/managed-apps-cli` (binary: `ms`) on the
+- `install-ms-cli` — installs `@microsoft/cmr-cli` (binary: `ms`) on the
   runner. Supports the public npm registry and private Azure DevOps Artifacts
   feeds (`_password`/PAT vs. bearer `_authToken`, chosen by strict hostname match).
 - `ms-app-pack` — runs `ms app pack` to build the app and stage the packed artifact.

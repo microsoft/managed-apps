@@ -1,12 +1,12 @@
 # Copilot Managed Runtime GitHub Actions
 
-GitHub Actions for building and deploying apps on [Copilot Managed Runtime](https://www.npmjs.com/package/@microsoft/managed-apps-cli) from CI.
+GitHub Actions for building and deploying apps on [Copilot Managed Runtime](https://www.npmjs.com/package/@microsoft/cmr-cli) from CI.
 
 ## Actions
 
 | Action | What it does | Ref |
 |---|---|---|
-| [`install-ms-cli`](./install-ms-cli) | Installs `@microsoft/managed-apps-cli` (binary: `ms`) on the runner. | `microsoft/Managed-Apps/github-actions/install-ms-cli@v1` |
+| [`install-ms-cli`](./install-ms-cli) | Installs `@microsoft/cmr-cli` (binary: `ms`) on the runner. | `microsoft/Managed-Apps/github-actions/install-ms-cli@v1` |
 | [`ms-app-pack`](./ms-app-pack) | Runs `ms app pack` — builds and packs the app into a deployable artifact. | `microsoft/Managed-Apps/github-actions/ms-app-pack@v1` |
 | [`ms-app-deploy`](./ms-app-deploy) | Runs `ms app deploy` — uploads the artifact and deploys to the target environment. | `microsoft/Managed-Apps/github-actions/ms-app-deploy@v1` |
 

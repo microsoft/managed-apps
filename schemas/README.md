@@ -19,7 +19,7 @@ https://raw.githubusercontent.com/microsoft/Managed-Apps/main/schemas/stage-over
 ## Do not hand-edit
 
 Both files are generated from the Zod contracts that the CLI and runtime validate against
-(`@microsoft/managed-apps-common`, `src/config/V0/Schema.ts` and
+(`@microsoft/cmr-apps-common`, `src/config/V0/Schema.ts` and
 `src/config/stage/OverlaySchema.ts`). Editing them here would let the published schema drift
 from what the CLI actually enforces. Regenerate from the product repo and open a PR with the
 result instead.

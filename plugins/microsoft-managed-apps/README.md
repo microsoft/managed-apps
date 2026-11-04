@@ -2,7 +2,7 @@
 
 > **Preview** — this plugin is in preview and under active development. Behavior may change.
 
-Copilot plugin for building apps on **Copilot Managed Runtime** using `@microsoft/managed-apps-cli` (binary `ms`), React, and Vite. Works with both Claude Code and GitHub Copilot.
+Copilot plugin for building apps on **Copilot Managed Runtime** using `@microsoft/cmr-cli` (binary `ms`), React, and Vite. Works with both Claude Code and GitHub Copilot.
 
 Apps on Copilot Managed Runtime run locally against the App Player with hot reload (`ms app dev`) and deploy to the cloud only when you choose to.
 
@@ -34,9 +34,9 @@ as the rest of the app, not a separate Rayfin workflow.
 - [Node.js v22+](https://nodejs.org/)
 - Git + Git Credential Manager
 - [Claude Code](https://code.claude.com/docs/en/getting-started) or [GitHub Copilot CLI](https://github.com/features/copilot/cli/)
-- Access to a Copilot Managed Runtime-enabled tenant. The `@microsoft/managed-apps-cli` package is published on the public npm registry: [`@microsoft/managed-apps-cli`](https://www.npmjs.com/package/@microsoft/managed-apps-cli).
+- Access to a Copilot Managed Runtime-enabled tenant and an available release of [`@microsoft/cmr-cli`](https://www.npmjs.com/package/@microsoft/cmr-cli) on the public npm registry.
 
-The `/create-app` skill handles the global install of `@microsoft/managed-apps-cli@latest` on its own — you don't need to set that up by hand.
+The `/create-app` skill handles the global install of `@microsoft/cmr-cli@latest` on its own — you don't need to set that up by hand.
 
 ## Install the plugin
 
@@ -234,7 +234,7 @@ Describe the app in the command and the skill generates its name, plans the comp
 
 ## Telemetry
 
-This plugin sets an attribution tag on the `@microsoft/managed-apps-cli` (`ms`) commands it runs. A `PreToolUse` hook (`hooks/pre-tool-use.sh` / `.ps1`) transparently prefixes every shell command that invokes `ms` with `MS_CLI_ORIGIN=plugin/<host-agent>` (e.g. `plugin/claude-code`, `plugin/copilot-cli`). This tells the CLI's telemetry that the invocation originated from this plugin — it does **not** add any new data collection beyond what the `ms` CLI already reports, and it never blocks or alters the behavior of your command.
+This plugin sets an attribution tag on the `@microsoft/cmr-cli` (`ms`) commands it runs. A `PreToolUse` hook (`hooks/pre-tool-use.sh` / `.ps1`) transparently prefixes every shell command that invokes `ms` with `MS_CLI_ORIGIN=plugin/<host-agent>` (e.g. `plugin/claude-code`, `plugin/copilot-cli`). This tells the CLI's telemetry that the invocation originated from this plugin — it does **not** add any new data collection beyond what the `ms` CLI already reports, and it never blocks or alters the behavior of your command.
 
 - **What it does:** tags `ms` CLI runs so usage can be attributed to this plugin.
 - **What it does not do:** it does not run for non-`ms` commands, and it does not transmit anything itself.
@@ -251,5 +251,5 @@ Disable hooks in the client's settings rather than editing only the legacy confi
 
 ## Documentation
 
-- [`@microsoft/managed-apps-cli` on npm](https://www.npmjs.com/package/@microsoft/managed-apps-cli)
+- [`@microsoft/cmr-cli` on npm](https://www.npmjs.com/package/@microsoft/cmr-cli)
 - [Claude Code Plugins](https://code.claude.com/docs/en/plugins-reference)

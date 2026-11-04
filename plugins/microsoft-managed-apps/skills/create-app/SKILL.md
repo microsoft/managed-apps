@@ -13,7 +13,7 @@ allowed-tools: Read Edit Write Grep Glob Bash AskUserQuestion EnterPlanMode Exit
 
 # Create a Microsoft App
 
-This skill scaffolds a new Microsoft App end-to-end using `@microsoft/managed-apps-cli` (binary `ms`). The default outcome is a **running local dev server**, not a deployed cloud app. Deploying is a separate, explicit user choice via `/deploy`.
+This skill scaffolds a new Microsoft App end-to-end using `@microsoft/cmr-cli` (binary `ms`). The default outcome is a **running local dev server**, not a deployed cloud app. Deploying is a separate, explicit user choice via `/deploy`.
 
 ## Workflow
 
@@ -44,17 +44,17 @@ ms --version 2>/dev/null  # Probe the bin name
 - **Missing `ms`**: proceed to the global install block below. Confirm with the user before running `npm install -g`.
 - **One of them resolves**: record which binary name resolved (`$BIN`); use it in every subsequent step.
 
-#### Global install of `@microsoft/managed-apps-cli` (only if `ms` is missing)
+#### Global install of `@microsoft/cmr-cli` (only if `ms` is missing)
 
 Install the CLI **globally** from the public npm registry so the `ms` binary is on PATH.
 
-Ask the user: _"This will install `@microsoft/managed-apps-cli@latest` globally on your machine. OK to proceed?"_ Wait for explicit yes.
+Ask the user: _"This will install `@microsoft/cmr-cli@latest` globally on your machine. OK to proceed?"_ Wait for explicit yes.
 
 Then run:
 
 ```bash
 # Install globally, pinned to the @latest stable tag.
-npm install -g @microsoft/managed-apps-cli@latest
+npm install -g @microsoft/cmr-cli@latest
 
 # Re-probe the bin name.
 ms --version

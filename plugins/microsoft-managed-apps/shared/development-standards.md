@@ -9,18 +9,18 @@ Standards that apply to all Copilot Managed Runtime skills.
 
 ## Node.js
 
-- **Node.js 22+ is required** — `@microsoft/managed-apps-cli` rejects older versions for codegen-bearing commands.
+- **Node.js 22+ is required** — `@microsoft/cmr-cli` rejects older versions for codegen-bearing commands.
 - Check with `node --version` before starting.
 - If the user has multiple versions, suggest `nvm use 22`.
 
 ## CLI Install
 
-- **Install `@microsoft/managed-apps-cli` globally**, never per-workspace, so the `ms` binary is on PATH and the per-app workspace stays clean.
+- **Install `@microsoft/cmr-cli` globally**, never per-workspace, so the `ms` binary is on PATH and the per-app workspace stays clean.
 - Install command:
   ```bash
-  npm install -g @microsoft/managed-apps-cli@latest
+  npm install -g @microsoft/cmr-cli@latest
   ```
-- The CLI is published on the public npm registry: https://www.npmjs.com/package/@microsoft/managed-apps-cli
+- Install from the public npm registry once the renamed CLI package is available: https://www.npmjs.com/package/@microsoft/cmr-cli
 - Pin to the `@latest` tag.
 - After install, probe the binary name (`ms` (single supported binary)).
 
@@ -29,10 +29,10 @@ Standards that apply to all Copilot Managed Runtime skills.
 Run this gate once per top-level workflow, before its first operational `ms` command. The `ms --version` probe is part of the gate:
 
 1. Read the installed version with `ms --version`.
-2. Read the latest stable version with `npm view @microsoft/managed-apps-cli@latest version`.
+2. Read the latest stable version with `npm view @microsoft/cmr-cli@latest version`.
 3. Compare the versions using semver rules. Do not treat an installed version newer than `@latest` as outdated.
-4. If `@latest` is newer, tell the user both versions and ask: _"`@microsoft/managed-apps-cli` {installed} is installed, but {latest} is available. Update the global CLI before proceeding?"_ Wait for the answer.
-   - If approved, run `npm install -g @microsoft/managed-apps-cli@latest`, then verify `ms --version` reports the expected version before continuing.
+4. If `@latest` is newer, tell the user both versions and ask: _"`@microsoft/cmr-cli` {installed} is installed, but {latest} is available. Update the global CLI before proceeding?"_ Wait for the answer.
+   - If approved, run `npm install -g @microsoft/cmr-cli@latest`, then verify `ms --version` reports the expected version before continuing.
    - If declined, acknowledge the choice and continue with the installed version for the rest of the workflow.
 5. If the registry lookup fails, report that the latest version could not be checked and continue with the installed CLI. Do not silently claim it is current.
 

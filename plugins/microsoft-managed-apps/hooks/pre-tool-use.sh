@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse hook: for any shell command that invokes the `ms` CLI (the
-# @microsoft/managed-apps-cli binary), default MS_CLI_ORIGIN to
+# @microsoft/cmr-cli binary), default MS_CLI_ORIGIN to
 # `plugin/<host-agent>` (e.g. plugin/claude-code, plugin/copilot-cli, or
 # plugin/unknown) for that invocation so every CLI call made by this plugin
 # (or any of its skills) is attributed for telemetry purposes.
@@ -148,7 +148,7 @@ else:
 
 updated = dict(tool_input)
 updated["command"] = new_command
-reason = "Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution"
+reason = "Auto-set MS_CLI_ORIGIN for @microsoft/cmr-cli attribution"
 # Keep legacy fields, native Copilot modifiedArgs, and the Claude wrapper.
 print(json.dumps({
     "permissionDecision": "allow",

@@ -3,10 +3,10 @@
 #
 # install-ms-cli/action.yml
 #
-# Installs the Copilot Managed Runtime `ms` CLI (@microsoft/managed-apps-cli) on the GitHub Actions runner.
+# Installs the Copilot Managed Runtime `ms` CLI (@microsoft/cmr-cli) on the GitHub Actions runner.
 #
-# Defaults to the public npm registry — @microsoft/managed-apps-cli is published there
-# (since 2026-05-14). No inputs are required for standard usage:
+# Defaults to @microsoft/cmr-cli on the public npm registry. Standard usage
+# requires the renamed package to be published there:
 #
 #   - uses: microsoft/Managed-Apps/github-actions/install-ms-cli@v1
 #
@@ -20,12 +20,12 @@
 #       registry-auth-token: ${{ secrets.AZURE_DEVOPS_PAT }}
 #
 name: 'install-ms-cli'
-description: 'Install the Copilot Managed Runtime CLI (@microsoft/managed-apps-cli, binary: ms)'
+description: 'Install the Copilot Managed Runtime CLI (@microsoft/cmr-cli, binary: ms)'
 
 inputs:
   version:
     description: >
-      Version of @microsoft/managed-apps-cli to install. Use 'latest' or a specific
+      Version of @microsoft/cmr-cli to install. Use 'latest' or a specific
       semver / dev tag. Defaults to 'latest'.
     required: false
     default: 'latest'
@@ -47,10 +47,10 @@ inputs:
 
   npm-package-name:
     description: >
-      npm package to install. Defaults to @microsoft/managed-apps-cli, which provides
+      npm package to install. Defaults to @microsoft/cmr-cli, which provides
       the `ms` binary. Override only for testing alternate builds.
     required: false
-    default: '@microsoft/managed-apps-cli'
+    default: '@microsoft/cmr-cli'
 
 outputs:
   cli-version:

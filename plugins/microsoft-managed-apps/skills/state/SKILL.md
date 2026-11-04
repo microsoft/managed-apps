@@ -51,20 +51,20 @@ feature.
 ## ⚠️ Local testing requires local gateway mode
 
 Generated state services require the Copilot Managed Runtime local gateway path during local development.
-Before testing data behavior locally, make sure the app has `@microsoft/managed-apps-vite-plugin`
+Before testing data behavior locally, make sure the app has `@microsoft/cmr-apps-vite-plugin`
 0.4.2 or later (the version that added `devMode: 'localGateway'`; older versions won't start the
 local gateway), then opt the app into local gateway mode.
 
-Check the installed version first, for example with `npm ls @microsoft/managed-apps-vite-plugin`
-(or read `version` in `node_modules/@microsoft/managed-apps-vite-plugin/package.json`). If it is
+Check the installed version first, for example with `npm ls @microsoft/cmr-apps-vite-plugin`
+(or read `version` in `node_modules/@microsoft/cmr-apps-vite-plugin/package.json`). If it is
 0.4.2 or later, skip the install. If it is missing or older, install the latest with the app's
 package manager:
 
 ```bash
-npm install -D @microsoft/managed-apps-vite-plugin@latest
-# or: bun add -D @microsoft/managed-apps-vite-plugin@latest
-# or: pnpm add -D @microsoft/managed-apps-vite-plugin@latest
-# or: yarn add -D @microsoft/managed-apps-vite-plugin@latest
+npm install -D @microsoft/cmr-apps-vite-plugin@latest
+# or: bun add -D @microsoft/cmr-apps-vite-plugin@latest
+# or: pnpm add -D @microsoft/cmr-apps-vite-plugin@latest
+# or: yarn add -D @microsoft/cmr-apps-vite-plugin@latest
 ```
 
 Then update the app's `vite.config.ts` so the `managedApps()` plugin call enables the local gateway,
@@ -371,7 +371,7 @@ ms project state generate-code --json
 Then:
 
 - confirm `ms.config.json` has `enabled: true` on its state (or `data`/`db`) section;
-- confirm the app has `@microsoft/managed-apps-vite-plugin` 0.4.2 or later;
+- confirm the app has `@microsoft/cmr-apps-vite-plugin` 0.4.2 or later;
 - confirm `vite.config.ts` calls `managedApps({ devMode: 'localGateway' })` or preserves existing
   options while adding `devMode: 'localGateway'`;
 - run the narrowest relevant build/typecheck/lint for the app or package;
