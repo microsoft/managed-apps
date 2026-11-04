@@ -1,12 +1,11 @@
 # CRUD UI
 
-Reference for [/add-backend](../SKILL.md). Pass the
-[Rayfin feature gate](../../../shared/shared-instructions.md#rayfin-feature-gate)
-before using this guidance.
+Reference for [/add-backend](../SKILL.md).
 
 ## Read the docs first
 
-Use the entities and client from [data modeling](./rayfin-data-modeling.md).
+Use the entities and [host-initialized client](./rayfin-data-modeling.md#step-4-initialize-through-copilot-managed-runtime)
+from data modeling.
 The client API belongs to the installed packages; this reference covers the UI.
 Paths are relative to the app root; complete the entry skill's `npm install` step
 if dependencies are not installed.
@@ -17,7 +16,7 @@ and open `index.md` before the relevant pages:
 | Topic | Installed documentation |
 | --- | --- |
 | Paging, cursors and field nullability | `node_modules/@microsoft/rayfin-data/assets/docs/index.md` |
-| Client entry point | `node_modules/@microsoft/rayfin-client/assets/docs/index.md` |
+| Client data operations | `node_modules/@microsoft/rayfin-client/assets/docs/index.md` |
 
 If `@microsoft/rayfin-guide` is already installed, read
 `node_modules/@microsoft/rayfin-guide/assets/docs/data/graphql.md` for the query
@@ -69,8 +68,7 @@ until success, or restore it in its original position if an optimistic delete fa
 
 ## Per-user data
 
-Follow the installed permissions docs listed in [data modeling](./rayfin-data-modeling.md#read-the-docs-first)
-for server-side ownership.
+Follow the installed permissions docs listed in [data modeling](./rayfin-data-modeling.md#read-the-docs-first) for server-side ownership.
 Never use UI filtering as authorization. Clear private rows and pending results
 when the session changes.
 
@@ -105,9 +103,3 @@ source is unavailable.
   saved rows independently of unrelated live data.
 - [ ] Local fixtures cover partial results, write/readback failures, stale requests,
   and pagination across multiple pages, including empty pages and later-page retry.
-- [ ] On an approved backend, with approval for test writes: create a row and reload,
-  update it and reload, then delete it and reload. Verify each saved result.
-
-Follow the normal app build/deploy workflow and repeat runtime checks after app
-deployment. Report unavailable checks as blocked; build/pack success or mocks do
-not prove persistence.

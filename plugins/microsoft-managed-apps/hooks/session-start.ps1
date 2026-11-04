@@ -1,9 +1,9 @@
-# SessionStart hook (PowerShell): inform the agent that the Microsoft Managed
-# Apps plugin automatically attributes every `ms` CLI invocation via
+# SessionStart hook (PowerShell): inform the agent that the Copilot Managed Runtime
+# plugin automatically attributes every `ms` CLI invocation via
 # MS_CLI_ORIGIN. The PreToolUse hook enforces this transparently.
 $ErrorActionPreference = 'SilentlyContinue'
 
-$msg = "[microsoft-managed-apps] CLI attribution is enforced automatically: every shell command that invokes 'ms' (the @microsoft/cmr-cli binary) is rewritten by a PreToolUse hook to set MS_CLI_ORIGIN=plugin/<host-agent> (e.g. plugin/claude-code, plugin/copilot-cli, or plugin/unknown). You do not need to export this variable yourself - the hook handles it on every tool call. If a user has already set MS_CLI_ORIGIN to a different value, the hook leaves their value alone."
+$msg = "[microsoft-managed-apps] The PreToolUse hook defaults MS_CLI_ORIGIN to plugin for commands that invoke the ms CLI (@microsoft/cmr-cli). It preserves existing origin values, including empty values and inline assignments. The native Copilot hook also sets MS_PLUGIN_REPORT_AGENT=github-copilot from its fixed entry point. Shared hooks remove inherited agent reports so the CLI can detect the agent. The plugin does not detect agents from environment markers. Do not add attribution variables yourself when hooks are active."
 
 # Skip re-emitting on compaction so the guidance isn't duplicated.
 try {

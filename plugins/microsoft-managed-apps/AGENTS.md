@@ -77,7 +77,7 @@ This plugin uses a memory bank (`memory-bank.md`) to persist state across sessio
 
 ### App backend database
 
-**Setup:** `/add-backend` scaffolds the app backend database with `ms app add backend --provider rayfin`. Its local references use the installed SDK docs for API guidance.
+**Setup:** `/add-backend` scaffolds backend configuration and code with `ms app add backend --provider rayfin`; scaffolding does not provision the database. Its local references use the installed SDK docs for API guidance.
 
 Select it only for an explicit app backend database request (including
 `/add-backend` or Rayfin).
@@ -94,7 +94,7 @@ All Rayfin work requires the [Rayfin feature gate](shared/shared-instructions.md
 ```
 /create-app
    └── /dev (default loop)
-   └── /add-backend (when explicitly requested and the Rayfin feature is enabled)
+   └── /add-backend (when explicitly requested)
    └── /add-data-source (or a specific connector skill)
    └── /deploy (explicit, requires confirmation)
    └── /share, /delete-app (explicit, require confirmation)
@@ -159,6 +159,9 @@ Claude and legacy Copilot discover `hooks/hooks.json`.
 Agent Plugins Copilot discovers `com.github.copilot/hooks/hooks.json`.
 The latter uses native Copilot events, `${PLUGIN_ROOT}`, and the same scripts.
 Validation checks both configurations for equivalent scripts, matchers, and timeouts.
+Only the native Copilot entry point passes `--github-copilot` / `-GitHubCopilot` to report `MS_PLUGIN_REPORT_AGENT=github-copilot`.
+Shared hooks must remove inherited reports. Do not detect the host from environment markers or shell type.
+Keep the agent report independent of `MS_CLI_ORIGIN=plugin` and user-provided origin overrides.
 Keep both hook payload contracts when editing a script.
 
 The canonical manifest follows [Agent Plugins 1.0.0](https://agent-plugins.org/specification).

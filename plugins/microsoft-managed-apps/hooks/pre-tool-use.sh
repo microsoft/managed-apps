@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # PreToolUse hook: for any shell command that invokes the `ms` CLI (the
-# @microsoft/cmr-cli binary), default MS_CLI_ORIGIN to
-# `plugin/<host-agent>` (e.g. plugin/claude-code, plugin/copilot-cli, or
-# plugin/unknown) for that invocation so every CLI call made by this plugin
-# (or any of its skills) is attributed for telemetry purposes.
+# @microsoft/cmr-cli binary), default MS_CLI_ORIGIN to `plugin`.
+# Only the native Copilot entry point passes --github-copilot to report
+# MS_PLUGIN_REPORT_AGENT=github-copilot. Shared hooks remove inherited reports.
 #
 # Behavior:
 #   - If the command does not invoke `ms`, allow unchanged.
-#   - If the command already sets MS_CLI_ORIGIN= inline (env-prefix, `set`,
-#     or `$env:`), allow unchanged.
+#   - Preserve inline MS_CLI_ORIGIN assignments. A native agent report
+#     remains independent of the origin override.
 #   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput
 #     (Claude) and modifiedArgs (Copilot). The
 #     rewrite defaults MS_CLI_ORIGIN only when it is truly unset
@@ -46,7 +45,7 @@ else
   exit 0
 fi
 
-# Single-pass python: parse, detect, decide, emit. Uses stdin for the JSON
+# Single-pass python: parse, rewrite, emit. Uses stdin for the JSON
 # (no argv size limit) and emits exactly one JSON object on stdout. Any
 # uncaught exception falls through to the bash-level fallback below.
 PYTHON_SCRIPT=$(cat <<'PY'
@@ -56,19 +55,8 @@ ALLOW_UNCHANGED = json.dumps({
     "permissionDecision": "allow",
     "hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow"},
 })
-PLUGIN_ID = "plugin"
-
-# Detect the host agent so telemetry can split plugin attribution by which
-# CLI ran the command. Falls back to "unknown" rather than dropping the
-# suffix so the format (plugin/host) is stable for downstream parsers.
-import os
-if os.environ.get("CLAUDECODE") == "1" or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
-    HOST = "claude-code"
-elif os.environ.get("COPILOT_CLI") == "1" or os.environ.get("COPILOT_AGENT_SESSION_ID"):
-    HOST = "copilot-cli"
-else:
-    HOST = "unknown"
-ORIGIN_VALUE = PLUGIN_ID + "/" + HOST
+ORIGIN_VALUE = "plugin"
+github_copilot = sys.argv[1:] == ["--github-copilot"]
 
 def emit_allow():
     print(ALLOW_UNCHANGED)
@@ -111,7 +99,7 @@ ms_pattern = re.compile(
 if not ms_pattern.search(command):
     emit_allow()
 
-# Already explicitly set in the command itself? Don't touch. The boundary
+# Preserve explicit origin assignments. The boundary
 # mirrors ms_pattern (start-of-command or a real chain separator, plus any
 # leading env-prefix assignments) so inline assignments — including ones that
 # follow other env prefixes like `FOO=bar MS_CLI_ORIGIN=mine ms ...` — are
@@ -119,36 +107,40 @@ if not ms_pattern.search(command):
 inline_pattern = re.compile(
     r"(?:^|[;&|()\n\r])\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:export\s+MS_CLI_ORIGIN=|set\s+MS_CLI_ORIGIN=|MS_CLI_ORIGIN=|\$env:MS_CLI_ORIGIN\s*=)"
 )
-if inline_pattern.search(command):
-    emit_allow()
+inline_origin = bool(inline_pattern.search(command))
 
 is_powershell = tool_name.lower() in ("powershell", "pwsh")
+prefix = ""
 if is_powershell:
     # PowerShell: assign only when the env var does not exist, so a user-set
     # $env:MS_CLI_ORIGIN wins at exec time — including an empty value, which
     # `Test-Path Env:` correctly treats as "set" (unlike `-not $env:...`).
-    new_command = (
-        "if (-not (Test-Path Env:MS_CLI_ORIGIN)) { $env:MS_CLI_ORIGIN = '"
-        + ORIGIN_VALUE
-        + "' }; "
-        + command
-    )
+    if not inline_origin:
+        prefix = (
+            "if (-not (Test-Path Env:MS_CLI_ORIGIN)) { $env:MS_CLI_ORIGIN = '"
+            + ORIGIN_VALUE
+            + "' }; "
+        )
+    if github_copilot:
+        prefix += "$env:MS_PLUGIN_REPORT_AGENT = 'github-copilot'; "
+    else:
+        prefix += "$env:MS_PLUGIN_REPORT_AGENT = $null; "
 else:
     # Bash: ${VAR-default} (no colon) expands to the default ONLY when VAR is
     # unset, so any pre-existing user value — including an intentionally-empty
     # one — is preserved at exec time. The `&&` chain ensures the export runs
     # before the user command, and `export` makes the value visible to chained
     # segments (`cd app && ms app deploy`) and to the spawned `ms` process.
-    new_command = (
-        'export MS_CLI_ORIGIN="${MS_CLI_ORIGIN-'
-        + ORIGIN_VALUE
-        + '}" && '
-        + command
-    )
+    if not inline_origin:
+        prefix = 'export MS_CLI_ORIGIN="${MS_CLI_ORIGIN-' + ORIGIN_VALUE + '}" && '
+    if github_copilot:
+        prefix += "export MS_PLUGIN_REPORT_AGENT='github-copilot' && "
+    else:
+        prefix += "unset -v MS_PLUGIN_REPORT_AGENT && "
 
 updated = dict(tool_input)
-updated["command"] = new_command
-reason = "Auto-set MS_CLI_ORIGIN for @microsoft/cmr-cli attribution"
+updated["command"] = prefix + command
+reason = "Set plugin attribution for @microsoft/cmr-cli"
 # Keep legacy fields, native Copilot modifiedArgs, and the Claude wrapper.
 print(json.dumps({
     "permissionDecision": "allow",
@@ -165,7 +157,7 @@ print(json.dumps({
 PY
 )
 
-OUTPUT=$(printf '%s' "$INPUT_JSON" | $PYTHON_BIN -c "$PYTHON_SCRIPT" 2>/dev/null)
+OUTPUT=$(printf '%s' "$INPUT_JSON" | $PYTHON_BIN -c "$PYTHON_SCRIPT" "$@" 2>/dev/null)
 if [ -z "$OUTPUT" ]; then
   printf '%s\n' "$ALLOW_UNCHANGED"
 else

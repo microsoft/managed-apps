@@ -113,7 +113,12 @@ After the first `ms app create`, the project folder gets a `memory-bank.md`. Ope
 
 ### Telemetry
 
-The plugin tags the `ms` CLI commands it runs (via an `MS_CLI_ORIGIN` attribution prefix) so usage can be attributed to this plugin. It adds no new data collection and you can opt out by setting `MS_CLI_ORIGIN` yourself. See the [Telemetry section in the README](./README.md#telemetry) for details.
+The plugin defaults `MS_CLI_ORIGIN` to `plugin` for commands that invoke `ms`.
+It preserves existing origin values.
+The native Copilot hook separately sets `MS_PLUGIN_REPORT_AGENT=github-copilot`.
+Shared hooks remove inherited agent reports.
+An origin override does not disable telemetry.
+See the [Telemetry section in the README](./README.md#telemetry) for details.
 
 ### Uninstall
 

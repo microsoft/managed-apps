@@ -52,12 +52,9 @@ ms --version           # Bin name has flipped between dev builds
 
 Rayfin provides the app backend database; it is not a connector.
 
-Before recommending or using Rayfin, pass the
-[Rayfin feature gate](../shared/shared-instructions.md#rayfin-feature-gate).
-
-When the gate passes and the user explicitly requests an app backend database
-(including `/add-backend` or Rayfin), use
-[/add-backend](../skills/add-backend/SKILL.md).
+For an explicitly requested app backend database (including `/add-backend` or
+Rayfin), follow the [shared feature policy](../shared/shared-instructions.md#rayfin-feature-gate)
+and use [/add-backend](../skills/add-backend/SKILL.md).
 
 ### Connector-First Principle
 
