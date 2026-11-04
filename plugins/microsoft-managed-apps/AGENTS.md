@@ -159,6 +159,9 @@ Claude and legacy Copilot discover `hooks/hooks.json`.
 Agent Plugins Copilot discovers `com.github.copilot/hooks/hooks.json`.
 The latter uses native Copilot events, `${PLUGIN_ROOT}`, and the same scripts.
 Validation checks both configurations for equivalent scripts, matchers, and timeouts.
+Only the native Copilot entry point passes `--github-copilot` / `-GitHubCopilot` to report `MS_PLUGIN_REPORT_AGENT=github-copilot`.
+Shared hooks must remove inherited reports. Do not detect the host from environment markers or shell type.
+Keep the agent report independent of `MS_CLI_ORIGIN=plugin` and user-provided origin overrides.
 Keep both hook payload contracts when editing a script.
 
 The canonical manifest follows [Agent Plugins 1.0.0](https://agent-plugins.org/specification).

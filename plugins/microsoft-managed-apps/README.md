@@ -84,7 +84,8 @@ To evaluate a local checkout containing these changes:
 **Compatibility status:** the portable package does not establish full Codex runtime support.
 Skills use document-relative links to shared resources. They do not require `${CLAUDE_PLUGIN_ROOT}`.
 The package does not provide a Codex architect agent or Codex hooks.
-Shared instructions request `plugin/codex` attribution while preserving an existing `MS_CLI_ORIGIN` value.
+Shared instructions request `MS_CLI_ORIGIN=plugin` while preserving an existing value.
+They do not set `MS_PLUGIN_REPORT_AGENT` because the shared instructions do not identify the host.
 This attribution depends on the agent following instructions, not hook enforcement.
 Complete the client checks below before using workflows that change resources.
 
@@ -220,6 +221,8 @@ Run the client's enable/disable actions and confirm that the same components ret
 For each supported Claude and Copilot runtime, run `ms --version` through a shell tool.
 Capture the rewritten command or CLI attribution evidence.
 Repeat with `MS_CLI_ORIGIN=review/custom` already set and confirm that the hook preserves it.
+Check that the native Copilot entry point also sets `MS_PLUGIN_REPORT_AGENT=github-copilot`.
+Check that shared hooks remove inherited reports, even when agent environment markers exist.
 Check session-start guidance and the daily version-check instructions.
 Run `/create-app` and a representative `/add-*` only in an authorized test environment.
 For Codex, verify the documented instruction-based attribution instead of expecting a hook.
@@ -235,14 +238,41 @@ Describe the app in the command and the skill generates its name, plans the comp
 
 ## Telemetry
 
-This plugin sets an attribution tag on the `@microsoft/managed-apps-cli` (`ms`) commands it runs. A `PreToolUse` hook (`hooks/pre-tool-use.sh` / `.ps1`) transparently prefixes every shell command that invokes `ms` with `MS_CLI_ORIGIN=plugin/<host-agent>` (e.g. `plugin/claude-code`, `plugin/copilot-cli`). This tells the CLI's telemetry that the invocation originated from this plugin — it does **not** add any new data collection beyond what the `ms` CLI already reports, and it never blocks or alters the behavior of your command.
+This plugin marks commands that invoke `@microsoft/managed-apps-cli` (`ms`) with `MS_CLI_ORIGIN=plugin`.
+The CLI uses this value as `cliSource`, the source of the command.
+The [Bash hook](hooks/pre-tool-use.sh) and [PowerShell hook](hooks/pre-tool-use.ps1) apply this default before tool execution.
+They preserve existing origin values, including empty values and inline assignments.
+They leave non-`ms` commands unchanged and do not transmit telemetry themselves.
 
-- **What it does:** tags `ms` CLI runs so usage can be attributed to this plugin.
-- **What it does not do:** it does not run for non-`ms` commands, and it does not transmit anything itself.
-- **Opting out:** set `MS_CLI_ORIGIN` yourself (in your shell environment or inline on the command) and the hook leaves your value untouched. You can also disable the hook by removing/editing `hooks/hooks.json`, or refer to the `ms` CLI documentation for its own telemetry controls.
+Agent identity is separate from command origin.
+Only a known host-specific entry point supplies `MS_PLUGIN_REPORT_AGENT`.
+The plugin does not inspect agent environment markers.
 
-For Agent Plugins Copilot, the hook configuration is `com.github.copilot/hooks/hooks.json`.
-Disable hooks in the client's settings rather than editing only the legacy configuration.
+| Entry point within this plugin | Agent report |
+| --- | --- |
+| [com.github.copilot/hooks/hooks.json](com.github.copilot/hooks/hooks.json) | Fixed `github-copilot`, selected by the hook argument `--github-copilot` or `-GitHubCopilot`. |
+| [hooks/hooks.json](hooks/hooks.json), shared by Claude Code and legacy Copilot | Omitted. This configuration does not identify one host. |
+| Shared skills, including Codex and Cursor consumers | Omitted. No host-specific reporting hook exists. |
+
+The native report identifies Copilot without claiming CLI or VS Code.
+It replaces an inherited report and remains independent of any origin override.
+Shared hooks remove inherited reports before the command executes.
+They remove the variable rather than set an empty value, so stale reports cannot bypass CLI detection.
+The `.claude-plugin` directory and shell type do not identify the host.
+
+The CLI treats a supplied report as authoritative.
+A recognized report determines the agent name without environment-marker detection.
+An empty or unrecognized report produces `unknown` without fallback detection.
+Only an absent report allows the CLI to detect the agent from environment markers.
+This change does not add model detection or a CLI agent-selection option.
+
+Older CLI versions receive `plugin` instead of `plugin/<host-agent>` and ignore the new report.
+Release CLI support for the separate report before this plugin when continuous agent attribution is required.
+
+To override the origin, set `MS_CLI_ORIGIN` in your shell environment or inline on the command.
+An origin override is not a telemetry opt-out.
+Use the CLI's telemetry controls to disable telemetry.
+To disable hooks, use the client's settings rather than editing only the shared hook configuration.
 
 ## Uninstall
 

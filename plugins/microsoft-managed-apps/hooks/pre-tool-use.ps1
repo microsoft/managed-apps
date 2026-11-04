@@ -1,12 +1,12 @@
 # PreToolUse hook (PowerShell): for any shell command that invokes the `ms`
-# CLI (the @microsoft/managed-apps-cli binary), default MS_CLI_ORIGIN to
-# `plugin/<host-agent>` (e.g. plugin/claude-code, plugin/copilot-cli, or
-# plugin/unknown) for that invocation. Every CLI command run by this plugin
-# or any of its skills is thereby attributed for telemetry.
+# CLI (the @microsoft/managed-apps-cli binary), default MS_CLI_ORIGIN to `plugin`.
+# Only the native Copilot entry point passes -GitHubCopilot to report
+# MS_PLUGIN_REPORT_AGENT=github-copilot. Shared hooks remove inherited reports.
 #
 # Behavior:
 #   - If the command does not invoke `ms`, allow unchanged.
-#   - If the command already sets MS_CLI_ORIGIN inline, allow unchanged.
+#   - Preserve inline MS_CLI_ORIGIN assignments. A native agent report
+#     remains independent of the origin override.
 #   - Otherwise, rewrite the command via hookSpecificOutput.updatedInput
 #     (Claude) and modifiedArgs (Copilot). The
 #     rewrite defaults MS_CLI_ORIGIN only when it is truly unset
@@ -18,21 +18,11 @@
 # The hook never blocks; any failure falls through to the unchanged "allow"
 # decision (telemetry attribution must never block a developer's workflow).
 
+param([switch]$GitHubCopilot)
+
 $ErrorActionPreference = 'Stop'
 
-$PLUGIN_ID = 'plugin'
-
-# Detect the host agent so telemetry can split plugin attribution by which
-# CLI ran the command. Falls back to "unknown" rather than dropping the
-# suffix so the format (plugin/host) is stable for downstream parsers.
-if ($env:CLAUDECODE -eq '1' -or $env:CLAUDE_CODE_ENTRYPOINT) {
-    $HOST_AGENT = 'claude-code'
-} elseif ($env:COPILOT_CLI -eq '1' -or $env:COPILOT_AGENT_SESSION_ID) {
-    $HOST_AGENT = 'copilot-cli'
-} else {
-    $HOST_AGENT = 'unknown'
-}
-$ORIGIN_VALUE     = "$PLUGIN_ID/$HOST_AGENT"
+$ORIGIN_VALUE     = 'plugin'
 $ALLOW_UNCHANGED  = '{"permissionDecision":"allow","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'
 
 function Write-AllowUnchanged {
@@ -52,13 +42,13 @@ function Write-AllowWithRewrite {
     $updated['command'] = $NewCommand
     $payload = @{
         permissionDecision       = 'allow'
-        permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution'
+        permissionDecisionReason = 'Set plugin attribution for @microsoft/managed-apps-cli'
         updatedInput             = $updated
         modifiedArgs             = $updated
         hookSpecificOutput = @{
             hookEventName            = 'PreToolUse'
             permissionDecision       = 'allow'
-            permissionDecisionReason = 'Auto-set MS_CLI_ORIGIN for @microsoft/managed-apps-cli attribution'
+            permissionDecisionReason = 'Set plugin attribution for @microsoft/managed-apps-cli'
             updatedInput             = $updated
         }
     }
@@ -112,13 +102,13 @@ try {
     $msPattern = '(^|[;&|()\n\r])\s*([A-Za-z_][A-Za-z0-9_]*=\S*\s+)*ms(\s+\S|\s*$)'
     if ($command -notmatch $msPattern) { Write-AllowUnchanged }
 
-    # Already explicitly set in the command itself? Don't touch. The boundary
+    # Preserve explicit origin assignments. The boundary
     # mirrors $msPattern (start-of-command or a real chain separator, plus any
     # leading env-prefix assignments) so inline assignments — including ones
     # that follow other env prefixes like `FOO=bar MS_CLI_ORIGIN=mine ms ...`
     # — are recognized too.
     $inlinePattern = '(^|[;&|()\n\r])\s*([A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(export\s+MS_CLI_ORIGIN=|set\s+MS_CLI_ORIGIN=|MS_CLI_ORIGIN=|\$env:MS_CLI_ORIGIN\s*=)'
-    if ($command -match $inlinePattern) { Write-AllowUnchanged }
+    $inlineOrigin = $command -match $inlinePattern
 
     # Native Copilot payloads identify the actual shell. Legacy payloads
     # retain the existing platform-based fallback.
@@ -127,11 +117,19 @@ try {
         $isPowerShellTool = $toolName.ToLowerInvariant() -in @('powershell', 'pwsh')
     }
 
+    $prefix = ''
     if ($isPowerShellTool) {
         # Assign only when the env var does not exist, so a user-set
         # $env:MS_CLI_ORIGIN wins at exec time — including an empty value,
         # which `Test-Path Env:` treats as "set" (unlike `-not $env:...`).
-        $newCommand = "if (-not (Test-Path Env:MS_CLI_ORIGIN)) { `$env:MS_CLI_ORIGIN = '$ORIGIN_VALUE' }; $command"
+        if (-not $inlineOrigin) {
+            $prefix = "if (-not (Test-Path Env:MS_CLI_ORIGIN)) { `$env:MS_CLI_ORIGIN = '$ORIGIN_VALUE' }; "
+        }
+        if ($GitHubCopilot) {
+            $prefix += "`$env:MS_PLUGIN_REPORT_AGENT = 'github-copilot'; "
+        } else {
+            $prefix += "`$env:MS_PLUGIN_REPORT_AGENT = `$null; "
+        }
     } else {
         # `${VAR-default}` (no colon) expands to the default ONLY when VAR is
         # unset, so any pre-existing user value — including an intentionally-
@@ -140,10 +138,17 @@ try {
         # only `$ORIGIN_VALUE` is expanded here. The `&&` chain runs the export
         # before the user command, and `export` makes the value visible to
         # chained segments and to the spawned `ms` process.
-        $newCommand = "export MS_CLI_ORIGIN=`"`${MS_CLI_ORIGIN-$ORIGIN_VALUE}`" && $command"
+        if (-not $inlineOrigin) {
+            $prefix = "export MS_CLI_ORIGIN=`"`${MS_CLI_ORIGIN-$ORIGIN_VALUE}`" && "
+        }
+        if ($GitHubCopilot) {
+            $prefix += "export MS_PLUGIN_REPORT_AGENT='github-copilot' && "
+        } else {
+            $prefix += "unset -v MS_PLUGIN_REPORT_AGENT && "
+        }
     }
 
-    Write-AllowWithRewrite -NewCommand $newCommand -OriginalInput $inputHash
+    Write-AllowWithRewrite -NewCommand ($prefix + $command) -OriginalInput $inputHash
 } catch {
     # Any unexpected failure: fall through to allow-unchanged so we never
     # block the user's command.

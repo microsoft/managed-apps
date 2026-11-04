@@ -6,7 +6,6 @@
         "type": "command",
         "bash": "bash \"${PLUGIN_ROOT}/hooks/session-start.sh\"",
         "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/hooks/session-start.ps1\"",
-        "env": { "COPILOT_CLI": "1" },
         "timeoutSec": 5
       }
     ],
@@ -14,9 +13,8 @@
       {
         "type": "command",
         "matcher": "Bash|bash|shell|sh|execute|execute_command|run_in_terminal|terminal|powershell|PowerShell|pwsh",
-        "bash": "bash \"${PLUGIN_ROOT}/hooks/pre-tool-use.sh\"",
-        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/hooks/pre-tool-use.ps1\"",
-        "env": { "COPILOT_CLI": "1" },
+        "bash": "bash \"${PLUGIN_ROOT}/hooks/pre-tool-use.sh\" --github-copilot",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/hooks/pre-tool-use.ps1\" -GitHubCopilot",
         "timeoutSec": 5
       }
     ]

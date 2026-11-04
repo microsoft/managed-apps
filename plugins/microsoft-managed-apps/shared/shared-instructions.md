@@ -12,18 +12,22 @@ The plugin does not select an AI model. Use the model selected in the client.
 Claude Code and Copilot use the packaged hooks to set CLI attribution.
 Do not add another attribution prefix when those hooks are active.
 
-The package does not provide Codex hooks. In Codex, default `MS_CLI_ORIGIN` to `plugin/codex` before an `ms` command.
+The package does not provide Codex hooks. In Codex, default `MS_CLI_ORIGIN` to `plugin` before an `ms` command.
 Preserve any existing value, including an empty value. Use the syntax for the active shell:
 
 ```bash
-export MS_CLI_ORIGIN="${MS_CLI_ORIGIN-plugin/codex}"
+export MS_CLI_ORIGIN="${MS_CLI_ORIGIN-plugin}"
+unset -v MS_PLUGIN_REPORT_AGENT
 ```
 
 ```powershell
-if (-not (Test-Path Env:MS_CLI_ORIGIN)) { $env:MS_CLI_ORIGIN = 'plugin/codex' }
+if (-not (Test-Path Env:MS_CLI_ORIGIN)) { $env:MS_CLI_ORIGIN = 'plugin' }
+$env:MS_PLUGIN_REPORT_AGENT = $null
 ```
 
 This Codex behavior depends on the agent following these instructions. No hook enforces it.
+Do not set `MS_PLUGIN_REPORT_AGENT` from these shared instructions. They do not identify a specific host.
+Remove an inherited report so the CLI can detect the agent.
 
 ---
 
@@ -303,7 +307,8 @@ The rest of this plugin assumes `ms`.
 
 | Variable                              | Purpose                                                                       |
 | ------------------------------------- | ----------------------------------------------------------------------------- |
-| `MS_CLI_ORIGIN`                       | Attribution tag for CLI telemetry. **Defaulted when unset by this plugin's PreToolUse hook to `plugin/<host-agent>`** (e.g. `plugin/claude-code`, `plugin/copilot-cli`, or `plugin/unknown`) on every `ms` invocation — no skill action required. A user-provided value (parent environment or inline) is preserved at exec time (see Session Initialization below). |
+| `MS_CLI_ORIGIN`                       | Command source for CLI telemetry (`cliSource`). The PreToolUse hook defaults it to `plugin`. Existing values, including empty values and inline assignments, take precedence. |
+| `MS_PLUGIN_REPORT_AGENT`              | Agent report from a known host-specific entry point. The native Copilot hook sets `github-copilot`. Shared hooks remove inherited reports. |
 
 Environment targeting is never done via environment variables. `ms app create` resolves an environment automatically; pass `--environment-id <env-id>` **only** when the user explicitly provides an environment ID. Do not surface, discover, or construct environment IDs otherwise.
 
@@ -313,7 +318,16 @@ Normal flow: pass no environment flag and let `ms app create` resolve an environ
 
 ## Session Initialization
 
-`MS_CLI_ORIGIN=plugin/<host-agent>` (e.g. `plugin/claude-code`, `plugin/copilot-cli`, or `plugin/unknown` when the host can't be detected) is set automatically on every `ms` invocation by the plugin's PreToolUse hook (`hooks/pre-tool-use.sh` / `.ps1`). No skill action required. If the executed command in the shell log has a leading `export MS_CLI_ORIGIN=...` / `$env:MS_CLI_ORIGIN=...` that you didn't write, that's the hook — leave it alone. The hook respects any pre-existing `MS_CLI_ORIGIN` value.
+The PreToolUse hook (`hooks/pre-tool-use.sh` / `.ps1`) defaults `MS_CLI_ORIGIN` to `plugin` for commands that invoke `ms`.
+Do not add this variable when hooks are active unless the user requests an override.
+Do not remove attribution assignments that the hook adds to an executed command.
+The hook preserves existing origin values.
+
+The native Copilot entry point sets `MS_PLUGIN_REPORT_AGENT=github-copilot`, even when the origin has an override.
+This fixed report identifies Copilot, not a specific Copilot product.
+Shared hooks remove inherited reports so the CLI can detect the agent.
+Do not infer a report from environment markers, shell type, or the `.claude-plugin` directory.
+The CLI owns agent detection and report validation.
 
 ## Shell Compatibility
 

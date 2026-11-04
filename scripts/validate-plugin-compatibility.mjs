@@ -61,9 +61,8 @@ function validateComponents(directory) {
       return {
         type: hook.type,
         ...(event === 'PreToolUse' ? { matcher: group.matcher } : {}),
-        bash: hook.bash.replaceAll('${CLAUDE_PLUGIN_ROOT}', '${PLUGIN_ROOT}'),
-        powershell: hook.powershell.replaceAll('${CLAUDE_PLUGIN_ROOT}', '${PLUGIN_ROOT}'),
-        env: { COPILOT_CLI: '1' },
+        bash: hook.bash.replaceAll('${CLAUDE_PLUGIN_ROOT}', '${PLUGIN_ROOT}') + (event === 'PreToolUse' ? ' --github-copilot' : ''),
+        powershell: hook.powershell.replaceAll('${CLAUDE_PLUGIN_ROOT}', '${PLUGIN_ROOT}') + (event === 'PreToolUse' ? ' -GitHubCopilot' : ''),
         timeoutSec: hook.timeoutSec,
       };
     });
@@ -71,7 +70,7 @@ function validateComponents(directory) {
   }
   const copilot = readJson(directory, `${pluginPath}/com.github.copilot/hooks/hooks.json`);
   assert.deepEqual(copilot, { version: 1, hooks },
-    'Copilot hooks must match the legacy scripts, matchers, and timeouts with native root paths');
+    'Copilot hooks must match the shared scripts with native root paths and fixed agent-report arguments');
 
   for (const base of ['skills', 'shared', 'agents', 'com.github.copilot/agents']) {
     const visit = folder => {
