@@ -20,6 +20,7 @@ See the [Quickstart - CLI](https://go.microsoft.com/fwlink/?LinkId=2368962) to s
 ## Repository structure
 
 - [`templates/`](templates/) — first-party project templates (currently [`vite8`](templates/vite8), a React + TypeScript + Vite 8 starter).
+- [`samples/`](samples/) — complete sample apps you can set up in your own environment. Each sample's README and setup skill walk through copying it into its own folder, `ms app init` (which creates the app's platform-managed repository) and adding its connectors; app data is stored in the browser by default, and the bundled `add-data-source` skill moves it to SharePoint, Dataverse or your own API.
 - [`plugins/`](plugins/) — the [`microsoft-managed-apps`](plugins/microsoft-managed-apps) plugin: skills, agents, and hooks for building apps hosted on Copilot Managed Runtime with AI coding agents (works with Claude Code and GitHub Copilot).
 - [`.claude-plugin/`](.claude-plugin/) — marketplace manifest (`marketplace.json`) that registers the plugin so agents can install it via `/plugin marketplace add`.
 

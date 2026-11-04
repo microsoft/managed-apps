@@ -1,0 +1,1452 @@
+/*
+ * Windows 95 skin.
+ *
+ * src/index.css holds the base theme tokens — this stylesheet is imported
+ * from pages/home.tsx and layers a classic 95 look on top with plain CSS classes:
+ * grey chrome, beveled outset/inset borders, gradient title bars, chunky
+ * buttons with raised/pressed states, sunken input fields, classic tabs and
+ * 95-era scrollbars. Purely visual: no layout or behaviour is changed here.
+ *
+ * The bevels are real 95 bevels — TWO rings per edge (outer black/white,
+ * inner grey/light-grey), drawn with inset box-shadows so they never add to
+ * the box size and never fight Tailwind's border utilities.
+ */
+
+.w95 {
+  --w95-face: #c0c0c0;
+  --w95-light: #ffffff;
+  --w95-hilite: #dfdfdf;
+  --w95-shadow: #808080;
+  --w95-dark: #0a0a0a;
+  --w95-title-a: #000080;
+  --w95-title-b: #1084d0;
+  --w95-title-inactive-a: #808080;
+  --w95-title-inactive-b: #b5b5b5;
+  --w95-desktop: #008080;
+  --w95-select: #000080;
+
+  font-family: "MS Sans Serif", "Pixelated MS Sans Serif", Tahoma, Verdana,
+    "Segoe UI", sans-serif;
+  color: #000000;
+  background-color: var(--w95-desktop);
+}
+
+/* Everything inside the skin drops rounded corners + soft shadows — 95 had
+   neither. Scoped to .w95 so nothing outside the app is affected. */
+.w95 *,
+.w95-dialog * {
+  border-radius: 0 !important;
+  text-shadow: none;
+}
+
+/* ---------------------------------------------------------------- bevels -- */
+
+/* Raised panel / window frame ("outset"). */
+.w95-out {
+  background: var(--w95-face);
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-dark),
+    inset 1px 1px 0 0 var(--w95-light),
+    inset -2px -2px 0 0 var(--w95-shadow),
+    inset 2px 2px 0 0 var(--w95-hilite) !important;
+}
+
+/* Sunken well ("inset") — lists, scroll areas, status wells. */
+.w95-in {
+  background: var(--w95-face);
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-light),
+    inset 1px 1px 0 0 var(--w95-shadow),
+    inset -2px -2px 0 0 var(--w95-hilite),
+    inset 2px 2px 0 0 var(--w95-dark) !important;
+}
+
+/* Single-line "field" bevel used for inputs and thin wells. */
+.w95-field {
+  background: #ffffff;
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-light),
+    inset 1px 1px 0 0 var(--w95-shadow),
+    inset -2px -2px 0 0 var(--w95-hilite),
+    inset 2px 2px 0 0 var(--w95-dark) !important;
+}
+
+/* --------------------------------------------------------------- window --- */
+
+.w95-window {
+  background: var(--w95-face);
+  padding: 3px;
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-dark),
+    inset 1px 1px 0 0 var(--w95-light),
+    inset -2px -2px 0 0 var(--w95-shadow),
+    inset 2px 2px 0 0 var(--w95-hilite) !important;
+}
+
+.w95-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 3px 3px 4px;
+  background: linear-gradient(
+    90deg,
+    var(--w95-title-a, #000080) 0%,
+    var(--w95-title-b, #1084d0) 100%
+  );
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.w95-titlebar--inactive {
+  background: linear-gradient(
+    90deg,
+    var(--w95-title-inactive-a) 0%,
+    var(--w95-title-inactive-b) 100%
+  );
+}
+
+/* The little square control buttons at the right of a title bar. */
+.w95-titlebtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 16px;
+  background: var(--w95-face, #c0c0c0);
+  color: #000;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+  cursor: pointer;
+}
+
+.w95-titlebtn:disabled {
+  cursor: default;
+}
+
+.w95-titlebtn:active {
+  box-shadow:
+    inset 1px 1px 0 0 #808080,
+    inset 2px 2px 0 0 #0a0a0a,
+    inset -1px -1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #dfdfdf !important;
+}
+
+/* -------------------------------------------------------------- buttons --- */
+
+.w95-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 23px;
+  padding: 3px 10px;
+  background: var(--w95-face, #c0c0c0) !important;
+  color: #000000 !important;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+.w95-btn:hover:not(:disabled) {
+  background: var(--w95-face, #c0c0c0) !important;
+}
+
+/* Pressed: bevel flips and the label shifts a pixel down-right. */
+.w95-btn:active:not(:disabled) {
+  padding: 4px 9px 2px 11px;
+  box-shadow:
+    inset 1px 1px 0 0 #808080,
+    inset 2px 2px 0 0 #0a0a0a,
+    inset -1px -1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #dfdfdf !important;
+}
+
+/* STICKY PRESSED state for a toolbar TOGGLE — a button that stays in when it
+   is "on", the way 95's toolbar buttons and the taskbar's active task button
+   did. `.w95-btn:active` is the momentary press; this is the same bevel flip
+   held for as long as the option is switched on.
+
+   The label is NOT shifted the 1px that `:active` shifts it: a row of toggles
+   where the "on" ones sit a pixel lower reads as misalignment rather than as
+   state. The press shift still happens on click, because `:active` continues
+   to apply on top of this.
+
+   Pressed toggles also take the classic 50% dither — the 1px #ffffff/#c0c0c0
+   checker 95 painted into a latched toolbar button — so "on" is legible from
+   the fill alone, not only from the bevel direction, which is the part people
+   miss at a glance. */
+.w95-btn--on {
+  background-image: repeating-conic-gradient(
+    #ffffff 0% 25%,
+    var(--w95-face, #c0c0c0) 0% 50%
+  ) !important;
+  background-size: 2px 2px !important;
+  box-shadow:
+    inset 1px 1px 0 0 #808080,
+    inset 2px 2px 0 0 #0a0a0a,
+    inset -1px -1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #dfdfdf !important;
+}
+
+.w95-btn:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+}
+
+.w95-btn:disabled {
+  color: #808080 !important;
+  text-shadow: 1px 1px 0 #ffffff !important;
+  cursor: default;
+}
+
+/* Default (accepting) button — the extra black ring 95 drew around it. */
+.w95-btn--default {
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #0a0a0a,
+    inset -2px -2px 0 0 #0a0a0a,
+    inset 2px 2px 0 0 #0a0a0a,
+    inset -3px -3px 0 0 #808080,
+    inset 3px 3px 0 0 #ffffff,
+    inset -4px -4px 0 0 #dfdfdf,
+    inset 4px 4px 0 0 #dfdfdf !important;
+}
+
+.w95-btn--primary {
+  background: #000080 !important;
+  color: #ffffff !important;
+}
+
+.w95-btn--primary:hover:not(:disabled) {
+  background: #0000a8 !important;
+}
+
+.w95-btn--primary:disabled {
+  color: #c0c0c0 !important;
+  text-shadow: none !important;
+}
+
+.w95-btn--save:not(:disabled) {
+  cursor: pointer;
+}
+
+.w95-interactive::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.w95-interactive:not(.w95-menutarget):hover::after {
+  background: rgb(0 0 128 / 6%);
+  box-shadow: inset 0 0 0 1px #000080;
+}
+
+[data-slot="select-trigger"].w95-select-interactive:not([data-disabled]) {
+  cursor: pointer;
+}
+
+[data-slot="select-trigger"].w95-select-interactive:not([data-disabled]):hover {
+  background: #ffffff !important;
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-light),
+    inset 1px 1px 0 0 var(--w95-shadow),
+    inset -2px -2px 0 0 var(--w95-hilite),
+    inset 2px 2px 0 0 var(--w95-dark),
+    0 0 0 1px #000080 !important;
+}
+
+.w95-date-trigger {
+  cursor: pointer;
+}
+
+.w95-date-trigger:disabled {
+  cursor: pointer;
+}
+
+.w95-date-trigger:not(:disabled):hover {
+  background: #ffffff !important;
+  box-shadow:
+    inset -1px -1px 0 0 var(--w95-light),
+    inset 1px 1px 0 0 var(--w95-shadow),
+    inset -2px -2px 0 0 var(--w95-hilite),
+    inset 2px 2px 0 0 var(--w95-dark),
+    0 0 0 1px #000080 !important;
+}
+
+.w95-date-trigger:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+}
+
+/* --------------------------------------------------------------- inputs --- */
+
+.w95 input[type="text"],
+.w95 input:not([type]),
+.w95 textarea,
+.w95-dialog input[type="text"],
+.w95-dialog input:not([type]),
+.w95-dialog textarea {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: none !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  padding: 3px 4px !important;
+  box-shadow:
+    inset -1px -1px 0 0 #ffffff,
+    inset 1px 1px 0 0 #808080,
+    inset -2px -2px 0 0 #dfdfdf,
+    inset 2px 2px 0 0 #0a0a0a !important;
+}
+
+.w95 input::placeholder,
+.w95-dialog input::placeholder,
+.w95 textarea::placeholder,
+.w95-dialog textarea::placeholder {
+  color: #808080 !important;
+}
+
+/* shadcn Select trigger reads as a 95 combo box. */
+.w95 [data-slot="select-trigger"],
+.w95-dialog [data-slot="select-trigger"] {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: none !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  box-shadow:
+    inset -1px -1px 0 0 #ffffff,
+    inset 1px 1px 0 0 #808080,
+    inset -2px -2px 0 0 #dfdfdf,
+    inset 2px 2px 0 0 #0a0a0a !important;
+}
+
+[data-slot="select-content"] {
+  font-family: "MS Sans Serif", Tahoma, Verdana, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+[data-slot="select-item"] {
+  border-radius: 0 !important;
+}
+
+[data-slot="select-item"][data-highlighted] {
+  background: #000080 !important;
+  color: #ffffff !important;
+}
+
+/* Category picker options (see CategoryOptionLabel).
+   Closed trigger: NAME only — Radix clones the selected option's markup into
+   the trigger, so the description is hidden there rather than duplicated. */
+[data-slot="select-trigger"] .w95-cat-desc {
+  display: none !important;
+}
+
+/* Open dropdown: the description is legible in BOTH row states — grey on the
+   #c0c0c0 menu face, white on the classic dark-blue highlight/hover row (where
+   grey-on-navy was effectively unreadable). */
+[data-slot="select-item"] .w95-cat-desc {
+  color: #404040 !important;
+}
+
+[data-slot="select-item"][data-highlighted] .w95-cat-desc,
+[data-slot="select-item"][data-state="checked"][data-highlighted] .w95-cat-desc {
+  color: #ffffff !important;
+}
+
+/* ----------------------------------------------------------------- tabs --- */
+
+.w95-tabstrip {
+  display: flex;
+  align-items: flex-end;
+  /* Wraps (rather than overflowing) when the strip runs out of room — the
+     right-aligned Patch Notes tab then drops to its own row instead of pushing
+     the other tabs off-screen. */
+  flex-wrap: wrap;
+  gap: 2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: -2px;
+}
+
+.w95-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 4px 12px 5px;
+  background: var(--w95-face, #c0c0c0);
+  color: #000000;
+  font-size: 12px;
+  cursor: pointer !important;
+  box-shadow:
+    inset -1px 0 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px 0 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+/* Active tab sits a touch taller and merges into the panel below it. */
+.w95-tab--active {
+  padding: 6px 14px 7px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Icon-only tab (the Patch Notes tab). The padding above is sized for a text
+   label — 12px either side of a 14px glyph leaves a wide, half-empty box once
+   the text is gone — so this squares up the horizontal padding only.
+   Deliberately LAST of the three and deliberately the longhand: both `.w95-tab`
+   and `.w95-tab--active` set the `padding` SHORTHAND at the same specificity,
+   so anything earlier would simply be overwritten, and the active tab would
+   still spread to 14px a side. Setting only left/right, after both, squares the
+   box in BOTH states while leaving each one's own vertical padding — so the
+   active tab still sits taller and merges into the panel exactly as before.
+   The tab's NAME isn't lost with the text: it moves to aria-label + title. */
+.w95-tab--icon {
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.w95-tab:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -4px;
+}
+
+.w95-tab:disabled {
+  cursor: default !important;
+}
+
+/* --------------------------------------------------------------- panels --- */
+
+/* A 95 group box: raised panel with a caption strip. */
+.w95-panel {
+  background: var(--w95-face, #c0c0c0);
+  padding: 2px;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+/* Region divider — the classic 95 etched/grooved separator bar, used between
+   two stacked board regions (Engineers / Backlog) so they read as
+   distinct panels instead of one continuous grey field. */
+.w95-divider {
+  height: 6px;
+  margin: 1px 0 2px;
+  background: var(--w95-face, #c0c0c0);
+  box-shadow:
+    inset -1px -1px 0 0 #ffffff,
+    inset 1px 1px 0 0 #808080,
+    inset -2px -2px 0 0 #dfdfdf,
+    inset 2px 2px 0 0 #0a0a0a !important;
+}
+
+.w95-divider--resize {
+  position: relative;
+  height: 10px;
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.w95-divider--resize::after {
+  content: "";
+  position: absolute;
+  inset: 3px 35%;
+  background: repeating-linear-gradient(
+    90deg,
+    #808080 0 2px,
+    #ffffff 2px 4px
+  );
+  pointer-events: none;
+}
+
+.w95-divider--resize:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: 2px;
+}
+
+/* Status-bar segment (the sunken strips along the bottom of a 95 window). */
+.w95-status {
+  background: var(--w95-face, #c0c0c0);
+  padding: 2px 6px;
+  font-size: 11px;
+  box-shadow:
+    inset -1px -1px 0 0 #ffffff,
+    inset 1px 1px 0 0 #808080 !important;
+}
+
+/* Selected / highlighted row, 95-style. */
+.w95-selected {
+  background: #000080 !important;
+  color: #ffffff !important;
+}
+
+/* ----------------------------------------------------------- scrollbars --- */
+
+.w95 ::-webkit-scrollbar,
+.w95-dialog ::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+.w95 ::-webkit-scrollbar-track,
+.w95-dialog ::-webkit-scrollbar-track {
+  background-color: #ffffff;
+  background-image: linear-gradient(
+      45deg,
+      #c0c0c0 25%,
+      transparent 25%,
+      transparent 75%,
+      #c0c0c0 75%
+    ),
+    linear-gradient(45deg, #c0c0c0 25%, #ffffff 25%, #ffffff 75%, #c0c0c0 75%);
+  background-size: 2px 2px;
+  background-position:
+    0 0,
+    1px 1px;
+}
+
+.w95 ::-webkit-scrollbar-thumb,
+.w95-dialog ::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf;
+}
+
+.w95 ::-webkit-scrollbar-corner,
+.w95-dialog ::-webkit-scrollbar-corner {
+  background: #c0c0c0;
+}
+
+/* ------------------------------------------- "under construction" scene --- */
+
+/* The Retrospective tab's placeholder animation (see under-construction.tsx).
+   Frame-swapped like a 90s animated GIF: four <g> frames stacked in the same
+   SVG, each shown for a quarter of the loop by a `steps(1, end)` opacity
+   animation offset with a positive delay. No interpolation, no easing — the
+   picture simply CHANGES, which is the whole idiom.
+
+   Per this app's standing rule (see the note at the bottom of this file) it
+   always animates, regardless of the user's reduced-motion setting. */
+.w95-dig {
+  display: block;
+  width: 256px;
+  height: 160px;
+  max-width: 100%;
+  /* Keep the upscaled pixels square and hard-edged rather than smoothed. */
+  image-rendering: pixelated;
+}
+
+.w95-dig__frame {
+  opacity: 0;
+  animation: w95-dig-frames 1000ms steps(1, end) infinite;
+}
+
+/* Frame N is visible for the Nth quarter of the 1000ms loop. */
+.w95-dig__frame:nth-of-type(1) {
+  animation-delay: 0ms;
+  opacity: 1;
+}
+.w95-dig__frame:nth-of-type(2) {
+  animation-delay: 250ms;
+}
+.w95-dig__frame:nth-of-type(3) {
+  animation-delay: 500ms;
+}
+.w95-dig__frame:nth-of-type(4) {
+  animation-delay: 750ms;
+}
+
+@keyframes w95-dig-frames {
+  0%,
+  24.99% {
+    opacity: 1;
+  }
+  25%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The classic road-works barricade: hard-stop diagonal hazard stripes. The
+   colour stops are abrupt (no blend range), so the edges stay crisp. */
+.w95-hazard {
+  width: 256px;
+  max-width: 100%;
+  height: 10px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffff00 0,
+    #ffff00 6px,
+    #0a0a0a 6px,
+    #0a0a0a 12px
+  );
+  box-shadow:
+    inset -1px -1px 0 0 #808080,
+    inset 1px 1px 0 0 #ffffff;
+}
+
+.w95-closed-feedback {
+  background-color: #c0c0c0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 5px,
+      rgb(128 128 128 / 18%) 5px,
+      rgb(128 128 128 / 18%) 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 5px,
+      rgb(255 255 255 / 24%) 5px,
+      rgb(255 255 255 / 24%) 6px
+    );
+}
+
+/* -------------------------------------------------------------- dialogs --- */
+
+/* shadcn DialogContent gets .w95-dialog so the portal (outside .w95) is
+   skinned too. The default close button is hidden in favour of a 95 one. */
+.w95-dialog {
+  --w95-face: #c0c0c0;
+  --w95-light: #ffffff;
+  --w95-hilite: #dfdfdf;
+  --w95-shadow: #808080;
+  --w95-dark: #0a0a0a;
+  --w95-title-a: #000080;
+  --w95-title-b: #1084d0;
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", Tahoma, Verdana, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  border: none !important;
+  padding: 3px !important;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+.w95-dialog > button[data-slot="dialog-close"] {
+  display: none;
+}
+
+/* ---- dialogs open and close INSTANTLY, and are SQUARE ---------------------
+ *
+ * Windows 95 dialogs did not fade, zoom or slide — they were simply THERE on
+ * the next frame, and gone just as abruptly. shadcn's Dialog/AlertDialog ship
+ * the modern treatment instead (`duration-200` plus animate-in/animate-out with
+ * fade-0 and zoom-95 on the content, and a fade on the backdrop), so it is
+ * neutralised here rather than by editing the pre-installed
+ * `components/ui/*` primitives — the same data-slot override pattern this
+ * stylesheet already uses for selects, inputs and menus.
+ *
+ * `animation: none` is what makes the CLOSE genuinely instant rather than
+ * merely fast: Radix's Presence keeps an exiting node mounted while its
+ * computed `animation-name` is anything other than `none`, waiting for an
+ * `animationend` that a 0s animation may never fire. Forcing the name to
+ * `none` makes Presence unmount synchronously. The durations are zeroed too so
+ * nothing can reintroduce a delay through a leftover `duration-*` utility.
+ *
+ * `border-radius: 0` has to be repeated on these roots: the blanket rule at the
+ * top of this file is `.w95 *` / `.w95-dialog *`, which squares DESCENDANTS but
+ * never the dialog root itself — that is why the window kept `rounded-lg`
+ * corners. The 95 bevel/title-bar treatment above is untouched.
+ *
+ * This is deliberate, and consistent with the app's standing no-reduced-motion
+ * rule at the bottom of this file: animation choices here are explicit, and the
+ * explicit choice for dialogs is NO transition at all. Do not restore one.
+ */
+[data-slot="dialog-overlay"],
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-overlay"],
+[data-slot="alert-dialog-content"],
+/* Popups get the same snap: 95 dropdowns and menus never faded either, and the
+   category / work-item-state pickers are styled as 95 chrome throughout. */
+[data-slot="select-content"],
+[data-slot="popover-content"] {
+  border-radius: 0 !important;
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition: none !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* The AlertDialog behind useConfirm() isn't tagged .w95-dialog, so square its
+   inner panels the way `.w95-dialog *` does for the others. */
+[data-slot="alert-dialog-content"] * {
+  border-radius: 0 !important;
+}
+
+/* ---- the useConfirm() confirmation dialog --------------------------------
+ *
+ * <ConfirmDialogProvider> (components/confirm-dialog.tsx) now dresses its
+ * AlertDialog as a real 95 window — `.w95-dialog` frame, title bar, system
+ * message icon, chunky beveled buttons — and tags the content `.w95-confirm`
+ * so the two rules below can finish the job on the buttons.
+ *
+ * They need finishing because AlertDialogAction / AlertDialogCancel are not
+ * plain buttons: the shadcn primitives wrap each in a <Button>, and Radix's
+ * Slot CONCATENATES that Button's utility classes with ours instead of merging
+ * them — so `h-9`, `px-4`, `text-sm` and `font-medium` all survive next to
+ * `.w95-btn`, and only stylesheet order would decide the winner. `.w95-btn`
+ * already takes the face, bevel and colours with !important; these pin the box
+ * metrics and the type the same way, so a confirmation button is pixel-
+ * identical to every other 95 button in the app whatever the source order.
+ */
+.w95-confirm [data-slot="alert-dialog-cancel"],
+.w95-confirm [data-slot="alert-dialog-action"] {
+  height: auto !important;
+  min-height: 23px !important;
+  padding: 3px 10px !important;
+  border: 0 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  transition: none !important;
+}
+
+/* Pressed: the bevel flip itself lives in `.w95-btn:active`; this is the
+   matching 1px label shift, which the padding pinned above would otherwise
+   sit on. */
+.w95-confirm [data-slot="alert-dialog-cancel"]:active,
+.w95-confirm [data-slot="alert-dialog-action"]:active {
+  padding: 4px 9px 2px 11px !important;
+}
+
+/* Long unbroken text (a pasted URL, a giant token in a title or description,
+   a deep area path) must WRAP inside the window instead of stretching it or
+   spilling past the frame. `min-width: 0` defeats the `min-width: auto` that
+   grid/flex children get by default — which is what let one long word widen
+   the whole dialog — and the inputs are capped to the frame width so they can
+   never force horizontal expansion either. */
+.w95-dialog,
+.w95-dialog > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.w95-dialog input,
+.w95-dialog textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+/* Sonner toasts, 95-style. */
+[data-sonner-toast] {
+  font-family: "MS Sans Serif", Tahoma, Verdana, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf !important;
+}
+
+/* --------------------------------------------------------------- misc ----- */
+
+/* Search field with a leading magnifier (and an optional trailing clear button).
+ *
+ * ROOT CAUSE (why the previous fix silently did nothing): the generic input
+ * rules above are `.w95 input[type="text"]` and `.w95 input:not([type])`, which
+ * score specificity (0,2,1) — a class + an attribute/`:not()` selector + an
+ * element. The earlier fix was a BARE class, `.w95-search-input`, scoring only
+ * (0,1,0). Both declarations are `!important`, so `!important` cancels out and
+ * the cascade falls through to SPECIFICITY — where (0,2,1) beats (0,1,0). The
+ * generic `padding: 3px 4px` therefore kept winning and the 24px gutter was
+ * never applied, leaving the magnifier sitting on top of the typed text.
+ * (Source order can't save it either: a later rule only wins on a TIE.)
+ *
+ * THE FIX: qualify the class with the SAME element+attribute context the
+ * generic rules use, giving (0,3,1) — strictly higher than (0,2,1) in BOTH
+ * shadcn cases (`<Input>` renders `type="text"` when a type is passed and no
+ * `type` attribute at all when it isn't, so both variants are covered).
+ * `box-sizing: border-box` keeps the reserved gutters inside the 95 bevel.
+ */
+.w95 input[type="text"].w95-search-input,
+.w95 input:not([type]).w95-search-input,
+.w95 input[type="search"].w95-search-input,
+.w95-dialog input[type="text"].w95-search-input,
+.w95-dialog input:not([type]).w95-search-input,
+.w95-dialog input[type="search"].w95-search-input {
+  box-sizing: border-box !important;
+  /* 4px bevel gutter + 14px glyph + 6px breathing room */
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+/* Work-item count chip in a window title bar.
+
+   It reuses the raised `.w95-titlebtn` bevel, but `.w95-titlebtn` hard-codes
+   `width: 18px; height: 16px` — and because win95.css loads after Tailwind,
+   that fixed 18px box beat the `w-auto` utility and the count text spilled
+   OUTSIDE the chip (and past the window edge). Sizing to content here keeps
+   the count inline with the title and right-justified in the header. */
+.w95-count {
+  width: auto !important;
+  min-width: 18px;
+  height: auto !important;
+  min-height: 16px;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
+.w95-item:focus-visible {
+  outline: 1px dotted #000000;
+  outline-offset: -2px;
+}
+
+/* Insertion point while re-ordering a list: a hard 2px navy rule in the gap
+   between two cards, with a white hairline under it so it stays legible on the
+   grey face and on the lighter zebra rows. Absolutely positioned, so showing it
+   never nudges a card. No transition — it snaps, like 95 did. */
+.w95-dropline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #000080;
+  box-shadow: 0 0 0 1px #ffffff;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.w95-dropline--top {
+  top: -2px;
+}
+
+.w95-dropline--bottom {
+  bottom: -2px;
+}
+
+/* VERTICAL insertion line — the multi-column (maximized) lists, where two cards
+   sit side by side and "before / after" is a left / right relationship. Same
+   navy 2px rule, turned through 90 degrees. */
+.w95-dropline--left,
+.w95-dropline--right {
+  left: auto;
+  right: auto;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  height: auto;
+}
+
+.w95-dropline--left {
+  left: -2px;
+}
+
+.w95-dropline--right {
+  right: -2px;
+}
+
+/* Drop target highlight — 95 used a dotted marquee. */
+.w95-droptarget {
+  outline: 2px dotted #000080;
+  outline-offset: -3px;
+}
+
+/* Pointer-driven Board dragging deliberately avoids native HTML drag mode,
+   which can seize the managed-app iframe. Keep hover portals out of hit-testing
+   during the gesture and use one unambiguous cursor across the app surface. */
+body.w95-pointer-dragging,
+body.w95-pointer-dragging * {
+  cursor: grabbing !important;
+}
+
+body.w95-pointer-dragging [data-slot="hover-card-content"] {
+  display: none;
+}
+
+/* MENU TARGET — the work item whose right-click menu is open right now.
+
+   NAMED `w95-menutarget`, NOT `w95-selected`, on purpose: `.w95-selected`
+   already exists further up this file (navy fill + white text, both
+   `!important`) and is currently unused by any component. Reusing that name
+   would have silently pulled those two declarations in as well, and the
+   `!important` background would have overridden the zebra striping and the
+   greyed finished nested rows — the exact collisions this marker is designed
+   to avoid. That rule is left exactly as it is; this is simply a different
+   thing with a different name.
+   Applied in every list that has the menu: board engineer lists and backlog
+   columns (including the maximized multi-column layout), My Work cards, nested
+   child rows, and the read-only Triage / Completed rows.
+
+   WHAT IT IS: 95's selection navy (#000080 — the same navy as the title bars,
+   the menu highlight and the insertion line) as a SOLID 2px rule just inside
+   the card, plus a 10% wash of the same colour across the face. That reads as
+   "this one" at a glance without repainting anything.
+
+   WHY NOT THE FULL EXPLORER TREATMENT (navy fill + inverted white text): these
+   are not plain list rows. A card carries a category-coloured left accent, a
+   coloured state badge, an avatar, the flame and wrench markers and — on a
+   finished nested row — deliberately greyed text. Flooding the background with
+   navy would mean re-inverting every one of those to stay legible, and would
+   bury the exact colour-coding the board is read by. A ring plus a light wash
+   is the same 95 vocabulary without taking anything away.
+
+   HOW IT AVOIDS EVERY OTHER MARKER (all of these can be on the same card):
+     * `outline` is NOT used — .w95-hot owns it (2px solid, animated, drawn
+       OUTSIDE the card), so a hot item keeps its cycling ring untouched.
+     * `::before` is NOT used — .w95-repair owns it for the caution tape, also
+       drawn outside at inset -2px. This uses ::after, which nothing else does.
+     * SOLID, where .w95-droptarget's marquee is DOTTED navy, so a drop target
+       and a menu target never read as the same thing (and they can't coincide
+       anyway — dragging dismisses the menu).
+     * `inset: 2px` keeps the card's raised bevel fully visible; because an
+       absolutely positioned box is laid out against the PADDING box, the 4px
+       category-coloured left border sits outside this ring and stays whole.
+     * The wash is translucent, so the zebra band underneath still shows and
+       both zebra phases stay distinguishable while selected.
+     * z-index stays below .w95-dropline (5), so the insertion line still draws
+       over everything during a re-order.
+     * `pointer-events: none`, so click-to-open, right-click, drag-and-drop and
+       keyboard focus behave exactly as they did — this is purely paint. */
+/* MULTI-SELECTED card (My Work). 95's selection navy again, but drawn as a
+   ring at inset 4px — INSIDE `.w95-menutarget`'s inset-2px ring, inside the
+   `.w95-hot` outline (offset 0) and well inside `.w95-repair`'s tape (inset
+   -2px). Everything therefore nests concentrically instead of one marker
+   painting over another, and a card can legitimately carry all of them at
+   once.
+
+   A ring rather than a navy FILL on purpose: `.w95-selected`'s navy background
+   would bury the zebra band, the grey-red bug tint, the state badges and the
+   greyed finished rows — the collisions the menu-target marker was already
+   written to avoid. The dashed inner line adds a second, non-colour cue so
+   selection is still legible if the ring is mistaken for the menu target. */
+.w95-selecteditem {
+  position: relative;
+}
+
+.w95-selecteditem::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  z-index: 1;
+  box-shadow: inset 0 0 0 2px #000080;
+  outline: 1px dashed #ffffff;
+  outline-offset: -3px;
+}
+
+.w95-menutarget {
+  position: relative;
+}
+
+.w95-menutarget::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: inset 0 0 0 2px #000080;
+  background: rgba(0, 0, 128, 0.1);
+}
+
+/* Square icon-only button ("Open in ADO"): a plain `.w95-btn` is pill-ish here
+   because it carries `min-height: 23px` plus 10px of horizontal padding for a
+   text label, which left the 12px glyph in a wide, short box. This locks it to
+   an equal-sided 18px tile with the glyph centred, so the bevel frames the icon
+   the way a 95 toolbar button does. `!important` matches the specificity the
+   base `.w95-btn` declarations already use. */
+.w95-iconbtn {
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  gap: 0;
+  flex: 0 0 auto;
+}
+
+/* Pressed state keeps the square footprint — only the bevel flips (the base
+   `.w95-btn:active` re-pads to shift the label, which would distort the tile). */
+.w95-iconbtn:active:not(:disabled) {
+  padding: 0 !important;
+}
+
+/* -------------------------------------------------------- context menu ---- */
+
+/* Classic 95 pop-up menu: raised outer bevel on the standard face, square
+   corners, no shadow softening. Positioned by inline `fixed` coordinates from
+   the right-click point. */
+.w95-menu {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: auto;
+  min-width: 148px;
+  padding: 2px;
+  background: var(--w95-face, #c0c0c0);
+  color: #000000;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow:
+    inset -1px -1px 0 0 #0a0a0a,
+    inset 1px 1px 0 0 #ffffff,
+    inset -2px -2px 0 0 #808080,
+    inset 2px 2px 0 0 #dfdfdf,
+    2px 2px 0 0 rgba(0, 0, 0, 0.35);
+}
+
+.w95-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 4px 18px 4px 8px;
+  background: transparent;
+  color: #000000;
+  text-align: left;
+  cursor: default;
+  border: 0;
+}
+
+/* The classic navy highlight: on real pointer hover, or on the entry the arrow
+   keys have moved to (`--active`, driven by the menu's own activeIndex).
+ 
+   It deliberately does NOT match `:focus`. The menu used to focus its first
+   entry on open, so `:focus` left "Unassign" permanently painted in the
+   selection colour the instant you right-clicked a card — it looked stuck in a
+   hover state. Focus now stays on the menu container and the keyboard highlight
+   is an explicit class, so nothing is highlighted until it genuinely is. */
+.w95-menu-item:hover:not(:disabled),
+.w95-menu-item--active:not(:disabled) {
+  background: #000080;
+  color: #ffffff;
+  outline: none;
+}
+
+/* The pop-up itself takes focus on open; it's a container, not a control, so it
+   shouldn't paint a focus ring. */
+.w95-menu:focus,
+.w95-menu:focus-visible {
+  outline: none;
+}
+
+.w95-menu-item:disabled {
+  color: #808080;
+  text-shadow: 1px 1px 0 #ffffff;
+}
+
+/* A cascading entry ("Change state") wears the classic right-pointing triangle,
+   pushed to the far edge of the row. */
+.w95-menu-arrow {
+  margin-left: auto;
+  padding-left: 10px;
+  font-size: 8px;
+  line-height: 1;
+}
+
+/* Stacked rows: the state NAME over its description (see STATE_DESCRIPTIONS).
+   `align-items: flex-start` so the colour dot lines up with the name rather
+   than centring across both lines. */
+.w95-menu-item--stacked {
+  align-items: flex-start;
+  padding-right: 10px;
+}
+
+/* The description under a state name. Legible in BOTH row states — grey on the
+   #c0c0c0 menu face, white on the navy highlight (where grey-on-navy was
+   effectively unreadable). Same treatment as the category picker's
+   `.w95-cat-desc`. */
+.w95-menu-desc {
+  color: #404040;
+}
+
+.w95-menu-item:hover:not(:disabled) .w95-menu-desc,
+.w95-menu-item--active:not(:disabled) .w95-menu-desc {
+  color: #ffffff;
+}
+
+/* The state colour dot beside a state name — in the context menu's "Change
+   state" flyout and in the detail dialog's state picker.
+
+   Those dots are tuned to read on the LIGHT surfaces they mostly sit on (about
+   4:1 on the #c0c0c0 menu face, ~5:1 inside their own badge). They cannot also
+   be tuned for the navy highlight row: 3:1 against #c0c0c0 caps luminance at
+   0.1424 while 3:1 against #000080 needs at least 0.1468, so no colour clears
+   both — the theoretical best on both at once is ~2.97:1.
+
+   So the ROW fixes it instead of the colour: on the highlighted row the dot
+   gets a white ring, which delineates any of the six fills against the navy
+   without touching the fill itself. Exactly the treatment `.w95-menu-desc` and
+   `.w95-cat-desc` already get here (grey text -> white on the same row), and
+   it overrides the dot's usual dark `ring-1 ring-black/30`, which is invisible
+   against navy. */
+.w95-menu-item:hover:not(:disabled) .w95-state-dot,
+.w95-menu-item--active:not(:disabled) .w95-state-dot,
+[data-slot="select-item"][data-highlighted] .w95-state-dot,
+[data-slot="select-item"][data-state="checked"][data-highlighted] .w95-state-dot {
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+/* A disabled row (the state the work item is already in) greys out whole. */
+.w95-menu-item:disabled .w95-menu-desc {
+  color: #808080;
+}
+
+/* The cascading flyout. It hangs off the parent row: `top: -2px` lines its
+   inner face up with that row across the parent menu's 2px padding, and it
+   overlaps the parent's right bevel by 2px the way 95 submenus did. Position
+   is `absolute` (relative to the wrapper around the parent row), which
+   overrides `.w95-menu`'s own `position: fixed`. */
+.w95-submenu {
+  position: absolute;
+  top: -2px;
+  left: 100%;
+  margin-left: -2px;
+  z-index: 1001;
+  min-width: 190px;
+}
+
+/* Flipped to the left when opening right would run off the viewport. */
+.w95-submenu--left {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: -2px;
+}
+
+/* A DESTRUCTIVE menu entry (currently "Delete…" on a nested work item).
+ *
+ * Painted in the same red this app already uses for failures, and bold, so the
+ * one entry that removes a real work item can't be mistaken for the writes
+ * above it. It is also set apart by a `.w95-menu-sep` group separator.
+ *
+ * No hover/active/disabled overrides are needed here on purpose: the existing
+ * `.w95-menu-item:hover:not(:disabled)` / `--active` rules (specificity 0,3,0)
+ * and `.w95-menu-item:disabled` (0,2,0) both outrank this single class (0,1,0),
+ * so a highlighted row still goes white-on-navy and a disabled one still greys
+ * out, exactly like every other entry. Don't add !important here — that is what
+ * would break the navy highlight.
+ */
+.w95-menu-item--danger {
+  color: #a80000;
+  font-weight: bold;
+}
+
+/* Etched separator between menu groups. */
+.w95-menu-sep {
+  height: 2px;
+  margin: 3px 2px;
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #ffffff;
+}
+
+/* ------------------------------------------------ flame-marker item ------- */
+
+/* A work item whose configured tag uses the flame card visual is marked two
+   ways: a hard-edged outline around the card that ALTERNATES between the two
+   fire colours, and a 95-style pixel FLAME glyph next to its title (see
+   .w95-alert below).
+
+   The previous orange gradient / ember wash is gone entirely — soft multi-stop
+   gradients read as modern chrome, which is not the idiom here. This is a flat
+   2px outline that hard-cuts between the two FIRE colours (orange -> yellow ->
+   orange). Red is gone on purpose: red said "error", and a hot work item is
+   important, not broken.
+
+   The ring NEVER disappears. It used to blink — orange, off, yellow, off — and
+   the off phases are gone: the outline is painted at every moment of the cycle
+   and only its COLOUR changes. A hot card is therefore always fully outlined,
+   so its boundary never half-vanishes and it can't be mistaken for an unmarked
+   card at the wrong instant.
+
+   Why an OUTLINE rather than a border or an inset ring:
+     • outlines are drawn OUTSIDE the border box and take no layout space, so
+       the card never shifts, resizes or reflows as the colour changes;
+     • at the default `outline-offset: 0` it sits in the 4px list gutter, so it
+       never paints over the category-coloured `border-l-4` accent;
+     • it composites above the zebra background without changing it.
+   The width/style are declared statically and only `outline-color` animates,
+   which keeps the whole cycle layout- and paint-cheap. The static colour is one
+   of the two cycle colours rather than `transparent`, so the ring is solid from
+   the very first frame. */
+.w95-hot {
+  position: relative;
+  outline: 2px solid #ff8000;
+  animation: w95-hot-alternate 1200ms steps(1, end) infinite;
+}
+
+/* Hard cut, no fade: `steps(1, end)` plus flat halves is the period-correct
+   snap of a 95-era alert, not a modern pulse — the colour SWAPS between frames
+   and is never caught mid-tween.
+
+   TWO phases over the cycle — ORANGE, YELLOW — both from the fire end of the
+   16-colour palette, with no transparent phase between them: the ring is lit
+   for 100% of the cycle and only its colour alternates.
+
+   THE YELLOW IS DEEPENED, not pure #ffff00: full-intensity yellow is the
+   brightest colour a screen can make (relative luminance 0.93) and it glared
+   on a board that may show several hot cards at once. #d0d000 keeps the
+   IDENTICAL hue (CIELAB 102.9°, exactly pure yellow's — this is the same
+   colour deepened, not a different one) while cutting emitted luminance by
+   37%, so it reads as yellow at a glance and stops burning. It was dimmed in
+   two passes: #ffff00 -> #dcdc00 (-28%) -> #d0d000 (-37% total, a further
+   -12%).
+
+   THIS IS THE PRACTICAL FLOOR for a yellow that still reads as fire, and the
+   reason is worth keeping: the orange phase sits at L* 67, and between roughly
+   L* 64 and 78 a dimmed yellow MATCHES the orange in lightness. That band is a
+   dead zone — with red-green colour blindness the two phases are told apart
+   almost entirely BY lightness, so a yellow inside it makes the alternation
+   vanish for those viewers (measured: at #969600 the simulated protanope sees
+   ΔE00 0.4 between the phases, i.e. nothing happens at all). #d0d000 sits at
+   L* 81, +14 above the orange and clear of the band, which keeps the swap
+   visible: ΔE00 16.6 simulated protanope and 8.0 simulated deuteranope,
+   against 37.0 for normal vision. Dimming further along THIS side of the dead
+   zone buys very little — roughly 6% more luminance before L* 78 — and spends
+   the deuteranope margin doing it, so do not chase it.
+
+   If a MUCH darker marker is ever wanted, the only safe route is to cross to
+   the far side of the orange rather than into the band: ~#6b6b00 (L* 44, -85%
+   luminance) actually separates BETTER for colour blindness (protanope 16.6,
+   deuteranope 25.2) and is the one option that clears WCAG 3:1 against the
+   card face. It is a deliberate look change, though — at that depth it reads
+   as dark olive rather than fire, which is why it was offered rather than
+   taken.
+
+   It also has to stay distinct from the repair tape's yellow, because an item
+   carrying both tags wears the two as CONCENTRIC rings (.w95-repair sits at
+   inset -2px, this outline at offset 0). The tape stays pure #ffff00, and
+   ΔE00 10.5 between them — over 4x the ~2.3 just-noticeable difference, and
+   they are directly adjacent, which is the easiest case to discriminate — so
+   the two rings never read as one colour. Separation from the grey surfaces
+   stays chromatic and essentially unchanged (ΔE00 29.1 against the #c0c0c0
+   card face, 28.1 zebra, 27.5 nested); this ring never relied on lightness
+   against the grey — the orange phase is only 1.38:1 against the card face —
+   so the low luminance ratios there are the existing design, not a new
+   regression.
+
+   Cadence: 1200ms, so each colour holds 600ms. Dropping the two off phases
+   halved the number of visual events per cycle (four changes became two), and
+   trimming the cycle from 1600ms restores some of that urgency without turning
+   a deliberate alternation into a strobe — it lands at well under one swap per
+   second, which matters here because this app never honours reduced motion (see
+   the standing note at the foot of this file).
+
+   Only `outline-color` animates; the width and style are static, so the cycle
+   never costs a layout. */
+@keyframes w95-hot-alternate {
+  0%,
+  49.99% {
+    outline-color: #ff8000;
+  }
+  50%,
+  100% {
+    outline-color: #d0d000;
+  }
+}
+
+/* The marker glyph: a hand-plotted PIXEL FLAME (see hot-indicator.tsx), drawn
+   as flat 1x1 rects with `shape-rendering: crispEdges` — the 95 idiom for
+   "this one is hot", with no gradient, no shadow and no emoji glyph. Sized to
+   sit on a 12px text line so it never disturbs the card's title row, and it
+   stays STEADY while the outline alternates, so the card is always identifiable
+   at a glance.
+
+   The container is a bare 12x12 box now: the old red disc (border + radius +
+   background) is gone with the critical-stop icon it framed. */
+.w95-alert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.w95-alert svg {
+  display: block;
+}
+
+/* The repair spanner is plotted on a 13x13 grid instead of the flame's 12x12
+   (see repair-indicator.tsx): at 12 the jaw had no room for a readable slot.
+   The box grows by the same single pixel so the art stays whole and CRISP —
+   scaling 13 plotted pixels into a 12px box would land the rects on half
+   pixels and undo `crispEdges`, which is the whole point of the idiom. Flex
+   centring keeps it level with the flame when an item carries both. */
+.w95-alert--wrench {
+  width: 13px;
+  height: 13px;
+}
+
+/* ------------------------- ancient item (corner cobweb) -------------------- */
+
+/* A work item created 3+ years ago gets a small pixel COBWEB strung across its
+   TOP-RIGHT corner (see cobweb-indicator.tsx). Decoration, not a status: it
+   says "nobody has touched this", and it is drawn to stay out of everything
+   that carries actual meaning.
+
+   WHY THE TOP-RIGHT CORNER. It is the only corner free of a real signal in
+   every card this app renders:
+     • the LEFT gutter is spoken for three times over — the category `border-l-4`
+       accent, the `.w95-hot` outline and the `.w95-repair` tape all live there;
+     • the TOP-LEFT is the marker slot (flame, wrench) plus the board card's
+       drag handle;
+     • the BOTTOM edge is the meta chip row — state badge, id, rank, created-on
+       stamp — and the bottom-RIGHT specifically is the `ml-auto` category tag.
+   That leaves the top-right, which holds only the tail of the title line.
+
+   It is anchored INTO the corner, where every card has padding (px-1.5 through
+   px-4) and a 2px bevel, and its threads thin out going inward — so the solid
+   end sits over padding and only the sparse outer arc can reach text at all.
+
+   `z-index: 0` keeps it UNDER both selection markers: the multi-select ring
+   (`.w95-selecteditem::before`, z-index 1) and the navy menu-target ring and
+   wash (`.w95-menutarget::after`, z-index 2) both still paint over the top of
+   it, so neither is ever obscured by a joke.
+
+   `pointer-events: none` is what makes it safe on an interactive card: the
+   corner stays fully clickable, right-clickable and draggable, exactly as if
+   the web were not there. The trade-off, accepted deliberately: a
+   pointer-transparent element is never hovered, so the `title` does not raise
+   a mouse tooltip — the `aria-label` still carries the explanation to
+   assistive tech, and hovering the corner shows the card's own tooltip. */
+.w95-cobweb {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.w95-cobweb svg {
+  display: block;
+}
+
+/* ------------------------------------------------ repair-marker item ------ */
+
+/* A work item whose configured tag uses the repair visual is marked two ways: the
+   pixel WRENCH glyph next to its title (see repair-indicator.tsx), and the
+   hard-edged yellow/black CAUTION TAPE frame below — the hazard-stripe read
+   everyone knows from a taped-off area, in flat 16-colour yellow and black,
+   with no gradient blend, no glow and no rounding.
+
+   Why a pseudo-element ring rather than a border — the same three constraints
+   the `.w95-hot` outline above answers, met the same way:
+     • `position: absolute; inset: -2px` puts the frame entirely OUTSIDE the
+       card's border box, so it takes no layout space at all: tagging an item
+       never shifts, resizes or reflows the card or its neighbours;
+     • being outside the border box it sits in the 4px list gutter, so it never
+       paints over the category-coloured `border-l-4` accent inside the card;
+     • `pointer-events: none` leaves the card fully clickable and draggable
+       underneath it.
+
+   The stripes are four separate 2px bars (top, bottom, left, right) cut from
+   the SAME 45° pattern, so every stripe around the frame stays parallel — tape
+   wrapped around the card rather than four unrelated edges. The centre is empty
+   by construction (each bar is explicitly sized), which is what leaves the
+   card's own face, bevel and zebra band untouched.
+
+   It deliberately does NOT animate. The alternating outline is this board's one
+   motion signal and it belongs to the configured flame visual: urgent, look
+   now. A repair item is a standing classification rather than an interruption,
+   so it gets a loud but STILL frame — the two never compete for the eye, and a
+   backlog full of repair items costs no repaint. */
+.w95-repair {
+  position: relative;
+}
+
+.w95-repair::before {
+  /* One 45° hazard pattern, reused by all four bars: 3px flat yellow, 3px flat
+     black, hard stops — no blend anywhere in the ramp. */
+  --w95-tape: repeating-linear-gradient(45deg, #ffff00 0 3px, #000000 3px 6px);
+  content: "";
+  position: absolute;
+  inset: -2px;
+  pointer-events: none;
+  background-image: var(--w95-tape), var(--w95-tape), var(--w95-tape),
+    var(--w95-tape);
+  /* top, bottom, left, right — 2px thick, hugging the card's four edges. */
+  background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: no-repeat;
+}
+
+/* BOTH configured visuals on one item: the two frames NEST rather than fight
+   over the same 2px. The caution tape keeps the ring against the card (it is
+   the item's standing classification) and the hot ring steps one ring OUT, to
+   `outline-offset: 2px`, where it cycles orange/yellow around the tape without
+   either one covering the other. Now that the hot ring never drops to
+   transparent, the pair reads as two concentric rings that are both permanently
+   drawn — striped tape inside, alternating fire colour outside — rather than an
+   outer ring that comes and goes. Both stay legible, both stay outside the
+   border box, nothing reflows, and the two rings together use exactly the 4px
+   gutter the hot outline already used on its own. The flame and the wrench
+   both still show, side by side, on the title line. */
+.w95-hot.w95-repair {
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   APP-WIDE CONVENTION: this app does NOT honour `prefers-reduced-motion`.
+   =========================================================================
+
+   This is an explicit design decision for this template, and it applies to
+   EVERY animation in the app — not just the flame-marker outline below it. No
+   animation anywhere may be disabled, frozen, shortened or otherwise reduced
+   because of the user's OS/browser motion preference: everything always
+   animates, for every user.
+
+   Concretely, and permanently:
+     • NO `@media (prefers-reduced-motion: ...)` block may be added to this
+       stylesheet or to any component-level style. The flame-marker outline is
+       meant to keep animating.
+     • NO Tailwind `motion-reduce:` / `motion-safe:` variants.
+     • NO `useReducedMotion()` / `matchMedia("(prefers-reduced-motion...)")`
+       checks or motion-reduction branches in TS/TSX.
+     • motion/react is pinned to `reducedMotion="never"` in app-shell.tsx,
+       which overrides App.tsx's `reducedMotion="user"` for the whole
+       routed subtree. Don't relax it.
+
+   New animations must NOT ship a reduced-motion fallback. Please don't
+   reinstate any of the above without re-checking this requirement with the app
+   owner first.
+   ========================================================================= */

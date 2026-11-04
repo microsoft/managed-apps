@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vite-cache/
+*.log
+
+# Some global gitignore templates ignore `lib/`; keep the app's source folder.
+!src/lib/
+!src/lib/**
+
+# Managed Apps: ms.config.json, generated/ and .ms/ belong in your app's repository;
+# only the packed build output stays local.
+.ms/packed/
+
+# Local configuration
+.env
+.env.*
+!.env.example

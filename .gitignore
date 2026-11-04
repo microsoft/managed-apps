@@ -427,3 +427,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Sample setup output (ms app init / add data-source); it belongs in your own app repository
+samples/*/ms.config.json
+samples/*/generated/
+samples/*/.ms/

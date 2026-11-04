@@ -1,0 +1,4 @@
+{
+  "$comment": "Usernames (sign-in UPN/email) that see admin tabs. Case-insensitive. This only hides UI; Azure DevOps permissions still control what anyone can change.",
+  "admins": []
+}
