@@ -1,0 +1,142 @@
+/* Design tokens. Neutral surfaces and type follow Fluent 2 semantic tokens;
+   light-dark() follows the system scheme unless <html data-theme> pins one. */
+:root {
+  color-scheme: light dark;
+
+  --font-sans: "Segoe Sans", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Segoe Serif", "Georgia Pro", Georgia, "Times New Roman", serif;
+  --font-mono: Consolas, "Cascadia Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Surfaces (dark values from live Fluent: bg1 #242424, bg2 #292929, bg3 #2e2e2e) */
+  --canvas: light-dark(#ffffff, #242424);
+  --surface: light-dark(#ffffff, #292929);
+  --surface-raised: light-dark(#ffffff, #2e2e2e);
+  --surface-sunken: light-dark(#fafafa, #1f1f1f);
+  --fill-subtle: light-dark(#0000000a, #ffffff0f);
+  --fill-soft: light-dark(#00000014, #ffffff1f);
+  --fill-strong: light-dark(#0000001f, #ffffff29);
+
+  /* Text (dark fg1/fg2/fg3 from live Fluent) */
+  --fg: light-dark(#242424, #dedede);
+  --fg-secondary: light-dark(#5d5d5d, #aeaeae);
+  --fg-tertiary: light-dark(#6f6f6f, #929292);
+
+  /* Strokes. --stroke is also the field border; it is subtle (~1.5:1), so every field
+     has a visible label rather than relying on the border. */
+  --stroke-subtle: light-dark(#e6e6e6, #3b3b3b);
+  --stroke: light-dark(#d1d1d1, #484848);
+  --stroke-hover: light-dark(#c7c7c7, #5c5c5c);
+  --stroke-strong: light-dark(#929292, #7a7a7a);
+  --focus: light-dark(#000000, #ffffff);
+
+  /* Primary actions are near-black / white, never colored. */
+  --action: light-dark(#242424, #ffffff);
+  --action-hover: light-dark(#3d3d3d, #e0e0e0);
+  --on-action: light-dark(#ffffff, #1f1f1f);
+
+  /* Status pairs (text meets 4.5:1 on its background in both schemes) */
+  --success: light-dark(#017048, #5dce97);
+  --success-bg: light-dark(#e3fcee, #193426);
+  --warning: light-dark(#a93901, #fc9571);
+  --warning-bg: light-dark(#fff2ee, #40261d);
+  --danger: light-dark(#a62147, #fd8ea1);
+  --danger-bg: light-dark(#fff1f3, #402529);
+  --info: light-dark(#294482, #b7ccff);
+  --info-bg: light-dark(#f0f5ff, #1f2a40);
+
+  /* Coral accent. Decorative only, never text. */
+  --coral: light-dark(#e8735a, #ef8a70);
+  --coral-soft: light-dark(#fbd5c8, #6b3020);
+  --coral-faint: light-dark(#fdf1ec, #33241f);
+  --motif-bg: light-dark(#fdf3ef, #2c2421);
+  --motif-soft: light-dark(#f9d9cd, #5a2c1d);
+  --motif-soft-strong: light-dark(#f5c3b1, #7a3a25);
+  --motif-line: light-dark(#e58a74, #c8654c);
+  --motif-accent: light-dark(#e2694f, #e47a5f);
+
+  /* Talk tiles: a warm, coral-tinted neutral so faces and the play button carry the tile */
+  --tile-bg: light-dark(#f8f0eb, #2f2825);
+  --tile-stroke: light-dark(#efe3dc, #3c3330);
+  --tile-chip-bg: light-dark(#ffffffcc, #00000047);
+  --tile-texture-opacity: 0.35;
+  /* Open date tile: plain neutral, so it reads as an invitation rather than a missing video */
+  --slot-bg: light-dark(#f5f5f5, #2c2c2c);
+  --new-bg: light-dark(#fde6dd, #4a271c);
+  --new-fg: light-dark(#9c3418, #ffbea8);
+
+  /* Avatar initials tints: neutral and coral-adjacent, all with AA text */
+  --tint0-bg: light-dark(#fbe2d9, #5a2d20);
+  --tint0-fg: light-dark(#7a2e1a, #fbd3c6);
+  --tint1-bg: light-dark(#ebebeb, #3d3d3d);
+  --tint1-fg: light-dark(#3d3d3d, #e0e0e0);
+  --tint2-bg: light-dark(#f3e6d6, #4a3b2c);
+  --tint2-fg: light-dark(#5c4024, #f0dcc4);
+  --tint3-bg: light-dark(#f7dfe4, #4d2a31);
+  --tint3-fg: light-dark(#7a2a3a, #f5ccd4);
+  --tint4-bg: light-dark(#e3e7ec, #323a44);
+  --tint4-fg: light-dark(#2f3d4f, #d3dbe6);
+  --tint5-bg: light-dark(#fde8d7, #55331d);
+  --tint5-fg: light-dark(#7a3d12, #fbd9bd);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+
+  --radius-s: 0.375rem;
+  --radius-m: 0.75rem;
+  --radius-l: 1rem;
+  --radius-pill: 999px;
+
+  --shadow-c1: light-dark(#0000001f, #00000066);
+  --shadow-c2: light-dark(#00000024, #0000008c);
+  --shadow-card: 0 0 2px var(--shadow-c1), 0 1px 2px var(--shadow-c1);
+  --shadow-float: 0 0 2px var(--shadow-c1), 0 3px 12px var(--shadow-c2);
+
+  /* Motion (Fluent tokens) */
+  --dur-100: 100ms;
+  --dur-150: 150ms;
+  --dur-200: 200ms;
+  --dur-250: 250ms;
+  --dur-300: 300ms;
+  --ease-decelerate-mid: cubic-bezier(0, 0, 0, 1);
+  --ease-decelerate-min: cubic-bezier(0.33, 0, 0.1, 1);
+  --ease-easy: cubic-bezier(0.33, 0, 0.67, 1);
+
+  --page-max: 72rem;
+  --measure: 42rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  /* List rows keep full-width hairlines but inset their content, so trailing actions breathe. */
+  --list-row-inset: var(--space-3);
+  --topbar-height: 3.5rem;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Non-color tokens can't use light-dark(), so dark values are set per scheme. */
+:root[data-theme="dark"] {
+  --tile-texture-opacity: 0.22;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tile-texture-opacity: 0.22;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}

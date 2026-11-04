@@ -1,0 +1,50 @@
+{
+  "name": "learninghub-template",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "scripts": {
+    "predev": "node scripts/check-setup.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/check-setup.mjs",
+    "build": "tsc -b && vite build",
+    "check-setup": "node scripts/check-setup.mjs",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "storage:describe": "tsx scripts/storage-describe.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fluentui/react-icons": "^2.0.344",
+    "@microsoft/managed-apps": "^0.6.3",
+    "@tanstack/react-query": "^5.104.2",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@microsoft/managed-apps-cli": "0.32.2",
+    "@microsoft/managed-apps-vite-plugin": "^0.4.8",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.12.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "jsdom": "^30.1.3",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12",
+    "vitest": "^5.1.0"
+  }
+}
