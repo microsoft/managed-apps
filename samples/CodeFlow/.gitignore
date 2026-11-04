@@ -1,0 +1,30 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Managed Apps: ms.config.json, generated/ and .ms/ belong in your app's repository;
+# only the packed build output stays local.
+.ms/packed/
+
+# Local environment
+.env
+.env.*
+!.env.example
