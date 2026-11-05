@@ -4,8 +4,6 @@
 > **We've moved to [Copilot Managed Runtime](https://github.com/microsoft/Copilot-Managed-Runtime).**
 > Use the new repository for current development and [new issues](https://github.com/microsoft/Copilot-Managed-Runtime/issues/new/choose).
 > Existing open issues will be transferred with their discussion history; **you do not need to resubmit them**.
-> After transfer, existing issue URLs will redirect to their new locations. Closed issues remain here for reference.
-> Watch the new repository to receive updates about activity there.
 
 > [!NOTE]
 > Copilot Managed Runtime is in **public preview**. APIs, templates, and tooling may change before general availability.
