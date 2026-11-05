@@ -1,11 +1,16 @@
 # Apps on Microsoft Copilot Managed Runtime
 
+> [!IMPORTANT]
+> **We've moved to [Copilot Managed Runtime](https://github.com/microsoft/Copilot-Managed-Runtime).**
+> Use the new repository for current development and [new issues](https://github.com/microsoft/Copilot-Managed-Runtime/issues/new/choose).
+> Existing open issues will be transferred with their discussion history; **you do not need to resubmit them**.
+
 > [!NOTE]
 > Copilot Managed Runtime is in **public preview**. APIs, templates, and tooling may change before general availability.
 
 Copilot Managed Runtime hosts Microsoft 365 line-of-business applications that automatically inherit organizational governance, security, and compliance controls from the moment they're created.
 
-This repository hosts the official first-party project **templates** and is the home for **public issues**. The tooling itself ships as npm packages under the `@microsoft/managed-apps` scope:
+This repository retains the legacy first-party project **templates** and closed issue history. Current templates, tooling, and **public issues** are maintained in [Copilot Managed Runtime](https://github.com/microsoft/Copilot-Managed-Runtime). The legacy tooling ships as npm packages under the `@microsoft/managed-apps` scope:
 
 | Package | Description |
 | --- | --- |
@@ -29,7 +34,7 @@ See the [Microsoft Copilot Managed Runtime documentation](https://go.microsoft.c
 
 ## Support
 
-This project uses GitHub Issues to track bugs. Please search existing issues before filing a new one to avoid duplicates. For a new bug, open an issue in this repository. See [SUPPORT.md](SUPPORT.md) for details.
+Please [search issues in Copilot Managed Runtime](https://github.com/microsoft/Copilot-Managed-Runtime/issues) before filing a new bug to avoid duplicates, and check the historical issues here if relevant. File new bugs in [the CMR issue tracker](https://github.com/microsoft/Copilot-Managed-Runtime/issues/new/choose), not this repository. Existing open reports will be transferred by maintainers and kept open for continued triage; please do not resubmit them. See [SUPPORT.md](SUPPORT.md) for details.
 
 ## Contributing
 
